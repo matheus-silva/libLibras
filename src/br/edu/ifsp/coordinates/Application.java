@@ -37,8 +37,6 @@ public class Application {
 		}
 
 		coor.stopDetectingFrames();
-		NiTE.shutdown();
-		OpenNI.shutdown();
 
 		Set<Short> keys = usersCoordinates.keySet();
 		for (Short key : keys) {
@@ -49,7 +47,9 @@ public class Application {
 	
 	public static void imprimir(Map<Short, List<float[][]>> usersCoordinates, Short key){
 		List<float[][]> moves = usersCoordinates.get(key);
+		
 		System.out.println("User " + key + " in " + moves.size() + " frames detected.");
+		
 		float[][][] teste = moves.toArray(new float[moves.size()][JointType.values().length][3]);
 
 		for (int h = 0; h < teste.length; h++) {

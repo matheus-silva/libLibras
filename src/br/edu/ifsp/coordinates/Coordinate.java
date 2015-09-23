@@ -1,9 +1,12 @@
 package br.edu.ifsp.coordinates;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
+
+import com.primesense.nite.Point3D;
 
 import com.primesense.nite.JointType;
 import com.primesense.nite.Skeleton;
@@ -35,17 +38,7 @@ public class Coordinate implements Runnable, UserTracker.NewFrameListener {
 
 		List<UserData> users = frame.getUsers();
 		for (UserData user : users) {
-			if (user.isLost()) {
-				System.out.println("User " + user.getId() + " was lost.");
-				continue;
-			}
-			if (user.isNew()) {
-				System.out.println("User " + user.getId() + " found. Starting tracking.");
-				userTracker.startSkeletonTracking(user.getId());
-				continue;
-			}
-			if(!user.getSkeleton().getState().equals(SkeletonState.TRACKED)){
-				System.out.println("User " + user.getId() + " not tracked yet.");
+			if(!isUserReadyToTrack(user)){
 				continue;
 			}
 
@@ -67,6 +60,23 @@ public class Coordinate implements Runnable, UserTracker.NewFrameListener {
 	@Override
 	public void run() {
 		userTracker.addNewFrameListener(this);
+	}
+	
+	private boolean isUserReadyToTrack(UserData user){
+		if (user.isLost()) {
+			System.out.println("User " + user.getId() + " was lost.");
+			return false;
+		}
+		if (user.isNew()) {
+			System.out.println("User " + user.getId() + " found. Starting tracking.");
+			userTracker.startSkeletonTracking(user.getId());
+			return false;
+		}
+		if(!user.getSkeleton().getState().equals(SkeletonState.TRACKED)){
+			System.out.println("User " + user.getId() + " not tracked yet.");
+			return false;
+		}
+		return true;
 	}
 
 	private float[][] tracking(UserData user) {
@@ -91,5 +101,4 @@ public class Coordinate implements Runnable, UserTracker.NewFrameListener {
 	public Map<Short, List<float[][]>> getCoordinates(){
 		return coordinates;
 	}
-
 }
