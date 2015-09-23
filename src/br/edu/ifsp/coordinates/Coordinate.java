@@ -9,6 +9,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import com.primesense.nite.Point3D;
 
 import com.primesense.nite.JointType;
+import com.primesense.nite.Point2D;
 import com.primesense.nite.Skeleton;
 import com.primesense.nite.SkeletonJoint;
 import com.primesense.nite.SkeletonState;
@@ -19,8 +20,10 @@ import com.primesense.nite.UserTrackerFrameRef;;
 public class Coordinate implements Runnable, UserTracker.NewFrameListener {
 
 	public static final int X = 0, Y = 1, Z = 2;
+	public static final int REAL_WORLD = 10, DEPTH = 11;
 	private UserTracker userTracker = null;
 	private Map<Short, List<float[][]>> coordinates;
+	private boolean realWorld = true;
 
 	public Coordinate(UserTracker userTracker, Map<Short, List<float[][]>> coordinates) {
 		this.userTracker = userTracker;
@@ -86,9 +89,12 @@ public class Coordinate implements Runnable, UserTracker.NewFrameListener {
 
 		for (int i = 0; i < jointTypes.length; i++) {
 			SkeletonJoint joint = skeleton.getJoint(jointTypes[i]);
-			joints[i][X] = joint.getPosition().getX();
-			joints[i][Y] = joint.getPosition().getY();
-			joints[i][Z] = joint.getPosition().getZ();
+			
+			float[] system = converterCoordinateSystem(joint.getPosition());
+			
+			joints[i][X] = system[X];
+			joints[i][Y] = system[Y];
+			joints[i][Z] = system[Z];
 		}
 		
 		return joints;
@@ -100,5 +106,32 @@ public class Coordinate implements Runnable, UserTracker.NewFrameListener {
 	
 	public Map<Short, List<float[][]>> getCoordinates(){
 		return coordinates;
+	}
+	
+	public void setCoordinateSystem(int coordinate){
+		switch(coordinate){
+		case REAL_WORLD:
+			realWorld = true;
+			break;
+		case DEPTH:
+			realWorld = false;
+			break;
+		}
+	}
+	
+	private float[] converterCoordinateSystem(Point3D<Float> point){
+		float saida[] = new float[3];
+		saida[Z] = point.getZ();
+		
+		if(realWorld){
+			saida[X] = point.getX();
+			saida[Y] = point.getY();
+		} else {
+			Point2D<Float> pointDepth = userTracker.convertJointCoordinatesToDepth(point);
+			saida[X] = pointDepth.getX();
+			saida[Y] = pointDepth.getY();
+		}
+		
+		return saida;
 	}
 }

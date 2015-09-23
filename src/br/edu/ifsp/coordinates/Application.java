@@ -26,6 +26,7 @@ public class Application {
 		// Map<Short, List<float[][]>> usersCoordinates = new ConcurrentHashMap<>();
 		Map<Short, List<float[][]>> usersCoordinates = new HashMap<>();
 		Coordinate coor = new Coordinate(usersCoordinates);
+		coor.setCoordinateSystem(Coordinate.DEPTH);
 		Thread t = new Thread(coor);
 		t.start();
 
