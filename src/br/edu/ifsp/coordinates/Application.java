@@ -26,7 +26,8 @@ public class Application {
 		// Map<Short, List<float[][]>> usersCoordinates = new ConcurrentHashMap<>();
 		Map<Short, List<float[][]>> usersCoordinates = new HashMap<>();
 		Coordinate coor = new Coordinate(usersCoordinates);
-		coor.setCoordinateSystem(Coordinate.DEPTH);
+		coor.setCoordinateSystem(Coordinate.REAL_WORLD);
+		
 		Thread t = new Thread(coor);
 		t.start();
 
@@ -38,28 +39,25 @@ public class Application {
 		}
 
 		coor.stopDetectingFrames();
-
+		
+		Map<Short, float[][][]> converter = coor.structureConverter(usersCoordinates);
 		Set<Short> keys = usersCoordinates.keySet();
 		for (Short key : keys) {
-			imprimir(usersCoordinates, key);
+			float[][][] moves = converter.get(key); 
+			System.out.println("User " + key + " in " + moves.length + " frames detected.");
+			print(moves);
+			
 		}
 		
 	}
 	
-	public static void imprimir(Map<Short, List<float[][]>> usersCoordinates, Short key){
-		List<float[][]> moves = usersCoordinates.get(key);
-		
-		System.out.println("User " + key + " in " + moves.size() + " frames detected.");
-		
-		float[][][] teste = moves.toArray(new float[moves.size()][JointType.values().length][3]);
-
-		for (int h = 0; h < teste.length; h++) {
+	private static void print(float[][][] moves) {
+		for (int h = 0; h < moves.length; h++) {
 			System.out.print(h);
-			float[][] fs = teste[h];
+			float[][] joints = moves[h];
 			
-			for (int i = 0; i < fs.length; i++) {
-				float[] value = fs[i];
-				System.out.print(Arrays.toString(value));
+			for (int i = 0; i < joints.length; i++) {
+				System.out.print(Arrays.toString(joints[i]));
 			}
 			System.out.println("");
 		}
