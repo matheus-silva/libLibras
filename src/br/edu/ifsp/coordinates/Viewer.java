@@ -119,7 +119,7 @@ public class Viewer extends Component implements UserTracker.NewFrameListener {
 	}
 
 	public void drawSkeleton(Graphics g, float[][] fs) {
-
+		g.setColor(Color.red);
 		for (int i = 0; i < skelCoor.length; i++) {
 			g.drawLine((int) fs[skelCoor[i][0]][0], (int) fs[skelCoor[i][0]][1], (int) fs[skelCoor[i][1]][0],
 					(int) fs[skelCoor[i][1]][1]);

@@ -3,9 +3,6 @@ package br.edu.ifsp.coordinates;
 import java.awt.Component;
 import java.awt.GridLayout;
 import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import javax.swing.JFrame;
 
@@ -25,7 +22,7 @@ public class Application extends JFrame {
 		// java.util.ConcurrentModificationException
 		NewFrameInterface frame = new NewFrameInterface();
 		BodyCoordinate coor = frame.getCoordinate();
-		coor.setCoordinateSystem(BodyCoordinate.DEPTH);
+		coor.setCoordinateSystem(BodyCoordinate.REAL_WORLD);
 
 		this.getContentPane().setLayout(new GridLayout(1, 1));
 		Component view = frame.getUserViewer();
@@ -54,6 +51,7 @@ public class Application extends JFrame {
 	}
 
 	public static void main(String args[]) {
+		System.out.println("Started");
 		new Application();
 	}
 

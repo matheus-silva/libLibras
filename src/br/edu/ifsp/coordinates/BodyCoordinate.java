@@ -23,7 +23,7 @@ public class BodyCoordinate implements CoordinateInterface, UserTracker.NewFrame
 	public static final int HEAD = 0, NECK = 1, LEFT_SHOULDER = 2, RIGHT_SHOULDER = 3, LEFT_ELBOW = 4, RIGHT_ELBOW = 5,
 			LEFT_HAND = 6, RIGHT_HAND = 7, TORSO = 8, LEFT_HIP = 9, RIGHT_HIP = 10, LEFT_KNEE = 11, RIGHT_KNEE = 12,
 			LEFT_FOOT = 13, RIGHT_FOOT = 14;
-	
+
 	private UserTracker userTracker = null;
 	private Map<Short, List<float[][]>> coordinates;
 	private boolean realWorld = true;
@@ -47,21 +47,17 @@ public class BodyCoordinate implements CoordinateInterface, UserTracker.NewFrame
 		List<UserData> users = frame.getUsers();
 		for (UserData user : users) {
 			if (!isUserReadyToTrack(user)) {
-				System.out.println("User: " + user.getId() + " not ready to track.");
 				continue;
 			}
 
 			float[][] joints = trackingUser(user);
-			
-			if(view != null)
-			view.addMoviments(joints);
 
 			System.out.print(0);
 			for (float[] fs : joints) {
 				System.out.print(Arrays.toString(fs));
 			}
 			System.out.println();
-			
+
 			List<float[][]> userMoves = coordinates.get(user.getId());
 
 			if (userMoves == null) {
@@ -124,6 +120,7 @@ public class BodyCoordinate implements CoordinateInterface, UserTracker.NewFrame
 	}
 
 	private boolean isUserReadyToTrack(UserData user) {
+		userTracker.startSkeletonTracking(user.getId());
 		if (!user.isVisible()) {
 			return false;
 		}
@@ -145,34 +142,37 @@ public class BodyCoordinate implements CoordinateInterface, UserTracker.NewFrame
 		Skeleton skeleton = user.getSkeleton();
 		JointType[] jointTypes = JointType.values();
 		float[][] joints = new float[jointTypes.length][3];
+		float[][] depth = new float[jointTypes.length][3];
 
 		for (int i = 0; i < jointTypes.length; i++) {
 			SkeletonJoint joint = skeleton.getJoint(jointTypes[i]);
 
-			float[] system = converterCoordinateSystem(joint.getPosition());
+			// float[] system = converterCoordinateSystem(joint.getPosition());
+
+			float[] system;
+			Point2D<Float> pointDepth = userTracker.convertJointCoordinatesToDepth(joint.getPosition());
+
+			depth[i][X] = pointDepth.getX();
+			depth[i][Y] = pointDepth.getY();
+			depth[i][Z] = joint.getPosition().getZ();
+
+			if (realWorld) {
+				system = new float[3];
+				system[X] = joint.getPosition().getX();
+				system[Y] = joint.getPosition().getX();
+				system[Z] = joint.getPosition().getX();
+			} else {
+				system = depth[i];
+			}
 
 			joints[i][X] = system[X];
 			joints[i][Y] = system[Y];
 			joints[i][Z] = system[Z];
 		}
-
+		if (view != null){
+			view.addMoviments(depth);
+		}
+		
 		return joints;
 	}
-
-	private float[] converterCoordinateSystem(Point3D<Float> point) {
-		float saida[] = new float[3];
-		saida[Z] = point.getZ();
-		
-		if (realWorld) {
-			saida[X] = point.getX();
-			saida[Y] = point.getY();
-		} else {
-			Point2D<Float> pointDepth = userTracker.convertJointCoordinatesToDepth(point);
-			saida[X] = pointDepth.getX();
-			saida[Y] = pointDepth.getY();
-		}
-
-		return saida;
-	}
-
 }
