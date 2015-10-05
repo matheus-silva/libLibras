@@ -1,10 +1,10 @@
 package br.edu.ifsp.coordinates;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.primesense.nite.Point3D;
 import com.primesense.nite.JointType;
@@ -16,61 +16,92 @@ import com.primesense.nite.UserData;
 import com.primesense.nite.UserTracker;
 import com.primesense.nite.UserTrackerFrameRef;;
 
-public class Coordinate implements Runnable, UserTracker.NewFrameListener {
+public class BodyCoordinate implements CoordinateInterface, UserTracker.NewFrameListener {
 
 	public static final int X = 0, Y = 1, Z = 2;
 	public static final int REAL_WORLD = 10, DEPTH = 11;
-
+	public static final int HEAD = 0, NECK = 1, LEFT_SHOULDER = 2, RIGHT_SHOULDER = 3, LEFT_ELBOW = 4, RIGHT_ELBOW = 5,
+			LEFT_HAND = 6, RIGHT_HAND = 7, TORSO = 8, LEFT_HIP = 9, RIGHT_HIP = 10, LEFT_KNEE = 11, RIGHT_KNEE = 12,
+			LEFT_FOOT = 13, RIGHT_FOOT = 14;
+	
 	private UserTracker userTracker = null;
 	private Map<Short, List<float[][]>> coordinates;
 	private boolean realWorld = true;
+	private boolean startRecordingUsers = false;
+	private Viewer view = null;
 
-	public Coordinate(UserTracker userTracker, Map<Short, List<float[][]>> coordinates) {
+	public BodyCoordinate(UserTracker userTracker, Viewer view) {
+		coordinates = this.createMapStructure();
 		this.userTracker = userTracker;
-		this.coordinates = coordinates;
-	}
-
-	public Coordinate(Map<Short, List<float[][]>> coordinates) {
-		userTracker = UserTracker.create();
-		this.coordinates = coordinates;
+		this.view = view;
 	}
 
 	@Override
-	public void onNewFrame(UserTracker userTracker) {
+	public synchronized void onNewFrame(UserTracker userTracker) {
+		if (!startRecordingUsers) {
+			return;
+		}
+
 		UserTrackerFrameRef frame = userTracker.readFrame();
 
 		List<UserData> users = frame.getUsers();
 		for (UserData user : users) {
 			if (!isUserReadyToTrack(user)) {
+				System.out.println("User: " + user.getId() + " not ready to track.");
 				continue;
 			}
 
-			float[][] joints = tracking(user);
+			float[][] joints = trackingUser(user);
+			
+			if(view != null)
+			view.addMoviments(joints);
+
+			System.out.print(0);
+			for (float[] fs : joints) {
+				System.out.print(Arrays.toString(fs));
+			}
+			System.out.println();
+			
 			List<float[][]> userMoves = coordinates.get(user.getId());
 
 			if (userMoves == null) {
 				// userMoves = new CopyOnWriteArrayList<>();
-				userMoves = new ArrayList<>();
+				userMoves = this.createListStructure();
 				coordinates.put(user.getId(), userMoves);
 			}
 
 			userMoves.add(joints);
 		}
-
 		frame.release();
 	}
 
 	@Override
-	public void run() {
-		userTracker.addNewFrameListener(this);
+	public void startRecordingUsers() {
+		startRecordingUsers = true;
 	}
 
-	public void stopDetectingFrames() {
-		userTracker.removeNewFrameListener(this);
+	@Override
+	public void stopRecordingUsers() {
+		startRecordingUsers = false;
 	}
 
-	public Map<Short, List<float[][]>> getCoordinates() {
+	@Override
+	public Map<Short, List<float[][]>> getMovimentsList() {
 		return coordinates;
+	}
+
+	@Override
+	public Map<Short, float[][][]> getMovimentsArray() {
+		Map<Short, float[][][]> newCoordinates = new HashMap<>();
+		List<float[][]> list;
+		float[][][] array;
+
+		for (Short userID : coordinates.keySet()) {
+			list = coordinates.get(userID);
+			array = list.toArray(new float[list.size()][JointType.values().length][3]);
+			newCoordinates.put(userID, array);
+		}
+		return newCoordinates;
 	}
 
 	public void setCoordinateSystem(int coordinate) {
@@ -84,37 +115,33 @@ public class Coordinate implements Runnable, UserTracker.NewFrameListener {
 		}
 	}
 
-	public Map<Short, float[][][]> structureConverter(Map<Short, List<float[][]>> coordinates) {
-		Map<Short, float[][][]> newCoordinates = new HashMap<>();
-		List<float[][]> list;
-		float[][][] array;
-		
-		for(Short userID : coordinates.keySet()){
-			list = coordinates.get(userID);
-			array = list.toArray(new float[list.size()][JointType.values().length][3]);
-			newCoordinates.put(userID, array);
-		}
-		return newCoordinates;
+	private List<float[][]> createListStructure() {
+		return new ArrayList<float[][]>();
+	}
+
+	private Map<Short, List<float[][]>> createMapStructure() {
+		return new HashMap<Short, List<float[][]>>();
 	}
 
 	private boolean isUserReadyToTrack(UserData user) {
+		if (!user.isVisible()) {
+			return false;
+		}
 		if (user.isLost()) {
-			System.out.println("User " + user.getId() + " was lost.");
+			userTracker.stopSkeletonTracking(user.getId());
 			return false;
 		}
 		if (user.isNew()) {
-			System.out.println("User " + user.getId() + " found. Starting tracking.");
 			userTracker.startSkeletonTracking(user.getId());
 			return false;
 		}
-		if (!user.getSkeleton().getState().equals(SkeletonState.TRACKED)) {
-			System.out.println("User " + user.getId() + " not tracked yet.");
+		if (user.getSkeleton().getState() != SkeletonState.TRACKED) {
 			return false;
 		}
 		return true;
 	}
 
-	private float[][] tracking(UserData user) {
+	private float[][] trackingUser(UserData user) {
 		Skeleton skeleton = user.getSkeleton();
 		JointType[] jointTypes = JointType.values();
 		float[][] joints = new float[jointTypes.length][3];
@@ -135,7 +162,7 @@ public class Coordinate implements Runnable, UserTracker.NewFrameListener {
 	private float[] converterCoordinateSystem(Point3D<Float> point) {
 		float saida[] = new float[3];
 		saida[Z] = point.getZ();
-
+		
 		if (realWorld) {
 			saida[X] = point.getX();
 			saida[Y] = point.getY();
@@ -147,4 +174,5 @@ public class Coordinate implements Runnable, UserTracker.NewFrameListener {
 
 		return saida;
 	}
+
 }
