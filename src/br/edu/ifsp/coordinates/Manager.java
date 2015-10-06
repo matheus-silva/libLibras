@@ -7,24 +7,25 @@ import org.openni.OpenNI;
 import com.primesense.nite.NiTE;
 import com.primesense.nite.UserTracker;
 
-public class NewFrameInterface implements UserTracker.NewFrameListener, Runnable {
+public class Manager implements UserTracker.NewFrameListener, Runnable {
 
 	private UserTracker userTracker;
-	private Viewer view;
+	private SimpleViewer view;
 	private BodyCoordinate coor;
 
-	public NewFrameInterface() {
+	public Manager() {
 		OpenNI.initialize();
 		NiTE.initialize();
 
 		userTracker = UserTracker.create();
-		this.view = new Viewer(userTracker);
+		//this.view = new Viewer(userTracker);
+		this.view = new SimpleViewer();
 		this.coor = new BodyCoordinate(userTracker, view);
 	}
 
 	@Override
 	public synchronized void onNewFrame(UserTracker userTracker) {
-		view.onNewFrame(userTracker);
+		//view.onNewFrame(userTracker);
 		coor.onNewFrame(userTracker);
 		view.repaint();
 	}
