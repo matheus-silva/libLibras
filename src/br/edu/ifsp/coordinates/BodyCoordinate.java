@@ -29,16 +29,30 @@ public class BodyCoordinate implements InterfaceCoordinate, UserTracker.NewFrame
 	private boolean startRecordingUsers = false;
 	private SimpleViewer view = null;
 	
-	public BodyCoordinate(UserTracker userTracker){
-		this(userTracker, null);
+	public BodyCoordinate(){
+		this(null);
 	}
 
 	public BodyCoordinate(UserTracker userTracker, SimpleViewer view) {
 		this.coordinates = this.createMapStructure();
 		this.userTracker = userTracker;
 		this.view = view;
+		
+		userTracker.addNewFrameListener(this);
+	}
+	
+	public BodyCoordinate(SimpleViewer view) {
+		this.coordinates = this.createMapStructure();
+		this.userTracker = UserTracker.create();
+		this.view = view;
+		
+		userTracker.addNewFrameListener(this);
 	}
 
+	public void setView(SimpleViewer view) {
+		this.view = view;
+	}
+	
 	@Override
 	public synchronized void onNewFrame(UserTracker userTracker) {
 		UserTrackerFrameRef frame = userTracker.readFrame();

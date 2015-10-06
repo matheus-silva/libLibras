@@ -8,6 +8,10 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 
 public class Application extends JFrame {
+	
+	private SimpleViewer viewComponent;
+	private Viewer view;
+	private BodyCoordinate coor;
 
 	public Application() {
 		super("Component");
@@ -16,10 +20,10 @@ public class Application extends JFrame {
 		setSize(640, 480);
 		setVisible(true);
 
-		initialize();
+		initialize2();
 	}
 
-	private void initialize() {
+	private void initialize() {		
 		getContentPane().setLayout(new GridLayout(1, 1));
 		
 		Manager manager = new Manager();
@@ -35,6 +39,46 @@ public class Application extends JFrame {
 		t.start();
 
 		coor.startRecordingUsers();
+	}
+	
+	private void initialize2() {
+		Load.load();
+		
+		getContentPane().setLayout(new GridLayout(1, 1));
+		
+		view = new Viewer();
+		//viewComponent = view.getColor();
+		viewComponent = view.getDepth();
+		
+		coor = new BodyCoordinate();
+		coor.setView(viewComponent);
+		coor.setCoordinateSystem(BodyCoordinate.DEPTH);
+
+		this.getContentPane().add(viewComponent);
+
+		coor.startRecordingUsers();
+		
+		//changeView();
+	}
+	
+	private void changeView(){
+		boolean cor = true;
+		while(true){
+			try {
+				Thread.sleep(3_000);
+				if(cor){
+					viewComponent = view.getColor();
+				} else {
+					viewComponent = view.getDepth();
+				}
+				cor = !cor;
+				coor.setView(viewComponent);
+				getContentPane().add(viewComponent);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 	}
 
 	private void print(float[][][] moves) {

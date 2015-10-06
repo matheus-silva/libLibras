@@ -23,33 +23,16 @@ public class SimpleViewer extends Component
     private int[][] skelCoor = { { 0, 1 }, { 1, 8 }, { 8, 9 }, { 8, 10 }, { 9, 11 }, { 11, 13 }, { 10, 12 }, { 12, 14 },
 			{ 1, 3 }, { 3, 5 }, { 5, 7 }, { 1, 2 }, { 2, 4 }, { 4, 6 } };
 
-    public SimpleViewer() {
+    public SimpleViewer(SensorType type) {
     	Device d = Device.open();
-    	d.setImageRegistrationMode(ImageRegistrationMode.DEPTH_TO_COLOR);;
-    	VideoStream video = VideoStream.create(d, SensorType.COLOR);
-    	video.addNewFrameListener(this);
-    	this.setStream(video);
-
-    	video.start();
+    	mVideoStream = VideoStream.create(d, type);
+    	
+    	d.setImageRegistrationMode(ImageRegistrationMode.DEPTH_TO_COLOR);
+    	mVideoStream.addNewFrameListener(this);
+    	mVideoStream.addNewFrameListener(this);
+    	mVideoStream.start();
     }
     
-    private void setStream(VideoStream videoStream) {
-        if (mLastFrame != null) {
-            mLastFrame.release();
-            mLastFrame = null;
-        }
-        
-        if (mVideoStream != null) {
-            mVideoStream.removeNewFrameListener(this);
-        }
-        
-        mVideoStream = videoStream;
-        
-        if (mVideoStream != null) {
-            mVideoStream.addNewFrameListener(this);
-        }
-    }
-
     @Override
     public synchronized void paint(Graphics g) {
         drawBackground(g);

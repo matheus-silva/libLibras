@@ -3,6 +3,7 @@ package br.edu.ifsp.coordinates;
 import java.awt.Component;
 
 import org.openni.OpenNI;
+import org.openni.SensorType;
 
 import com.primesense.nite.NiTE;
 import com.primesense.nite.UserTracker;
@@ -17,17 +18,18 @@ public class Manager implements UserTracker.NewFrameListener, Runnable {
 		OpenNI.initialize();
 		NiTE.initialize();
 
-		userTracker = UserTracker.create();
+		//userTracker = UserTracker.create();
 		//this.view = new Viewer(userTracker);
-		this.view = new SimpleViewer();
-		this.coor = new BodyCoordinate(userTracker, view);
+		Viewer viewManager = new Viewer();
+		this.view = viewManager.getColor();
+		this.coor = new BodyCoordinate(view);
 	}
 
 	@Override
 	public synchronized void onNewFrame(UserTracker userTracker) {
 		//view.onNewFrame(userTracker);
 		coor.onNewFrame(userTracker);
-		view.repaint();
+		//view.repaint();
 	}
 
 	public BodyCoordinate getCoordinate() {
@@ -40,6 +42,6 @@ public class Manager implements UserTracker.NewFrameListener, Runnable {
 
 	@Override
 	public void run() {
-		userTracker.addNewFrameListener(this);
+		//userTracker.addNewFrameListener(this);
 	}
 }
