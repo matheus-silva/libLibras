@@ -1,62 +1,45 @@
 package br.edu.ifsp.coordinates;
 
-import java.awt.Component;
 import java.awt.GridLayout;
 import java.util.Arrays;
 
 import javax.swing.JFrame;
-import javax.swing.JLabel;
+
+import com.primesense.nite.PoseType;
 
 public class Application extends JFrame {
 	
-	private SimpleViewer viewComponent;
+	private ComponentViewer viewComponent;
 	private Viewer view;
 	private BodyCoordinate coor;
 
 	public Application() {
 		super("Component");
 
+		initialize();
+		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setSize(640, 480);
 		setVisible(true);
-
-		initialize2();
-	}
-
-	private void initialize() {		
-		getContentPane().setLayout(new GridLayout(1, 1));
 		
-		Manager manager = new Manager();
-		BodyCoordinate coor = manager.getCoordinate();
-		Component view = manager.getUserViewer();
-		
-		coor.setCoordinateSystem(BodyCoordinate.DEPTH);
-		view.setSize(640, 480);
-
-		this.getContentPane().add(view);
-		
-		Thread t = new Thread(manager);
-		t.start();
-
-		coor.startRecordingUsers();
 	}
 	
-	private void initialize2() {
-		Load.load();
+	private void initialize() {
+		//Load.load();
 		
 		getContentPane().setLayout(new GridLayout(1, 1));
 		
 		view = new Viewer();
-		//viewComponent = view.getColor();
-		viewComponent = view.getDepth();
+		viewComponent = view.getColor();
+		//viewComponent = view.getDepth();
+		this.getContentPane().add(viewComponent);
 		
 		coor = new BodyCoordinate();
 		coor.setView(viewComponent);
-		coor.setCoordinateSystem(BodyCoordinate.DEPTH);
+		coor.setCoordinateSystem(BodyCoordinate.REAL_WORLD);
 
-		this.getContentPane().add(viewComponent);
-
-		coor.startRecordingUsers();
+		//coor.startRecordingUsers();
+		coor.startRecordingUsers(PoseType.CROSSED_HANDS, 1);
 		
 		//changeView();
 	}

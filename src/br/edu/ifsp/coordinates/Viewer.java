@@ -1,21 +1,27 @@
 package br.edu.ifsp.coordinates;
 
+import org.openni.OpenNI;
 import org.openni.SensorType;
+
+import com.primesense.nite.NiTE;
 
 public class Viewer {
 	
-	private SimpleViewer depth, color;
+	private ComponentViewer depth, color;
 	
 	public Viewer(){
-		depth = new SimpleViewer(SensorType.DEPTH);
-		color = new SimpleViewer(SensorType.COLOR);
+		OpenNI.initialize();
+		//NiTE.initialize();
+		
+		depth = new ComponentViewer(SensorType.DEPTH);
+		color = new ComponentViewer(SensorType.COLOR);
 	}
 	
-	public SimpleViewer getDepth(){
+	public ComponentViewer getDepth(){
 		return this.depth;
 	}
 	
-	public SimpleViewer getColor(){
+	public ComponentViewer getColor(){
 		return this.color;
 	}
 

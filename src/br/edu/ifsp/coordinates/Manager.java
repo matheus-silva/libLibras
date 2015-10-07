@@ -3,7 +3,6 @@ package br.edu.ifsp.coordinates;
 import java.awt.Component;
 
 import org.openni.OpenNI;
-import org.openni.SensorType;
 
 import com.primesense.nite.NiTE;
 import com.primesense.nite.UserTracker;
@@ -11,7 +10,7 @@ import com.primesense.nite.UserTracker;
 public class Manager implements UserTracker.NewFrameListener, Runnable {
 
 	private UserTracker userTracker;
-	private SimpleViewer view;
+	private ComponentViewer view;
 	private BodyCoordinate coor;
 
 	public Manager() {
