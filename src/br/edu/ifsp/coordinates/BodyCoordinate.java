@@ -32,8 +32,8 @@ public class BodyCoordinate implements InterfaceCoordinate, UserTracker.NewFrame
 	private Map<Short, List<float[][]>> coordinates = null;
 	private boolean realWorld = true;
 	private PoseType startingPose = null;
-	private Integer seconds;
-	private boolean startRecordingUsers = false;
+	public static Integer seconds;
+	private boolean startRecordingUsers = false, startTimer = false;
 	private ComponentViewer view = null;
 
 	public BodyCoordinate() {
@@ -65,7 +65,7 @@ public class BodyCoordinate implements InterfaceCoordinate, UserTracker.NewFrame
 				continue;
 			}
 
-			if(startingPose != null){
+			if (startingPose != null) {
 				detectingPose(user);
 			}
 
@@ -93,11 +93,22 @@ public class BodyCoordinate implements InterfaceCoordinate, UserTracker.NewFrame
 	}
 
 	private void detectingPose(UserData user) {
-		if(user.getPoses(startingPose).isHeld()){
-			
-			startRecordingUsers = true;
+		if (user.getPoses(startingPose).isHeld()) {
+			if (seconds <= 0) {
+				startRecordingUsers = true;
+				startTimer = false;
+			} else {
+				if (!startTimer) {
+					new Thread(new Timer()).start();
+					startTimer = true;
+				}
+			}
 			userTracker.stopPoseDetection(user.getId(), startingPose);
-		}		
+		}
+		if(startTimer && seconds <= 0){
+			startRecordingUsers = true;
+			startTimer = false;
+		}
 	}
 
 	@Override
@@ -111,7 +122,7 @@ public class BodyCoordinate implements InterfaceCoordinate, UserTracker.NewFrame
 	}
 
 	public void startRecordingUsers(PoseType pose, int seconds) {
-		this.seconds = seconds;
+		BodyCoordinate.seconds = seconds;
 		this.startingPose = pose;
 	}
 
@@ -158,7 +169,7 @@ public class BodyCoordinate implements InterfaceCoordinate, UserTracker.NewFrame
 	private boolean isUserReadyToTrack(UserData user) {
 		if (user.isLost()) {
 			userTracker.stopSkeletonTracking(user.getId());
-			
+
 			if (startingPose != null) {
 				userTracker.startPoseDetection(user.getId(), startingPose);
 			}
@@ -222,4 +233,22 @@ public class BodyCoordinate implements InterfaceCoordinate, UserTracker.NewFrame
 
 		return joints;
 	}
+
+	private class Timer implements Runnable {
+
+		@Override
+		public void run() {
+			while (BodyCoordinate.seconds > 0) {
+				try {
+					Thread.sleep(1_000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				System.out.println("Wait " + BodyCoordinate.seconds + " seconds. ");
+				BodyCoordinate.seconds--;
+			}
+		}
+	}
+
 }

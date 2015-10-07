@@ -1,9 +1,11 @@
 package br.edu.ifsp.coordinates;
 
+import java.awt.Font;
 import java.awt.GridLayout;
 import java.util.Arrays;
 
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 
 import com.primesense.nite.PoseType;
 
@@ -30,8 +32,8 @@ public class Application extends JFrame {
 		getContentPane().setLayout(new GridLayout(1, 1));
 		
 		view = new Viewer();
-		viewComponent = view.getColor();
-		//viewComponent = view.getDepth();
+		//viewComponent = view.getColor();
+		viewComponent = view.getDepth();
 		this.getContentPane().add(viewComponent);
 		
 		coor = new BodyCoordinate();
@@ -39,7 +41,7 @@ public class Application extends JFrame {
 		coor.setCoordinateSystem(BodyCoordinate.REAL_WORLD);
 
 		//coor.startRecordingUsers();
-		coor.startRecordingUsers(PoseType.CROSSED_HANDS, 1);
+		coor.startRecordingUsers(PoseType.CROSSED_HANDS, 5);
 		
 		//changeView();
 	}

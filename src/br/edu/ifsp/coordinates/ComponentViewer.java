@@ -39,7 +39,9 @@ public class ComponentViewer extends Component implements VideoStream.NewFrameLi
 	public synchronized void paint(Graphics g) {
 		drawBackground(g);
 		drawUsers(g);
-
+		g.setFont(new Font("Serif", Font.BOLD, 46));
+		g.setColor(Color.red);
+		g.drawString(BodyCoordinate.seconds + "", 10, 46);
 		usersBodyMoviments = new ArrayList<>();
 	}
 
