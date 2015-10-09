@@ -18,11 +18,11 @@ public class ComponentViewer extends Component implements VideoStream.NewFrameLi
 	BufferedImage mBufferedImage;
 
 	private List<float[][]> usersBodyMoviments = new ArrayList<>();
-	private int[][] skelCoor = { { BodyCoordinate.HEAD, 1 }, { 1, 8 }, { 8, 9 }, { 8, 10 }, { 9, 11 }, { 11, 13 }, { 10, 12 }, { 12, 14 },
-			{ 1, 3 }, { 3, 5 }, { 5, 7 }, { 1, 2 }, { 2, 4 }, { 4, 6 } };
+	private int[][] skelCoor = { { BodyCoordinate.HEAD, 1 }, { 1, 8 }, { 8, 9 }, { 8, 10 }, { 9, 11 }, { 11, 13 },
+			{ 10, 12 }, { 12, 14 }, { 1, 3 }, { 3, 5 }, { 5, 7 }, { 1, 2 }, { 2, 4 }, { 4, 6 } };
 
 	public ComponentViewer(SensorType type) {
-		//Device d = Device.open();
+		// Device d = Device.open();
 		Device d = Device.open(OpenNI.enumerateDevices().get(0).getUri());
 		mVideoStream = VideoStream.create(d, type);
 
@@ -39,9 +39,11 @@ public class ComponentViewer extends Component implements VideoStream.NewFrameLi
 	public synchronized void paint(Graphics g) {
 		drawBackground(g);
 		drawUsers(g);
-		g.setFont(new Font("Serif", Font.BOLD, 46));
-		g.setColor(Color.red);
-		g.drawString(BodyCoordinate.seconds + "", 10, 46);
+		if (BodyCoordinate.seconds != 0) {
+			g.setFont(new Font("Serif", Font.BOLD, 46));
+			g.setColor(Color.red);
+			g.drawString(BodyCoordinate.seconds + "", 10, 46);
+		}
 		usersBodyMoviments = new ArrayList<>();
 	}
 
@@ -91,7 +93,7 @@ public class ComponentViewer extends Component implements VideoStream.NewFrameLi
 
 		// make sure we have enough room
 		if (mImagePixels == null || mImagePixels.length < mLastFrame.getWidth() * mLastFrame.getHeight()) {
-			
+
 			mImagePixels = new int[mLastFrame.getWidth() * mLastFrame.getHeight()];
 		}
 

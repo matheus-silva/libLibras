@@ -31,8 +31,8 @@ public class BodyCoordinate implements InterfaceCoordinate, UserTracker.NewFrame
 	private UserTracker userTracker = null;
 	private Map<Short, List<float[][]>> coordinates = null;
 	private boolean realWorld = true;
-	private PoseType startingPose = null;
-	public static Integer seconds;
+	private PoseType startingPose = null, stoppingPose = null;
+	public static Integer seconds = 0;
 	private boolean startRecordingUsers = false, startTimer = false;
 	private ComponentViewer view = null;
 
@@ -97,6 +97,9 @@ public class BodyCoordinate implements InterfaceCoordinate, UserTracker.NewFrame
 			if (seconds <= 0) {
 				startRecordingUsers = true;
 				startTimer = false;
+				if (stoppingPose != null) {
+					userTracker.startPoseDetection(user.getId(), stoppingPose);
+				}
 			} else {
 				if (!startTimer) {
 					new Thread(new Timer()).start();
@@ -105,9 +108,16 @@ public class BodyCoordinate implements InterfaceCoordinate, UserTracker.NewFrame
 			}
 			userTracker.stopPoseDetection(user.getId(), startingPose);
 		}
-		if(startTimer && seconds <= 0){
+		if (startTimer && seconds <= 0) {
 			startRecordingUsers = true;
 			startTimer = false;
+			if (stoppingPose != null) {
+				userTracker.startPoseDetection(user.getId(), stoppingPose);
+			}
+		}
+		if(user.getPoses(stoppingPose).isHeld()){
+			startRecordingUsers = false;
+			userTracker.stopPoseDetection(user.getId(), stoppingPose);
 		}
 	}
 
@@ -124,6 +134,10 @@ public class BodyCoordinate implements InterfaceCoordinate, UserTracker.NewFrame
 	public void startRecordingUsers(PoseType pose, int seconds) {
 		BodyCoordinate.seconds = seconds;
 		this.startingPose = pose;
+	}
+
+	public void stopRecordingUsers(PoseType pose) {
+		this.stoppingPose = pose;
 	}
 
 	@Override
@@ -169,10 +183,6 @@ public class BodyCoordinate implements InterfaceCoordinate, UserTracker.NewFrame
 	private boolean isUserReadyToTrack(UserData user) {
 		if (user.isLost()) {
 			userTracker.stopSkeletonTracking(user.getId());
-
-			if (startingPose != null) {
-				userTracker.startPoseDetection(user.getId(), startingPose);
-			}
 			return false;
 		}
 		if (!user.isVisible()) {

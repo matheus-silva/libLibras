@@ -32,8 +32,8 @@ public class Application extends JFrame {
 		getContentPane().setLayout(new GridLayout(1, 1));
 		
 		view = new Viewer();
-		//viewComponent = view.getColor();
-		viewComponent = view.getDepth();
+		viewComponent = view.getColor();
+		//viewComponent = view.getDepth();
 		this.getContentPane().add(viewComponent);
 		
 		coor = new BodyCoordinate();
@@ -42,6 +42,7 @@ public class Application extends JFrame {
 
 		//coor.startRecordingUsers();
 		coor.startRecordingUsers(PoseType.CROSSED_HANDS, 5);
+		coor.stopRecordingUsers(PoseType.PSI);
 		
 		//changeView();
 	}
