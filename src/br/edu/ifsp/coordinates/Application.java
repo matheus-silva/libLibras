@@ -42,7 +42,6 @@ public class Application extends JFrame {
 
 		//coor.startRecordingUsers();
 		coor.startRecordingUsers(PoseType.CROSSED_HANDS, 5);
-		coor.stopRecordingUsers(PoseType.PSI);
 		
 		//changeView();
 	}

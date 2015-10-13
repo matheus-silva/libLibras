@@ -17,16 +17,19 @@ public class ComponentViewer extends Component implements VideoStream.NewFrameLi
 	VideoFrameRef mLastFrame;
 	BufferedImage mBufferedImage;
 
+	private String status = null;
 	private List<float[][]> usersBodyMoviments = new ArrayList<>();
 	private int[][] skelCoor = { { BodyCoordinate.HEAD, 1 }, { 1, 8 }, { 8, 9 }, { 8, 10 }, { 9, 11 }, { 11, 13 },
 			{ 10, 12 }, { 12, 14 }, { 1, 3 }, { 3, 5 }, { 5, 7 }, { 1, 2 }, { 2, 4 }, { 4, 6 } };
 
-	public ComponentViewer(SensorType type) {
+	public ComponentViewer(Device d, SensorType type) {
 		// Device d = Device.open();
-		Device d = Device.open(OpenNI.enumerateDevices().get(0).getUri());
+		System.out.println("1");
 		mVideoStream = VideoStream.create(d, type);
-
+		
+		System.out.println("2");
 		d.setImageRegistrationMode(ImageRegistrationMode.DEPTH_TO_COLOR);
+		System.out.println("3");
 		mVideoStream.addNewFrameListener(this);
 		mVideoStream.start();
 	}
@@ -35,16 +38,24 @@ public class ComponentViewer extends Component implements VideoStream.NewFrameLi
 		this.usersBodyMoviments.add(moviment);
 	}
 
+	public void setStatus(String status) {
+		this.status = status;
+	}
+
 	@Override
 	public synchronized void paint(Graphics g) {
 		drawBackground(g);
 		drawUsers(g);
-		if (BodyCoordinate.seconds != 0) {
+		drawStatus(g);
+		usersBodyMoviments = new ArrayList<>();
+	}
+
+	private void drawStatus(Graphics g) {
+		if (!(status == null || status.equals(""))) {
 			g.setFont(new Font("Serif", Font.BOLD, 46));
 			g.setColor(Color.red);
-			g.drawString(BodyCoordinate.seconds + "", 10, 46);
+			g.drawString(status, 10, 46);
 		}
-		usersBodyMoviments = new ArrayList<>();
 	}
 
 	public void drawUsers(Graphics g) {
@@ -55,6 +66,7 @@ public class ComponentViewer extends Component implements VideoStream.NewFrameLi
 
 	public void drawSkeleton(Graphics g, float[][] fs) {
 		g.setColor(Color.red);
+		g.setPaintMode();
 		for (int i = 0; i < skelCoor.length; i++) {
 			g.drawLine((int) (getWidth() * fs[skelCoor[i][0]][0] / mLastFrame.getWidth()),
 					(int) (getHeight() * fs[skelCoor[i][0]][1] / mLastFrame.getHeight()),

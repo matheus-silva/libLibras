@@ -6,12 +6,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.openni.OpenNI;
-
 import com.primesense.nite.JointType;
 import com.primesense.nite.NiTE;
 import com.primesense.nite.Point2D;
-import com.primesense.nite.PoseData;
 import com.primesense.nite.PoseType;
 import com.primesense.nite.Skeleton;
 import com.primesense.nite.SkeletonJoint;
@@ -21,7 +18,8 @@ import com.primesense.nite.UserTracker;
 import com.primesense.nite.UserTrackerFrameRef;;
 
 public class BodyCoordinate implements InterfaceCoordinate, UserTracker.NewFrameListener {
-
+	
+	private Integer seconds = 0;
 	public static final int X = 0, Y = 1, Z = 2;
 	public static final int REAL_WORLD = 10, DEPTH = 11;
 	public static final int HEAD = 0, NECK = 1, LEFT_SHOULDER = 2, RIGHT_SHOULDER = 3, LEFT_ELBOW = 4, RIGHT_ELBOW = 5,
@@ -32,7 +30,6 @@ public class BodyCoordinate implements InterfaceCoordinate, UserTracker.NewFrame
 	private Map<Short, List<float[][]>> coordinates = null;
 	private boolean realWorld = true;
 	private PoseType startingPose = null, stoppingPose = null;
-	public static Integer seconds = 0;
 	private boolean startRecordingUsers = false, startTimer = false;
 	private ComponentViewer view = null;
 
@@ -93,29 +90,24 @@ public class BodyCoordinate implements InterfaceCoordinate, UserTracker.NewFrame
 	}
 
 	private void detectingPose(UserData user) {
-		if (user.getPoses(startingPose).isHeld()) {
-			if (seconds <= 0) {
-				startRecordingUsers = true;
-				startTimer = false;
-				if (stoppingPose != null) {
-					userTracker.startPoseDetection(user.getId(), stoppingPose);
-				}
-			} else {
-				if (!startTimer) {
-					new Thread(new Timer()).start();
-					startTimer = true;
-				}
-			}
+		if (seconds <= 0 && (user.getPoses(startingPose).isHeld() || startTimer)) {
 			userTracker.stopPoseDetection(user.getId(), startingPose);
-		}
-		if (startTimer && seconds <= 0) {
+
 			startRecordingUsers = true;
 			startTimer = false;
+
 			if (stoppingPose != null) {
 				userTracker.startPoseDetection(user.getId(), stoppingPose);
 			}
 		}
-		if(user.getPoses(stoppingPose).isHeld()){
+
+		if (user.getPoses(startingPose).isHeld() && seconds > 0 && !startTimer) {
+			new Thread(new Timer()).start();
+			startTimer = true;
+			userTracker.stopPoseDetection(user.getId(), startingPose);
+		}
+		
+		if (user.getPoses(stoppingPose).isHeld()) {
 			startRecordingUsers = false;
 			userTracker.stopPoseDetection(user.getId(), stoppingPose);
 		}
@@ -132,7 +124,7 @@ public class BodyCoordinate implements InterfaceCoordinate, UserTracker.NewFrame
 	}
 
 	public void startRecordingUsers(PoseType pose, int seconds) {
-		BodyCoordinate.seconds = seconds;
+		this.seconds = seconds;
 		this.startingPose = pose;
 	}
 
@@ -169,6 +161,14 @@ public class BodyCoordinate implements InterfaceCoordinate, UserTracker.NewFrame
 			break;
 		}
 	}
+	
+	public Integer getSeconds(){
+		return seconds;
+	}
+	
+	public boolean isTimerActivated(){
+		return startTimer;
+	}
 
 	private List<float[][]> createListStructure() {
 		// return new CopyOnWriteArrayList<>();
@@ -192,7 +192,7 @@ public class BodyCoordinate implements InterfaceCoordinate, UserTracker.NewFrame
 		if (user.isNew()) {
 			userTracker.startSkeletonTracking(user.getId());
 
-			if (startingPose != null) {
+			if (startingPose != null && !startRecordingUsers) {
 				userTracker.startPoseDetection(user.getId(), startingPose);
 			}
 			return false;
@@ -248,15 +248,15 @@ public class BodyCoordinate implements InterfaceCoordinate, UserTracker.NewFrame
 
 		@Override
 		public void run() {
-			while (BodyCoordinate.seconds > 0) {
+			while (seconds > 0) {
 				try {
 					Thread.sleep(1_000);
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				System.out.println("Wait " + BodyCoordinate.seconds + " seconds. ");
-				BodyCoordinate.seconds--;
+				System.out.println("Wait " + seconds + " seconds. ");
+				seconds--;
 			}
 		}
 	}
