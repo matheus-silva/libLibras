@@ -1,5 +1,7 @@
 package br.edu.ifsp.coordinates;
 
+import java.awt.Component;
+
 import org.openni.Device;
 import org.openni.OpenNI;
 import org.openni.SensorType;
@@ -15,14 +17,14 @@ public class Viewer {
 		OpenNI.initialize();
 		// NiTE.initialize();
 		d = Device.open(OpenNI.enumerateDevices().get(0).getUri());
-		
-		if(isDepthSupported()){
+
+		if (isDepthSupported()) {
 			depth = createComponent(SensorType.DEPTH);
 		}
-		if(isColorSupported()){
+		if (isColorSupported()) {
 			color = createComponent(SensorType.COLOR);
 		}
-		if(isIrSupported()){
+		if (isIrSupported()) {
 			ir = createComponent(SensorType.IR);
 		}
 	}
@@ -51,9 +53,14 @@ public class Viewer {
 		return this.color;
 	}
 
+	public ComponentViewer getIr() {
+		return this.ir;
+	}
+
 	public void setStatus(String value) {
 		depth.setStatus(value);
 		color.setStatus(value);
+		ir.setStatus(value);
 	}
 
 }

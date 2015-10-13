@@ -3,6 +3,7 @@ package br.edu.ifsp.application;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Container;
+import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
@@ -30,23 +31,25 @@ import br.edu.ifsp.coordinates.BodyCoordinate;
 import br.edu.ifsp.coordinates.ComponentViewer;
 import br.edu.ifsp.coordinates.Viewer;
 
-public class Application extends JFrame {
-	
+public class Application extends JFrame implements ItemListener {
+
 	private Camera camera;
 	private ComponentViewer viewComponent;
 	private Viewer view;
 	private BodyCoordinate coor;
-	
+
+	private JComboBox<String> startingPose = new JComboBox<String>(new String[] { "Manual", "Crossed Hands", "PSI" });
+	private JComboBox<String> stoppingPose = new JComboBox<String>(new String[] { "Manual", "Crossed Hands", "PSI" });
 	private JPanel timer, cameras, setup, record;
 	private JRadioButton color, depth, ir;
 	private ButtonGroup camerasGroup;
-	
+
 	public Application() {
 		super("Application");
-		
+
 		initialize();
 		initializeComponentsForm();
-		
+
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setSize(500, 300);
 		setVisible(true);
@@ -55,15 +58,15 @@ public class Application extends JFrame {
 	private void initialize() {
 		view = new Viewer();
 		viewComponent = view.getColor();
-		
+
 		coor = new BodyCoordinate(viewComponent);
 		coor.setCoordinateSystem(BodyCoordinate.DEPTH);
-		
+
 		camera = new Camera(view);
-		//new Thread(camera).start();
+		// new Thread(camera).start();
 	}
-	
-	private void initializeComponentsForm(){
+
+	private void initializeComponentsForm() {
 		Container c = getContentPane();
 		c.setLayout(new BorderLayout());
 
@@ -75,6 +78,19 @@ public class Application extends JFrame {
 		depth = new JRadioButton("Depth");
 		ir = new JRadioButton("IR");
 		camerasGroup = new ButtonGroup();
+
+		camera.setComponentView("Color");
+		color.setSelected(true);
+		
+		depth.addItemListener(this);
+		color.addItemListener(this);
+		ir.addItemListener(this);
+		startingPose.addItemListener(this);
+		stoppingPose.addItemListener(this);
+
+		depth.setVisible(view.isDepthSupported());
+		color.setVisible(view.isColorSupported());
+		ir.setVisible(view.isIrSupported());
 
 		timer.setBorder(new TitledBorder("Timer"));
 		cameras.setBorder(new TitledBorder("Cameras"));
@@ -93,9 +109,9 @@ public class Application extends JFrame {
 		record.add(new JLabel("Seconds:"));
 		record.add(new JSpinner());
 		record.add(new JLabel("Start Recording Pose:"));
-		record.add(new JComboBox<String>(new String[] { "Manual", "Crossed Hands", "PSI" }));
+		record.add(startingPose);
 		record.add(new JLabel("Stop Recording Pose:"));
-		record.add(new JComboBox<String>(new String[] { "Manual", "Crossed Hands", "PSI" }));
+		record.add(stoppingPose);
 		record.add(new JButton("Start Recording"));
 		record.add(new JButton("Stop Recording"));
 
@@ -120,6 +136,28 @@ public class Application extends JFrame {
 				System.out.print(Arrays.toString(joints[i]));
 			}
 			System.out.println("");
+		}
+	}
+
+	@Override
+	public void itemStateChanged(ItemEvent ie) {
+		if (ie.getStateChange() == ItemEvent.DESELECTED) {
+			return;
+		}
+		if (ie.getSource() == color) {
+			System.out.println("Color");
+			camera.setComponentView("Color");
+			coor.setView(view.getColor());
+		} else if (ie.getSource() == depth) {
+			System.out.println("Depth");
+			camera.setComponentView("Depth");
+			coor.setView(view.getDepth());
+		} else if (ie.getSource() == ir) {
+			System.out.println("Infrared");
+		} else if (ie.getSource() == startingPose) {
+			System.out.println("Starting");
+		} else if (ie.getSource() == stoppingPose) {
+			System.out.println("Stopping");
 		}
 	}
 
