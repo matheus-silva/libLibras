@@ -35,6 +35,7 @@ import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JSpinner;
@@ -191,8 +192,6 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 		pnSetup.add(BorderLayout.SOUTH, pnSave);
 	}
 
-	
-
 	@Override
 	public void itemStateChanged(ItemEvent ie) {
 		if (ie.getStateChange() == ItemEvent.DESELECTED) {
@@ -255,9 +254,12 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 	}
 
 	public void saveFile(File file) {
-		if(file.exists()){
-			System.out.println("There is already a file like this");
-			return;
+		if (file.exists()) {
+			if (JOptionPane.showConfirmDialog(this,
+					"There is already a file with this name.\n" + "Would you like to override it?", "Alert",
+					JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) != JOptionPane.YES_OPTION) {
+				return;
+			}
 		}
 		try {
 			Files.write(Paths.get(file.toURI()), getCoords().getBytes());
@@ -266,7 +268,7 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 			e.printStackTrace();
 		}
 	}
-	
+
 	private String getCoords() {
 		String coords = new String();
 		for (Float[][][] user : coor.getMovimentsArray().values()) {
