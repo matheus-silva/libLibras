@@ -264,7 +264,8 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 		try {
 			Files.write(Paths.get(file.toURI()), getCoords().getBytes());
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			JOptionPane.showMessageDialog(this, "An error happened. Try again later!\n" + "Message: " + e.getMessage(),
+					"Error", JOptionPane.ERROR_MESSAGE);
 			e.printStackTrace();
 		}
 	}
