@@ -1,12 +1,8 @@
 package br.edu.ifsp.coordinates;
 
-import java.awt.Component;
-
 import org.openni.Device;
 import org.openni.OpenNI;
 import org.openni.SensorType;
-
-import com.primesense.nite.NiTE;
 
 public class Viewer {
 
@@ -58,9 +54,15 @@ public class Viewer {
 	}
 
 	public void setStatus(String value) {
-		depth.setStatus(value);
-		color.setStatus(value);
-		ir.setStatus(value);
+		if (isDepthSupported()) {
+			depth.setStatus(value);
+		}
+		if (isColorSupported()) {
+			color.setStatus(value);
+		}
+		if (isIrSupported()) {
+			ir.setStatus(value);
+		}
 	}
 
 }

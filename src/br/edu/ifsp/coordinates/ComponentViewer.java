@@ -18,7 +18,7 @@ public class ComponentViewer extends Component implements VideoStream.NewFrameLi
 	BufferedImage mBufferedImage;
 
 	private String status = null;
-	private List<float[][]> usersBodyMoviments = new ArrayList<>();
+	private List<Float[][]> usersBodyMoviments = new ArrayList<>();
 	private int[][] skelCoor = { { BodyCoordinate.HEAD, 1 }, { 1, 8 }, { 8, 9 }, { 8, 10 }, { 9, 11 }, { 11, 13 },
 			{ 10, 12 }, { 12, 14 }, { 1, 3 }, { 3, 5 }, { 5, 7 }, { 1, 2 }, { 2, 4 }, { 4, 6 } };
 
@@ -29,12 +29,13 @@ public class ComponentViewer extends Component implements VideoStream.NewFrameLi
 		
 		System.out.println("2");
 		d.setImageRegistrationMode(ImageRegistrationMode.DEPTH_TO_COLOR);
+		
 		System.out.println("3");
 		mVideoStream.addNewFrameListener(this);
 		mVideoStream.start();
 	}
 
-	public synchronized void addUserMoviments(float[][] moviment) {
+	public synchronized void addUserMoviments(Float[][] moviment) {
 		this.usersBodyMoviments.add(moviment);
 	}
 
@@ -59,12 +60,12 @@ public class ComponentViewer extends Component implements VideoStream.NewFrameLi
 	}
 
 	public void drawUsers(Graphics g) {
-		for (float[][] fs : usersBodyMoviments) {
+		for (Float[][] fs : usersBodyMoviments) {
 			drawSkeleton(g, fs);
 		}
 	}
 
-	public void drawSkeleton(Graphics g, float[][] fs) {
+	public void drawSkeleton(Graphics g, Float[][] fs) {
 		g.setColor(Color.red);
 		g.setPaintMode();
 		for (int i = 0; i < skelCoor.length; i++) {
@@ -101,6 +102,7 @@ public class ComponentViewer extends Component implements VideoStream.NewFrameLi
 		}
 
 		mLastFrame = mVideoStream.readFrame();
+		//System.out.println("OpenNI: "+ mVideoStream.getSensorType()+ " "+mLastFrame.getFrameIndex());
 		ByteBuffer frameData = mLastFrame.getData().order(ByteOrder.LITTLE_ENDIAN);
 
 		// make sure we have enough room
