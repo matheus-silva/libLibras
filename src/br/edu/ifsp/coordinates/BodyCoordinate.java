@@ -96,7 +96,7 @@ public class BodyCoordinate implements InterfaceCoordinate, UserTracker.NewFrame
 		for (UserData user : users) {
 
 			/* If the currently user is not ready to be tracked */
-			if (!isUserReadyToTrack(user)) {
+			if (!isUserTracked(user)) {
 				continue;
 			}
 
@@ -130,6 +130,10 @@ public class BodyCoordinate implements InterfaceCoordinate, UserTracker.NewFrame
 		}
 	}
 
+	/**
+	 * Method that has the policy of the startingPose.
+	 * @param user The user to check.
+	 */
 	private void detectingStartingPose(UserData user) {
 		/* If there is not a startingPose */
 		if (startingPose == null) {
@@ -334,8 +338,10 @@ public class BodyCoordinate implements InterfaceCoordinate, UserTracker.NewFrame
 	}
 
 	/**
+	 * Check a chronometer is activated.
 	 * 
-	 * @return
+	 * @return true if there is a chronometer counting the time, false
+	 *         otherwise.
 	 */
 	public boolean isTimerActivated() {
 		return startTimer;
@@ -355,7 +361,14 @@ public class BodyCoordinate implements InterfaceCoordinate, UserTracker.NewFrame
 		return new HashMap<Short, List<Float[][]>>();
 	}
 
-	private boolean isUserReadyToTrack(UserData user) {
+	/**
+	 * Check if the user informed was already tracked.
+	 * 
+	 * @param user
+	 *            User to check
+	 * @return true if the user was tracked, false otherwise.
+	 */
+	private boolean isUserTracked(UserData user) {
 
 		/*
 		 * Check if the user was in the previous frame, but no longer in this
