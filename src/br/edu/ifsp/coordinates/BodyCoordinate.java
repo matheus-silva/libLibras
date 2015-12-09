@@ -155,15 +155,31 @@ public class BodyCoordinate implements InterfaceCoordinate, UserTracker.NewFrame
 			System.out.println("Start: " + startingPose + " is Held");
 		}
 
+		/*
+		 * If the seconds remaining are lower than 1, it means that it is time
+		 * to record the user movements. However, it will only start the
+		 * recording of the current user if he is holding the startingPose, or
+		 * the chronometer has been started.
+		 */
 		if (secondsRemaining <= 0 && (user.getPoses(startingPose).isHeld() || startTimer)) {
+
+			/*
+			 * =================== CHECK ===================
+			 */
 			userTracker.stopPoseDetection(user.getId(), startingPose);
 
+			/* Turn off the chronometer */
 			startTimer = false;
+
+			/* Call the client's listener that are waiting for some events. */
 			startRecordingUsers = true;
 			if (stateChanged != null) {
 				stateChanged.stateChanged(StateChangedListener.RECORDING_STARTED);
 			}
 
+			/*
+			 * =================== CHECK ===================
+			 */
 			if (stoppingPose != null) {
 				userTracker.startPoseDetection(user.getId(), stoppingPose);
 			}
@@ -212,6 +228,9 @@ public class BodyCoordinate implements InterfaceCoordinate, UserTracker.NewFrame
 		}
 	}
 
+	/**
+	 * Start recording the user movements right away
+	 */
 	@Override
 	public void startRecordingUsers() {
 		startRecordingUsers = true;
@@ -220,6 +239,9 @@ public class BodyCoordinate implements InterfaceCoordinate, UserTracker.NewFrame
 		}
 	}
 
+	/**
+	 * Stop recording the user movements right away
+	 */
 	@Override
 	public void stopRecordingUsers() {
 		startRecordingUsers = false;
@@ -242,6 +264,12 @@ public class BodyCoordinate implements InterfaceCoordinate, UserTracker.NewFrame
 		this.startingPose = pose;
 	}
 
+	/**
+	 * Stop recording the user movements when an user held the informed pose.
+	 * 
+	 * @param pose
+	 *            Pose Pose to be detected
+	 */
 	public void stopRecordingUsers(PoseType pose) {
 		for (UserData user : userTracker.readFrame().getUsers()) {
 			if (this.stoppingPose != null) {
@@ -273,6 +301,16 @@ public class BodyCoordinate implements InterfaceCoordinate, UserTracker.NewFrame
 		return newCoordinates;
 	}
 
+	/**
+	 * Set the coordinate system used to store the coordinates of the users'
+	 * joints. There are to coordinate system used: Real World and Depth. Check
+	 * the OpenNI Documentation for more details.
+	 * 
+	 * @param coordinate
+	 *            The coordinate system used. Please, use the constants
+	 *            {@link BodyCoordinate}.REAL_WORLD or {@link BodyCoordinate}
+	 *            .DEPTH.
+	 */
 	public void setCoordinateSystem(int coordinate) {
 		switch (coordinate) {
 		case REAL_WORLD:
@@ -284,10 +322,21 @@ public class BodyCoordinate implements InterfaceCoordinate, UserTracker.NewFrame
 		}
 	}
 
+	/**
+	 * Get the seconds remaining to start storing the movements. Useful when a
+	 * chronometer has already been started. Use the class
+	 * {@link BodyCoordinate.StateChangedListener} to receive more informations.
+	 * 
+	 * @return The seconds remaining to start storing the movements
+	 */
 	public Integer getSeconds() {
 		return secondsRemaining;
 	}
 
+	/**
+	 * 
+	 * @return
+	 */
 	public boolean isTimerActivated() {
 		return startTimer;
 	}
