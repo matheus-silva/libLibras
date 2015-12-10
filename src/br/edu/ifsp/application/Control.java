@@ -51,6 +51,7 @@ import com.primesense.nite.PoseType;
 import br.edu.ifsp.coordinates.BodyCoordinate;
 import br.edu.ifsp.coordinates.ComponentViewer;
 import br.edu.ifsp.coordinates.Viewer;
+import br.edu.ifsp.util.Save;
 
 public class Control extends JFrame implements ItemListener, ActionListener, ChangeListener {
 
@@ -244,52 +245,19 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 		} else if (ae.getSource() == btStop) {
 			coor.stopRecordingUsers();
 		} else if (ae.getSource() == btSave) {
-			JFileChooser chooser = new JFileChooser();
-			if (chooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
-				saveFile(chooser.getSelectedFile());
+			Save save = new Save();
+			File f = save.getFile(this);
+			if (f != null) {
+				Float[][][] moviments = null;
+				for(Float[][][] userFrames : coor.getMovimentsArray().values()){
+					moviments = userFrames;
+					break;
+				}
+				save.saveFile(this, f, moviments);
 			}
 		} else if (ae.getSource() == btClear) {
-
+			coor.clearMoviments();
 		}
-	}
-
-	public void saveFile(File file) {
-		if (file.exists()) {
-			if (JOptionPane.showConfirmDialog(this,
-					"There is already a file with this name.\n" + "Would you like to override it?", "Alert",
-					JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) != JOptionPane.YES_OPTION) {
-				return;
-			}
-		}
-		try {
-			Files.write(Paths.get(file.toURI()), getCoords().getBytes());
-		} catch (IOException e) {
-			JOptionPane.showMessageDialog(this, "An error happened. Try again later!\n" + "Message: " + e.getMessage(),
-					"Error", JOptionPane.ERROR_MESSAGE);
-			e.printStackTrace();
-		}
-	}
-
-	private String getCoords() {
-		String coords = new String();
-		for (Float[][][] user : coor.getMovimentsArray().values()) {
-			coords += getUserCoords(user) + "\n";
-		}
-		return coords;
-	}
-
-	private String getUserCoords(Float[][][] moves) {
-		String coords = new String();
-		for (int h = 0; h < moves.length; h++) {
-			coords += h;
-			Float[][] joints = moves[h];
-
-			for (int i = 0; i < joints.length; i++) {
-				coords += Arrays.toString(joints[i]);
-			}
-			coords += "\n";
-		}
-		return coords;
 	}
 
 	public static void main(String args[]) {

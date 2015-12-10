@@ -132,7 +132,9 @@ public class BodyCoordinate implements InterfaceCoordinate, UserTracker.NewFrame
 
 	/**
 	 * Method that has the policy of the startingPose.
-	 * @param user The user to check.
+	 * 
+	 * @param user
+	 *            The user to check.
 	 */
 	private void detectingStartingPose(UserData user) {
 		/* If there is not a startingPose */
@@ -306,6 +308,30 @@ public class BodyCoordinate implements InterfaceCoordinate, UserTracker.NewFrame
 	}
 
 	/**
+	 * Get the amount of frames stored. This method identify what user has more
+	 * frames stored, and return the amount of frames for this user.
+	 * 
+	 * @return The amount of frames stored to the user who has more frames
+	 */
+	public int getFramesCount() {
+		int max = 0;
+		for (List<Float[][]> userFrames : coordinates.values()) {
+			if (max < userFrames.size()) {
+				max = userFrames.size();
+			}
+		}
+		return max;
+	}
+
+	/**
+	 * Delete all the movements stored. This method clean the movements that was
+	 * stored.
+	 */
+	public void clearMoviments() {
+		coordinates = createMapStructure();
+	}
+
+	/**
 	 * Set the coordinate system used to store the coordinates of the users'
 	 * joints. There are to coordinate system used: Real World and Depth. Check
 	 * the OpenNI Documentation for more details.
@@ -331,7 +357,7 @@ public class BodyCoordinate implements InterfaceCoordinate, UserTracker.NewFrame
 	 * chronometer has already been started. Use the class
 	 * {@link BodyCoordinate.StateChangedListener} to receive more informations.
 	 * 
-	 * @return The seconds remaining to start storing the movements
+	 * @return The seconds remaining to start storing the movements.
 	 */
 	public Integer getSeconds() {
 		return secondsRemaining;
@@ -347,6 +373,14 @@ public class BodyCoordinate implements InterfaceCoordinate, UserTracker.NewFrame
 		return startTimer;
 	}
 
+	/**
+	 * Set a listener which will be called every time that something happens.
+	 * 
+	 * @param stateChanged
+	 *            Object {@link StateChangedListener} which method will be
+	 *            called every time that something new happens.
+	 * @see StateChangedListener
+	 */
 	public void setStateChanged(StateChangedListener stateChanged) {
 		this.stateChanged = stateChanged;
 	}
@@ -365,7 +399,7 @@ public class BodyCoordinate implements InterfaceCoordinate, UserTracker.NewFrame
 	 * Check if the user informed was already tracked.
 	 * 
 	 * @param user
-	 *            User to check
+	 *            User to check.
 	 * @return true if the user was tracked, false otherwise.
 	 */
 	private boolean isUserTracked(UserData user) {
@@ -437,6 +471,19 @@ public class BodyCoordinate implements InterfaceCoordinate, UserTracker.NewFrame
 		return true;
 	}
 
+	/**
+	 * Get the position of the joints of the informed user. This method return
+	 * the coordinates, according to the coordinate system informed, of the
+	 * joints of the informed user. Moreover, this method also feed the
+	 * {@link ComponentViewer} object with the newest data.
+	 * 
+	 * @param user
+	 *            The current user The current user whose coordinates will be
+	 *            returned.
+	 * @return An array representing the coordinates, where: Float[] represents
+	 *         the joints; Float[][] represents the positions in the axis X, Y
+	 *         and Z
+	 */
 	private Float[][] trackingUser(UserData user) {
 		Skeleton skeleton = user.getSkeleton();
 		JointType[] jointTypes = JointType.values();
