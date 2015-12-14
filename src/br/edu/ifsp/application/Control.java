@@ -69,7 +69,7 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 	private ButtonGroup btCamerasGroup;
 	private JSpinner sSeconds;
 	private JButton btStart, btStop, btSave, btClear;
-	private JLabel lblSeconds;
+	private JLabel lblSeconds, lblCount;
 
 	public Control() {
 		super("Control");
@@ -98,15 +98,18 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 				switch (value) {
 				case BodyCoordinate.StateChangedListener.RECORDING_STARTED:
 					lblSeconds.setText("\u25CF");
-					// view.setStatus("\u25CF");
+					view.setStatus("\u25CF");
 					break;
 				case BodyCoordinate.StateChangedListener.RECORDING_STOPPED:
 					lblSeconds.setText("\u25A0");
-					// view.setStatus("\u25A0");
+					view.setStatus("\u25A0");
 					break;
 				case BodyCoordinate.StateChangedListener.TIMER_CHANGED:
 					lblSeconds.setText(String.valueOf(coor.getSeconds()));
-					// view.setStatus(String.valueOf(coor.getSeconds()));
+					view.setStatus(String.valueOf(coor.getSeconds()));
+					break;
+				case BodyCoordinate.StateChangedListener.NEW_SKELETON_STORED:
+					lblCount.setText("Frames: " + coor.getFramesCount());
 					break;
 				}
 			}
@@ -124,6 +127,7 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 		pnSetup = new JPanel(new BorderLayout(0, 0));
 		pnCameras = new JPanel(new FlowLayout(FlowLayout.LEADING, 0, 0));
 		pnRecord = new JPanel(new GridLayout(8, 1, 0, 1));
+		JPanel pnStatus = new JPanel(new BorderLayout());
 		pnSave = new JPanel(new GridLayout(0, 1));
 		rbColor = new JRadioButton("Color");
 		rbDepth = new JRadioButton("Depth");
@@ -135,6 +139,7 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 		btSave = new JButton("Save");
 		btClear = new JButton("Clear");
 		lblSeconds = new JLabel();
+		lblCount = new JLabel("Frames: 0");
 
 		// Creating listeners
 		rbDepth.addItemListener(this);
@@ -162,6 +167,7 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 		pnTimer.setBorder(new TitledBorder("Timer"));
 		pnCameras.setBorder(new TitledBorder("Cameras"));
 		pnRecord.setBorder(new TitledBorder("Record"));
+		pnStatus.setBorder(new TitledBorder("Status"));
 		btCamerasGroup.add(rbColor);
 		btCamerasGroup.add(rbDepth);
 		btCamerasGroup.add(rbIr);
@@ -183,9 +189,13 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 		pnRecord.add(btStop);
 
 		pnTimer.add(lblSeconds);
+		
+		pnStatus.add(BorderLayout.CENTER, lblCount);
+		
 		lblSeconds.setHorizontalAlignment(SwingConstants.CENTER);
 		c.add(BorderLayout.CENTER, pnTimer);
 		c.add(BorderLayout.EAST, pnSetup);
+		c.add(BorderLayout.SOUTH, pnStatus);
 
 		pnSave.setBorder(new TitledBorder("Save"));
 		pnSave.add(btSave);
@@ -249,7 +259,7 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 			File f = save.getFile(this);
 			if (f != null) {
 				Float[][][] moviments = null;
-				for(Float[][][] userFrames : coor.getMovimentsArray().values()){
+				for (Float[][][] userFrames : coor.getMovimentsArray().values()) {
 					moviments = userFrames;
 					break;
 				}
@@ -257,6 +267,7 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 			}
 		} else if (ae.getSource() == btClear) {
 			coor.clearMoviments();
+			lblCount.setText("Frames: " + coor.getFramesCount());
 		}
 	}
 

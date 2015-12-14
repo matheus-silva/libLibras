@@ -127,6 +127,10 @@ public class BodyCoordinate implements InterfaceCoordinate, UserTracker.NewFrame
 			}
 
 			userMoves.add(joints);
+			
+			if(stateChanged != null){
+				stateChanged.stateChanged(BodyCoordinate.StateChangedListener.NEW_SKELETON_STORED);
+			}
 		}
 	}
 
@@ -485,7 +489,9 @@ public class BodyCoordinate implements InterfaceCoordinate, UserTracker.NewFrame
 	 *         and Z
 	 */
 	private Float[][] trackingUser(UserData user) {
+		/* Get the skeleton of the current user */
 		Skeleton skeleton = user.getSkeleton();
+		
 		JointType[] jointTypes = JointType.values();
 		Float[][] joints = new Float[jointTypes.length][3];
 		Float[][] depth = new Float[jointTypes.length][3];
@@ -530,15 +536,16 @@ public class BodyCoordinate implements InterfaceCoordinate, UserTracker.NewFrame
 		@Override
 		public void run() {
 			while (secondsRemaining > 0) {
+				if (stateChanged != null) {
+					stateChanged.stateChanged(StateChangedListener.TIMER_CHANGED);
+				}
+
 				try {
 					Thread.sleep(1_000);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
 
-				if (stateChanged != null) {
-					stateChanged.stateChanged(StateChangedListener.TIMER_CHANGED);
-				}
 				secondsRemaining--;
 			}
 		}
@@ -549,6 +556,7 @@ public class BodyCoordinate implements InterfaceCoordinate, UserTracker.NewFrame
 		public static final int RECORDING_STARTED = 0;
 		public static final int RECORDING_STOPPED = 1;
 		public static final int TIMER_CHANGED = 2;
+		public static final int NEW_SKELETON_STORED = 3;
 
 		public void stateChanged(int value);
 
