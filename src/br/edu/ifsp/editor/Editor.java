@@ -47,6 +47,7 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
 import br.edu.ifsp.util.Load;
+import br.edu.ifsp.util.Save;
 
 public class Editor extends JFrame implements ChangeListener, ActionListener {
 
@@ -62,6 +63,8 @@ public class Editor extends JFrame implements ChangeListener, ActionListener {
 	private JCheckBox cbMoveTimeline;
 
 	private JMenuItem mOpen;
+	private JMenuItem mSave;
+	private JMenuItem mSaveAs;
 	private JMenuItem mUndo;
 	private JMenuItem mRedo;
 	private JMenuItem mInvert;
@@ -125,6 +128,8 @@ public class Editor extends JFrame implements ChangeListener, ActionListener {
 		JMenuBar menu = new JMenuBar();
 
 		mOpen = new JMenuItem("Open");
+		mSave = new JMenuItem("Save");
+		mSaveAs = new JMenuItem("Save As...");
 		mUndo = new JMenuItem("Undo");
 		mRedo = new JMenuItem("Redo");
 		mInvert = new JMenuItem("Invert");
@@ -148,6 +153,8 @@ public class Editor extends JFrame implements ChangeListener, ActionListener {
 		mSkeleton.setSelected(true);
 
 		mOpen.addActionListener(this);
+		mSave.addActionListener(this);
+		mSaveAs.addActionListener(this);
 		mUndo.addActionListener(this);
 		mRedo.addActionListener(this);
 		mInvert.addActionListener(this);
@@ -193,8 +200,8 @@ public class Editor extends JFrame implements ChangeListener, ActionListener {
 
 		file.add(mOpen);
 		file.addSeparator();
-		file.add(new JMenuItem("Save"));
-		file.add(new JMenuItem("Save As..."));
+		file.add(mSave);
+		file.add(mSaveAs);
 		file.addSeparator();
 		file.add(new JMenuItem("Close"));
 		file.add(new JMenuItem("Exit"));
@@ -294,7 +301,7 @@ public class Editor extends JFrame implements ChangeListener, ActionListener {
 
 		slCrop = new RangeSlider(0, coords.length - 1);
 		int major = (int) Math.floor((coords.length - 1) / 15);
-		if(major % 5 != 0)
+		if (major % 5 != 0)
 			major = (int) Math.floor(major / 5) * 5;
 		slCrop.setMajorTickSpacing(major);
 		slCrop.setMinorTickSpacing(5);
@@ -412,7 +419,16 @@ public class Editor extends JFrame implements ChangeListener, ActionListener {
 			if (f != null) {
 				openFile(f);
 			}
-
+		} else if (e.getSource() == mSave) {
+			new Save().saveFile(this, currentFile, history.getCurrentState());
+		} else if (e.getSource() == mSaveAs) {
+			Save s = new Save();
+			File f = s.getFile(this);
+			if(f != null){
+				s.saveFile(this, f, history.getCurrentState());
+				currentFile = f;
+				setTitle("Editor - " + f.getAbsolutePath());
+			}			
 		} else if (e.getSource() == mUndo) {
 			loadCoords(history.undo());
 			mUndo.setEnabled(!history.isFirst());
@@ -491,7 +507,7 @@ public class Editor extends JFrame implements ChangeListener, ActionListener {
 			}
 		}
 		// Editor e = new Editor();
-		 Editor e = new Editor(new File("data/Dados - Juntas 10.txt"));
+		Editor e = new Editor(new File("data/Dados - Juntas 10.txt"));
 		// Editor e = new Editor("data/Dados - Real World.txt");
 		e.setVisible(true);
 	}
@@ -520,25 +536,25 @@ public class Editor extends JFrame implements ChangeListener, ActionListener {
 				return newArray;
 			}
 		}
-		
-		public boolean isEquals(float[][][] a, float[][][] b){
-			if(a.length != b.length){
+
+		public boolean isEquals(float[][][] a, float[][][] b) {
+			if (a.length != b.length) {
 				return false;
 			}
-			
-			for(int i = 0; i < a.length; i++){
-				if(a[i].length != b[i].length){
+
+			for (int i = 0; i < a.length; i++) {
+				if (a[i].length != b[i].length) {
 					return false;
 				}
-				
-				for(int j = 0; j < a[i].length; j++){
-					if(a[i][j].length != b[i][j].length){
+
+				for (int j = 0; j < a[i].length; j++) {
+					if (a[i][j].length != b[i][j].length) {
 						return false;
 					}
-					
-					for(int k = 0; k < a[i][j].length; k++){
-						
-						if(a[i][j][k] != b[i][j][k]){
+
+					for (int k = 0; k < a[i][j].length; k++) {
+
+						if (a[i][j][k] != b[i][j][k]) {
 							return false;
 						}
 					}
