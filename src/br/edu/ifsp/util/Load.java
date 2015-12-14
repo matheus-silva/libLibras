@@ -29,9 +29,9 @@ public class Load {
 		return null;
 	}
 	
-	public float[][][] loadFile(String arquivo) {
+	public float[][][] loadFile(File arquivo) {
 		Charset c = StandardCharsets.UTF_8;
-		Path get = Paths.get(arquivo);
+		Path get = Paths.get(arquivo.toURI());
 		List<String> readAllLines = new ArrayList<>();
 		try {
 			readAllLines = Files.readAllLines(get, c);

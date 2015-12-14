@@ -1,6 +1,7 @@
 package br.edu.ifsp.editor;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class HistoryCoordinate {
@@ -24,6 +25,10 @@ public class HistoryCoordinate {
 		
 		history.add(change);
 		index++;
+	}
+	
+	public float[][][] getOriginal(){
+		return history.get(0);
 	}
 	
 	public boolean isFirst(){

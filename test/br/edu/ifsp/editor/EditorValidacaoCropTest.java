@@ -5,7 +5,7 @@ import static org.junit.Assert.assertArrayEquals;
 import org.junit.Before;
 import org.junit.Test;
 
-public class EditorValidacaoTest {
+public class EditorValidacaoCropTest {
 	
 	private Editor.Util v;
 	private float[][][] array = new float[][][]{

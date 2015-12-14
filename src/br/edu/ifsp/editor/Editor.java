@@ -50,6 +50,7 @@ import br.edu.ifsp.util.Load;
 
 public class Editor extends JFrame implements ChangeListener, ActionListener {
 
+	private File currentFile;
 	private HistoryCoordinate history;
 
 	private JPanel pnMain;
@@ -88,7 +89,7 @@ public class Editor extends JFrame implements ChangeListener, ActionListener {
 		this(null);
 	}
 
-	public Editor(String arquivo) {
+	public Editor(File arquivo) {
 		super("Editor");
 
 		setJMenuBar(getMenu());
@@ -102,8 +103,9 @@ public class Editor extends JFrame implements ChangeListener, ActionListener {
 		setLocationRelativeTo(this);
 	}
 
-	private void openFile(String arquivo) {
-		setTitle("Editor - " + arquivo);
+	private void openFile(File arquivo) {
+		currentFile = arquivo;
+		setTitle("Editor - " + arquivo.getAbsolutePath());
 		float[][][] c = new Load().loadFile(arquivo);
 		history = new HistoryCoordinate(c);
 		loadCoords(history.getCurrentState());
@@ -408,7 +410,7 @@ public class Editor extends JFrame implements ChangeListener, ActionListener {
 		if (e.getSource() == mOpen) {
 			File f = new Load().open(this);
 			if (f != null) {
-				openFile(f.getPath());
+				openFile(f);
 			}
 
 		} else if (e.getSource() == mUndo) {
@@ -489,7 +491,7 @@ public class Editor extends JFrame implements ChangeListener, ActionListener {
 			}
 		}
 		// Editor e = new Editor();
-		 Editor e = new Editor("data/Dados - Juntas 10.txt");
+		 Editor e = new Editor(new File("data/Dados - Juntas 10.txt"));
 		// Editor e = new Editor("data/Dados - Real World.txt");
 		e.setVisible(true);
 	}
@@ -517,6 +519,32 @@ public class Editor extends JFrame implements ChangeListener, ActionListener {
 
 				return newArray;
 			}
+		}
+		
+		public boolean isEquals(float[][][] a, float[][][] b){
+			if(a.length != b.length){
+				return false;
+			}
+			
+			for(int i = 0; i < a.length; i++){
+				if(a[i].length != b[i].length){
+					return false;
+				}
+				
+				for(int j = 0; j < a[i].length; j++){
+					if(a[i][j].length != b[i][j].length){
+						return false;
+					}
+					
+					for(int k = 0; k < a[i][j].length; k++){
+						
+						if(a[i][j][k] != b[i][j][k]){
+							return false;
+						}
+					}
+				}
+			}
+			return true;
 		}
 
 	}
