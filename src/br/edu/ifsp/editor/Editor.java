@@ -269,7 +269,10 @@ public class Editor extends JFrame implements ChangeListener, ActionListener {
 
 		slTimeline.setSize(pnTimeline.getSize());
 
-		slTimeline.setMajorTickSpacing(25);
+		int major = (int) Math.floor((coords.length - 1) / 7);
+		if (major % 5 != 0)
+			major = (int) Math.floor(major / 5) * 5;
+		slTimeline.setMajorTickSpacing(major);
 		slTimeline.setMinorTickSpacing(5);
 		slTimeline.setPaintTicks(true);
 		slTimeline.setPaintLabels(true);
@@ -288,7 +291,10 @@ public class Editor extends JFrame implements ChangeListener, ActionListener {
 		cbMoveTimeline.setSelected(false);
 
 		slCrop = new RangeSlider(0, coords.length - 1);
-		slCrop.setMajorTickSpacing(25);
+		int major = (int) Math.floor((coords.length - 1) / 15);
+		if(major % 5 != 0)
+			major = (int) Math.floor(major / 5) * 5;
+		slCrop.setMajorTickSpacing(major);
 		slCrop.setMinorTickSpacing(5);
 		slCrop.setPaintTicks(true);
 		slCrop.setPaintLabels(true);
@@ -483,8 +489,8 @@ public class Editor extends JFrame implements ChangeListener, ActionListener {
 			}
 		}
 		// Editor e = new Editor();
-		// Editor e = new Editor("data/Dados - Juntas 1.txt");
-		Editor e = new Editor("data/Dados - Real World.txt");
+		 Editor e = new Editor("data/Dados - Juntas 10.txt");
+		// Editor e = new Editor("data/Dados - Real World.txt");
 		e.setVisible(true);
 	}
 
