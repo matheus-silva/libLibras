@@ -79,7 +79,7 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setLocation(camera.getLocation().x + camera.getWidth(), camera.getLocation().y);
-		setSize(500, 350);
+		setSize(500, 375);
 		setVisible(true);
 	}
 
