@@ -14,21 +14,26 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.JFileChooser;
+import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import br.edu.ifsp.editor.Editor;
 
 public class Load {
 
-	public File open(Component father){
+	public File open(Component father) {
 		JFileChooser chooser = new JFileChooser();
 		chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 		if (chooser.showOpenDialog(father) == JFileChooser.APPROVE_OPTION) {
 			File f = chooser.getSelectedFile();
+			if (!f.getName().endsWith(".txt")) {
+				return null;
+			}
 			return f;
 		}
 		return null;
 	}
-	
+
 	public float[][][] loadFile(File arquivo) {
 		Charset c = StandardCharsets.UTF_8;
 		Path get = Paths.get(arquivo.toURI());
@@ -54,14 +59,18 @@ public class Load {
 			String[] jointsTemp = linha.split("]\\[");
 			for (int j = 0; j < jointsTemp.length; j++) {
 				String coordTemp[] = jointsTemp[j].split(", ");
-				moves[i][j][0] = Float.parseFloat(coordTemp[0]);
-				moves[i][j][1] = Float.parseFloat(coordTemp[1]);
-				moves[i][j][2] = Float.parseFloat(coordTemp[2]);
+				try {
+					moves[i][j][0] = Float.parseFloat(coordTemp[0]);
+					moves[i][j][1] = Float.parseFloat(coordTemp[1]);
+					moves[i][j][2] = Float.parseFloat(coordTemp[2]);
+				} catch (Exception e) {
+					continue;
+				}
 			}
 
 		}
 
 		return moves;
 	}
-	
+
 }
