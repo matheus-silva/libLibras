@@ -26,6 +26,7 @@ public class BodyCoordinate implements InterfaceCoordinate, UserTracker.NewFrame
 			LEFT_FOOT = 13, RIGHT_FOOT = 14;
 
 	private UserTracker userTracker = null;
+	private UserTrackerFrameRef frame;
 	private Map<Short, List<Float[][]>> coordinates = null;
 	private boolean realWorld = true;
 	private PoseType startingPose = null, stoppingPose = null;
@@ -83,12 +84,11 @@ public class BodyCoordinate implements InterfaceCoordinate, UserTracker.NewFrame
 	@Override
 	public synchronized void onNewFrame(UserTracker userTracker) {
 		this.userTracker = userTracker;
-
 		/*
 		 * Get the object that stores all the information of the currently frame
 		 * that NiTE is able to say
 		 */
-		UserTrackerFrameRef frame = userTracker.readFrame();
+		this.frame = userTracker.readFrame();
 		// System.out.println("NiTE: "+frame.getDepthFrame().getFrameIndex());
 
 		/* For each users detected by the middleware NiTE in this frame */
@@ -127,8 +127,8 @@ public class BodyCoordinate implements InterfaceCoordinate, UserTracker.NewFrame
 			}
 
 			userMoves.add(joints);
-			
-			if(stateChanged != null){
+
+			if (stateChanged != null) {
 				stateChanged.stateChanged(BodyCoordinate.StateChangedListener.NEW_SKELETON_STORED);
 			}
 		}
@@ -141,6 +141,7 @@ public class BodyCoordinate implements InterfaceCoordinate, UserTracker.NewFrame
 	 *            The user to check.
 	 */
 	private void detectingStartingPose(UserData user) {
+		
 		/* If there is not a startingPose */
 		if (startingPose == null) {
 			return;
@@ -172,27 +173,7 @@ public class BodyCoordinate implements InterfaceCoordinate, UserTracker.NewFrame
 		 * the chronometer has been started.
 		 */
 		if (secondsRemaining <= 0 && (user.getPoses(startingPose).isHeld() || startTimer)) {
-
-			/*
-			 * =================== CHECK ===================
-			 */
-			userTracker.stopPoseDetection(user.getId(), startingPose);
-
-			/* Turn off the chronometer */
-			startTimer = false;
-
-			/* Call the client's listener that are waiting for some events. */
-			startRecordingUsers = true;
-			if (stateChanged != null) {
-				stateChanged.stateChanged(StateChangedListener.RECORDING_STARTED);
-			}
-
-			/*
-			 * =================== CHECK ===================
-			 */
-			if (stoppingPose != null) {
-				userTracker.startPoseDetection(user.getId(), stoppingPose);
-			}
+			startRecording(user);
 		}
 
 		if (user.getPoses(startingPose).isHeld() && secondsRemaining > 0 && !startTimer) {
@@ -218,24 +199,58 @@ public class BodyCoordinate implements InterfaceCoordinate, UserTracker.NewFrame
 
 		if (user.getPoses(stoppingPose).isHeld()) {
 			userTracker.stopPoseDetection(user.getId(), stoppingPose);
-			startRecordingUsers = false;
 
-			delay = 60;
-
-			if (stateChanged != null) {
-				stateChanged.stateChanged(StateChangedListener.RECORDING_STOPPED);
-			}
-
-			if (startingPose != null) {
-
-				if (user.getPoses(startingPose).isHeld()) {
-					System.out.println("Start: " + startingPose + " is Held");
-				}
-
-				userTracker.startPoseDetection(user.getId(), startingPose);
-				secondsRemaining = seconds;
-			}
+			stopRecording(user);
 		}
+	}
+
+	private void startRecording(UserData user) {
+
+		/*
+		 * =================== CHECK ===================
+		 */
+		if (startingPose != null) {
+			userTracker.stopPoseDetection(user.getId(), startingPose);
+		}
+
+		/* Turn off the chronometer */
+		startTimer = false;
+
+		secondsRemaining = 0;
+
+		/* Call the client's listener that are waiting for some events. */
+		startRecordingUsers = true;
+		if (stateChanged != null) {
+			stateChanged.stateChanged(StateChangedListener.RECORDING_STARTED);
+		}
+
+		/*
+		 * =================== CHECK ===================
+		 */
+		if (stoppingPose != null) {
+			userTracker.startPoseDetection(user.getId(), stoppingPose);
+		}
+	}
+
+	private void stopRecording(UserData user) {
+		startRecordingUsers = false;
+
+		delay = 60;
+
+		if (stateChanged != null) {
+			stateChanged.stateChanged(StateChangedListener.RECORDING_STOPPED);
+		}
+
+		if (startingPose != null) {
+
+			if (user.getPoses(startingPose).isHeld()) {
+				System.out.println("Start: " + startingPose + " is Held");
+			}
+
+			userTracker.startPoseDetection(user.getId(), startingPose);
+			secondsRemaining = seconds;
+		}
+
 	}
 
 	/**
@@ -243,9 +258,8 @@ public class BodyCoordinate implements InterfaceCoordinate, UserTracker.NewFrame
 	 */
 	@Override
 	public void startRecordingUsers() {
-		startRecordingUsers = true;
-		if (stateChanged != null) {
-			stateChanged.stateChanged(StateChangedListener.RECORDING_STARTED);
+		for (UserData user : frame.getUsers()) {
+			startRecording(user);
 		}
 	}
 
@@ -254,22 +268,22 @@ public class BodyCoordinate implements InterfaceCoordinate, UserTracker.NewFrame
 	 */
 	@Override
 	public void stopRecordingUsers() {
-		startRecordingUsers = false;
-		if (stateChanged != null) {
-			stateChanged.stateChanged(StateChangedListener.RECORDING_STOPPED);
+		for (UserData user : frame.getUsers()) {
+			stopRecording(user);
 		}
 	}
 
 	public void startRecordingUsers(PoseType pose, int seconds) {
 		this.seconds = seconds;
 		this.secondsRemaining = seconds;
-		for (UserData user : userTracker.readFrame().getUsers()) {
+		for (UserData user : frame.getUsers()) {
 			if (this.startingPose != null) {
 				userTracker.stopPoseDetection(user.getId(), startingPose);
 			}
-			if (!startRecordingUsers) {
-				userTracker.startPoseDetection(user.getId(), pose);
-			}
+			if (pose != null)
+				if (!startRecordingUsers) {
+					userTracker.startPoseDetection(user.getId(), pose);
+				}
 		}
 		this.startingPose = pose;
 	}
@@ -281,13 +295,14 @@ public class BodyCoordinate implements InterfaceCoordinate, UserTracker.NewFrame
 	 *            Pose Pose to be detected
 	 */
 	public void stopRecordingUsers(PoseType pose) {
-		for (UserData user : userTracker.readFrame().getUsers()) {
+		for (UserData user : frame.getUsers()) {
 			if (this.stoppingPose != null) {
 				userTracker.stopPoseDetection(user.getId(), stoppingPose);
 			}
-			if (startRecordingUsers) {
-				userTracker.startPoseDetection(user.getId(), pose);
-			}
+			if (pose != null)
+				if (startRecordingUsers) {
+					userTracker.startPoseDetection(user.getId(), pose);
+				}
 		}
 		this.stoppingPose = pose;
 	}
@@ -491,7 +506,7 @@ public class BodyCoordinate implements InterfaceCoordinate, UserTracker.NewFrame
 	private Float[][] trackingUser(UserData user) {
 		/* Get the skeleton of the current user */
 		Skeleton skeleton = user.getSkeleton();
-		
+
 		JointType[] jointTypes = JointType.values();
 		Float[][] joints = new Float[jointTypes.length][3];
 		Float[][] depth = new Float[jointTypes.length][3];

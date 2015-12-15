@@ -99,14 +99,29 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 				case BodyCoordinate.StateChangedListener.RECORDING_STARTED:
 					lblSeconds.setText("\u25CF");
 					view.setStatus("\u25CF");
+					
+					cbStartingPose.setEnabled(false);
+					btStart.setEnabled(false);
+					cbStoppingPose.setEnabled(true);
+					btStop.setEnabled(true);
 					break;
 				case BodyCoordinate.StateChangedListener.RECORDING_STOPPED:
 					lblSeconds.setText("\u25A0");
 					view.setStatus("\u25A0");
+					
+					cbStartingPose.setEnabled(true);
+					btStart.setEnabled(true);
+					cbStoppingPose.setEnabled(false);
+					btStop.setEnabled(false);
 					break;
 				case BodyCoordinate.StateChangedListener.TIMER_CHANGED:
 					lblSeconds.setText(String.valueOf(coor.getSeconds()));
 					view.setStatus(String.valueOf(coor.getSeconds()));
+					
+					cbStartingPose.setEnabled(false);
+					btStart.setEnabled(false);
+					cbStoppingPose.setEnabled(false);
+					btStop.setEnabled(false);
 					break;
 				case BodyCoordinate.StateChangedListener.NEW_SKELETON_STORED:
 					lblCount.setText("Frames: " + coor.getFramesCount());
@@ -221,17 +236,12 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 			coor.setView(view.getIr());
 
 		} else if (ie.getSource() == cbStartingPose) {
-			btStart.setEnabled(cbStartingPose.getSelectedItem().equals("Manual"));
+			//btStart.setEnabled(cbStartingPose.getSelectedItem().equals("Manual"));
 			startingPoseDetection();
 
 		} else if (ie.getSource() == cbStoppingPose) {
-			btStop.setEnabled(cbStoppingPose.getSelectedItem().equals("Manual"));
-
-			if (cbStoppingPose.getSelectedItem().equals("Crossed Hands")) {
-				coor.stopRecordingUsers(PoseType.CROSSED_HANDS);
-			} else if (cbStoppingPose.getSelectedItem().equals("PSI")) {
-				coor.stopRecordingUsers(PoseType.PSI);
-			}
+			//btStop.setEnabled(cbStoppingPose.getSelectedItem().equals("Manual"));
+			stoppingPoseDetection();
 		}
 	}
 
@@ -240,6 +250,18 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 			coor.startRecordingUsers(PoseType.CROSSED_HANDS, (int) sSeconds.getValue());
 		} else if (cbStartingPose.getSelectedItem().equals("PSI")) {
 			coor.startRecordingUsers(PoseType.PSI, (int) sSeconds.getValue());
+		} else if (cbStartingPose.getSelectedItem().equals("Manual")){
+			coor.startRecordingUsers(null, (int) sSeconds.getValue());
+		}
+	}
+	
+	private void stoppingPoseDetection(){
+		if (cbStoppingPose.getSelectedItem().equals("Crossed Hands")) {
+			coor.stopRecordingUsers(PoseType.CROSSED_HANDS);
+		} else if (cbStoppingPose.getSelectedItem().equals("PSI")) {
+			coor.stopRecordingUsers(PoseType.PSI);
+		} else if (cbStartingPose.getSelectedItem().equals("Manual")){
+			coor.stopRecordingUsers(null);
 		}
 	}
 

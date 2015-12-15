@@ -178,6 +178,8 @@ public class Editor extends JFrame implements ChangeListener, ActionListener {
 		mOpen.setMnemonic(KeyEvent.VK_O);
 
 		mOpen.setAccelerator(KeyStroke.getKeyStroke("control O"));
+		mSave.setAccelerator(KeyStroke.getKeyStroke("control S"));
+		mSaveAs.setAccelerator(KeyStroke.getKeyStroke("control shift S"));
 		mUndo.setAccelerator(KeyStroke.getKeyStroke("control Z"));
 		mRedo.setAccelerator(KeyStroke.getKeyStroke("control shift Z"));
 
