@@ -260,7 +260,7 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 			coor.stopRecordingUsers(PoseType.CROSSED_HANDS);
 		} else if (cbStoppingPose.getSelectedItem().equals("PSI")) {
 			coor.stopRecordingUsers(PoseType.PSI);
-		} else if (cbStartingPose.getSelectedItem().equals("Manual")){
+		} else if (cbStoppingPose.getSelectedItem().equals("Manual")){
 			coor.stopRecordingUsers(null);
 		}
 	}
