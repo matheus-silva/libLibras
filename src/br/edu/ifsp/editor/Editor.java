@@ -30,6 +30,7 @@ import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JScrollPane;
@@ -65,6 +66,8 @@ public class Editor extends JFrame implements ChangeListener, ActionListener {
 	private JMenuItem mOpen;
 	private JMenuItem mSave;
 	private JMenuItem mSaveAs;
+	private JMenuItem mClose;
+	private JMenuItem mExit;
 	private JMenuItem mUndo;
 	private JMenuItem mRedo;
 	private JMenuItem mInvert;
@@ -115,10 +118,7 @@ public class Editor extends JFrame implements ChangeListener, ActionListener {
 	}
 
 	private void loadCoords(float[][][] coords) {
-		if (pnMain != null) {
-			getContentPane().remove(pnMain);
-			getContentPane().revalidate();
-		}
+		close();
 		getContentPane().add(BorderLayout.CENTER, getMainPanel(coords));
 		revalidate();
 		repaint();
@@ -130,6 +130,8 @@ public class Editor extends JFrame implements ChangeListener, ActionListener {
 		mOpen = new JMenuItem("Open");
 		mSave = new JMenuItem("Save");
 		mSaveAs = new JMenuItem("Save As...");
+		mClose = new JMenuItem("Close");
+		mExit = new JMenuItem("Exit");
 		mUndo = new JMenuItem("Undo");
 		mRedo = new JMenuItem("Redo");
 		mInvert = new JMenuItem("Invert");
@@ -155,6 +157,8 @@ public class Editor extends JFrame implements ChangeListener, ActionListener {
 		mOpen.addActionListener(this);
 		mSave.addActionListener(this);
 		mSaveAs.addActionListener(this);
+		mClose.addActionListener(this);
+		mExit.addActionListener(this);
 		mUndo.addActionListener(this);
 		mRedo.addActionListener(this);
 		mInvert.addActionListener(this);
@@ -205,8 +209,8 @@ public class Editor extends JFrame implements ChangeListener, ActionListener {
 		file.add(mSave);
 		file.add(mSaveAs);
 		file.addSeparator();
-		file.add(new JMenuItem("Close"));
-		file.add(new JMenuItem("Exit"));
+		file.add(mClose);
+		file.add(mExit);
 
 		edit.add(mUndo);
 		edit.add(mRedo);
@@ -393,6 +397,14 @@ public class Editor extends JFrame implements ChangeListener, ActionListener {
 		((DefaultTableModel) tbCoords.getModel())
 				.addRow(new String[] { "14", "Foot Right", c[14][0], c[14][1], c[14][2] });
 	}
+	
+	private void close(){
+		if (pnMain != null) {
+			getContentPane().remove(pnMain);
+			getContentPane().revalidate();
+			repaint();
+		}
+	}
 
 	@Override
 	public void stateChanged(ChangeEvent e) {
@@ -423,6 +435,7 @@ public class Editor extends JFrame implements ChangeListener, ActionListener {
 			}
 		} else if (e.getSource() == mSave) {
 			new Save().saveFile(this, currentFile, history.getCurrentState());
+			
 		} else if (e.getSource() == mSaveAs) {
 			Save s = new Save();
 			File f = s.getFile(this);
@@ -431,7 +444,17 @@ public class Editor extends JFrame implements ChangeListener, ActionListener {
 				currentFile = f;
 				setTitle("Editor - " + f.getAbsolutePath());
 			}			
-		} else if (e.getSource() == mUndo) {
+		} else if(e.getSource() == mClose){
+			if(!new Editor.Util().isEquals(history.getOriginal(), history.getCurrentState())){
+				return;
+			}
+			close();
+		} else if(e.getSource() == mExit){
+			if(!new Editor.Util().isEquals(history.getOriginal(), history.getCurrentState())){
+				return;
+			}
+			System.exit(0);
+		}else if (e.getSource() == mUndo) {
 			loadCoords(history.undo());
 			mUndo.setEnabled(!history.isFirst());
 			mRedo.setEnabled(!history.isLast());

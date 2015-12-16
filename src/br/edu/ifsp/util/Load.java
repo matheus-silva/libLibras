@@ -14,8 +14,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.JFileChooser;
-import javax.swing.filechooser.FileFilter;
-import javax.swing.filechooser.FileNameExtensionFilter;
 
 import br.edu.ifsp.editor.Editor;
 
@@ -56,7 +54,7 @@ public class Load {
 			linha = linha.replaceAll("^\\[", "");
 			linha = linha.replaceAll("]$", "");
 
-			String[] jointsTemp = linha.split("]\\[");
+			String[] jointsTemp = linha.split("]\\[");	
 			for (int j = 0; j < jointsTemp.length; j++) {
 				String coordTemp[] = jointsTemp[j].split(", ");
 				try {

@@ -1,13 +1,20 @@
 package br.edu.ifsp.coordinates;
 
-import java.awt.*;
-import java.awt.image.*;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.image.BufferedImage;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.openni.*;
+import org.openni.Device;
+import org.openni.ImageRegistrationMode;
+import org.openni.SensorType;
+import org.openni.VideoFrameRef;
+import org.openni.VideoStream;
 
 public class ComponentViewer extends Component implements VideoStream.NewFrameListener {
 
@@ -19,17 +26,17 @@ public class ComponentViewer extends Component implements VideoStream.NewFrameLi
 
 	private String status = null;
 	private List<Float[][]> usersBodyMoviments = new ArrayList<>();
-	private int[][] skelCoor = { { BodyCoordinate.HEAD, 1 }, { 1, 8 }, { 8, 9 }, { 8, 10 }, { 9, 11 }, { 11, 13 },
-			{ 10, 12 }, { 12, 14 }, { 1, 3 }, { 3, 5 }, { 5, 7 }, { 1, 2 }, { 2, 4 }, { 4, 6 } };
+	private int[][] skelCoor = { { 0, 1 }, { 1, 8 }, { 8, 9 }, { 8, 10 }, { 9, 11 }, { 11, 13 }, { 10, 12 }, { 12, 14 },
+			{ 1, 3 }, { 3, 5 }, { 5, 7 }, { 1, 2 }, { 2, 4 }, { 4, 6 } };
 
 	public ComponentViewer(Device d, SensorType type) {
 		// Device d = Device.open();
 		System.out.println("1");
 		mVideoStream = VideoStream.create(d, type);
-		
+
 		System.out.println("2");
 		d.setImageRegistrationMode(ImageRegistrationMode.DEPTH_TO_COLOR);
-		
+
 		System.out.println("3");
 		mVideoStream.addNewFrameListener(this);
 		mVideoStream.start();
@@ -102,7 +109,8 @@ public class ComponentViewer extends Component implements VideoStream.NewFrameLi
 		}
 
 		mLastFrame = mVideoStream.readFrame();
-		//System.out.println("OpenNI: "+ mVideoStream.getSensorType()+ " "+mLastFrame.getFrameIndex());
+		// System.out.println("OpenNI: "+ mVideoStream.getSensorType()+ "
+		// "+mLastFrame.getFrameIndex());
 		ByteBuffer frameData = mLastFrame.getData().order(ByteOrder.LITTLE_ENDIAN);
 
 		// make sure we have enough room

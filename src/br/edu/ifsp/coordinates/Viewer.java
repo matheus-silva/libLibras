@@ -12,7 +12,13 @@ public class Viewer {
 	public Viewer() {
 		OpenNI.initialize();
 		// NiTE.initialize();
-		d = Device.open(OpenNI.enumerateDevices().get(0).getUri());
+		try {
+			d = Device.open(OpenNI.enumerateDevices().get(0).getUri());
+		} catch (Exception e) {
+			System.out.println("Error during the loading of the sensor.");
+			System.out.println("Make sure that there is a sensor connected and try again.");
+			System.exit(0);
+		}
 
 		if (isDepthSupported()) {
 			depth = createComponent(SensorType.DEPTH);
