@@ -82,7 +82,6 @@ public class Editor extends JFrame implements ChangeListener, ActionListener {
 	private JRadioButtonMenuItem mNumber;
 
 	private JButton btCrop;
-	private JButton btCancelCrop;
 
 	private JTable tbCoords;
 
@@ -115,10 +114,10 @@ public class Editor extends JFrame implements ChangeListener, ActionListener {
 		setTitle("Editor - " + arquivo.getAbsolutePath());
 		float[][][] c = new Load().loadFile(arquivo);
 		history = new HistoryCoordinate(c);
-		if(mUndo != null){
+		if (mUndo != null) {
 			mUndo.setEnabled(!history.isFirst());
 		}
-		if(mRedo != null){
+		if (mRedo != null) {
 			mRedo.setEnabled(!history.isLast());
 		}
 		loadCoords(history.getCurrentState());
@@ -184,8 +183,6 @@ public class Editor extends JFrame implements ChangeListener, ActionListener {
 		JMenu edit = new JMenu("Edit");
 		JMenu view = new JMenu("View");
 
-		
-
 		mOpen.setAccelerator(KeyStroke.getKeyStroke("control O"));
 		mSave.setAccelerator(KeyStroke.getKeyStroke("control S"));
 		mSaveAs.setAccelerator(KeyStroke.getKeyStroke("control shift S"));
@@ -219,8 +216,6 @@ public class Editor extends JFrame implements ChangeListener, ActionListener {
 
 		edit.add(mUndo);
 		edit.add(mRedo);
-		edit.addSeparator();
-		edit.add(new JMenuItem("Crop"));
 
 		JMenu move = new JMenu("Move");
 		move.add(mMoveUp);
@@ -252,11 +247,11 @@ public class Editor extends JFrame implements ChangeListener, ActionListener {
 		mSaveAs.setMnemonic(KeyEvent.VK_A);
 		mClose.setMnemonic(KeyEvent.VK_C);
 		mExit.setMnemonic(KeyEvent.VK_X);
-		
+
 		edit.setMnemonic(KeyEvent.VK_E);
 		mUndo.setMnemonic(KeyEvent.VK_U);
 		mRedo.setMnemonic(KeyEvent.VK_R);
-		
+
 		view.setMnemonic(KeyEvent.VK_V);
 		mInvert.setMnemonic(KeyEvent.VK_I);
 		move.setMnemonic(KeyEvent.VK_M);
@@ -271,7 +266,7 @@ public class Editor extends JFrame implements ChangeListener, ActionListener {
 		zoom.setMnemonic(KeyEvent.VK_Z);
 		mZoomIn.setMnemonic(KeyEvent.VK_I);
 		mZoomOut.setMnemonic(KeyEvent.VK_O);
-		
+
 		return menu;
 	}
 
@@ -349,15 +344,12 @@ public class Editor extends JFrame implements ChangeListener, ActionListener {
 
 		JPanel pnCropTolls = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 5));
 
-		btCancelCrop = new JButton("Cancel");
 		btCrop = new JButton("Crop");
-		btCancelCrop.addActionListener(this);
 		btCrop.addActionListener(this);
 
 		pnCropTolls.add(new JSpinner());
 		pnCropTolls.add(new JSpinner());
 		pnCropTolls.add(cbMoveTimeline);
-		pnCropTolls.add(btCancelCrop);
 		pnCropTolls.add(btCrop);
 
 		pnCropArea.add(pnCropTolls);
@@ -549,8 +541,6 @@ public class Editor extends JFrame implements ChangeListener, ActionListener {
 		} else if (e.getSource() == mSkeleton) {
 			comp.setOption(Comp.SKELETON);
 			comp.repaint();
-
-		} else if (e.getSource() == btCancelCrop) {
 
 		} else if (e.getSource() == btCrop) {
 
