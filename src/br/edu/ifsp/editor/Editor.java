@@ -89,6 +89,7 @@ public class Editor extends JFrame implements ChangeListener, ActionListener {
 	private RangeSlider slCrop;
 	private Comp comp;
 
+	private boolean saved;
 	private float[][][] coords;
 
 	public Editor() {
@@ -114,7 +115,14 @@ public class Editor extends JFrame implements ChangeListener, ActionListener {
 		setTitle("Editor - " + arquivo.getAbsolutePath());
 		float[][][] c = new Load().loadFile(arquivo);
 		history = new HistoryCoordinate(c);
+		if(mUndo != null){
+			mUndo.setEnabled(!history.isFirst());
+		}
+		if(mRedo != null){
+			mRedo.setEnabled(!history.isLast());
+		}
 		loadCoords(history.getCurrentState());
+		saved = true;
 	}
 
 	private void loadCoords(float[][][] coords) {
@@ -176,10 +184,7 @@ public class Editor extends JFrame implements ChangeListener, ActionListener {
 		JMenu edit = new JMenu("Edit");
 		JMenu view = new JMenu("View");
 
-		file.setMnemonic(KeyEvent.VK_F);
-		edit.setMnemonic(KeyEvent.VK_E);
-		view.setMnemonic(KeyEvent.VK_V);
-		mOpen.setMnemonic(KeyEvent.VK_O);
+		
 
 		mOpen.setAccelerator(KeyStroke.getKeyStroke("control O"));
 		mSave.setAccelerator(KeyStroke.getKeyStroke("control S"));
@@ -241,6 +246,32 @@ public class Editor extends JFrame implements ChangeListener, ActionListener {
 		menu.add(edit);
 		menu.add(view);
 
+		file.setMnemonic(KeyEvent.VK_F);
+		mOpen.setMnemonic(KeyEvent.VK_O);
+		mSave.setMnemonic(KeyEvent.VK_S);
+		mSaveAs.setMnemonic(KeyEvent.VK_A);
+		mClose.setMnemonic(KeyEvent.VK_C);
+		mExit.setMnemonic(KeyEvent.VK_X);
+		
+		edit.setMnemonic(KeyEvent.VK_E);
+		mUndo.setMnemonic(KeyEvent.VK_U);
+		mRedo.setMnemonic(KeyEvent.VK_R);
+		
+		view.setMnemonic(KeyEvent.VK_V);
+		mInvert.setMnemonic(KeyEvent.VK_I);
+		move.setMnemonic(KeyEvent.VK_M);
+		mMoveDown.setMnemonic(KeyEvent.VK_D);
+		mMoveLeft.setMnemonic(KeyEvent.VK_L);
+		mMoveRight.setMnemonic(KeyEvent.VK_R);
+		mMoveUp.setMnemonic(KeyEvent.VK_U);
+		option.setMnemonic(KeyEvent.VK_O);
+		mSkeleton.setMnemonic(KeyEvent.VK_S);
+		mCircle.setMnemonic(KeyEvent.VK_C);
+		mNumber.setMnemonic(KeyEvent.VK_N);
+		zoom.setMnemonic(KeyEvent.VK_Z);
+		mZoomIn.setMnemonic(KeyEvent.VK_I);
+		mZoomOut.setMnemonic(KeyEvent.VK_O);
+		
 		return menu;
 	}
 
@@ -397,13 +428,24 @@ public class Editor extends JFrame implements ChangeListener, ActionListener {
 		((DefaultTableModel) tbCoords.getModel())
 				.addRow(new String[] { "14", "Foot Right", c[14][0], c[14][1], c[14][2] });
 	}
-	
-	private void close(){
+
+	private void close() {
 		if (pnMain != null) {
 			getContentPane().remove(pnMain);
-			getContentPane().revalidate();
+			revalidate();
 			repaint();
 		}
+	}
+
+	private boolean closeFile() {
+		int v = JOptionPane.showConfirmDialog(this,
+				"Are you sure you want to close this file?" + "\nAny unsaved changes will be lost", "Close/Exit",
+				JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
+		if (v != JOptionPane.YES_OPTION) {
+			return false;
+		}
+
+		return true;
 	}
 
 	@Override
@@ -435,26 +477,30 @@ public class Editor extends JFrame implements ChangeListener, ActionListener {
 			}
 		} else if (e.getSource() == mSave) {
 			new Save().saveFile(this, currentFile, history.getCurrentState());
-			
+			saved = true;
+
 		} else if (e.getSource() == mSaveAs) {
 			Save s = new Save();
 			File f = s.getFile(this);
-			if(f != null){
+			if (f != null) {
 				s.saveFile(this, f, history.getCurrentState());
-				currentFile = f;
-				setTitle("Editor - " + f.getAbsolutePath());
-			}			
-		} else if(e.getSource() == mClose){
-			if(!new Editor.Util().isEquals(history.getOriginal(), history.getCurrentState())){
+				// currentFile = f;
+				// setTitle("Editor - " + f.getAbsolutePath());
+
+				openFile(f);
+			}
+		} else if (e.getSource() == mClose) {
+			if (closeFile()) {
+				close();
+			}
+		} else if (e.getSource() == mExit) {
+			if (closeFile()) {
+				System.exit(0);
+			}
+			if (!new Editor.Util().isEquals(history.getOriginal(), history.getCurrentState())) {
 				return;
 			}
-			close();
-		} else if(e.getSource() == mExit){
-			if(!new Editor.Util().isEquals(history.getOriginal(), history.getCurrentState())){
-				return;
-			}
-			System.exit(0);
-		}else if (e.getSource() == mUndo) {
+		} else if (e.getSource() == mUndo) {
 			loadCoords(history.undo());
 			mUndo.setEnabled(!history.isFirst());
 			mRedo.setEnabled(!history.isLast());
@@ -514,6 +560,7 @@ public class Editor extends JFrame implements ChangeListener, ActionListener {
 			loadCoords(history.getCurrentState());
 			mUndo.setEnabled(!history.isFirst());
 			mRedo.setEnabled(!history.isLast());
+			saved = false;
 		}
 		// System.out.println(history.getCurrentState() == coords);
 	}
