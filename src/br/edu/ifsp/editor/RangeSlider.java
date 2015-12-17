@@ -140,6 +140,14 @@ class RangeSliderUI extends BasicSliderUI {
 	public boolean isUpperDragging(){
 		return this.upperDragging;
 	}
+	
+	public boolean isLowerSelected(){
+		return !this.upperThumbSelected;
+	}
+	
+	public boolean isUpperSelected(){
+		return this.upperThumbSelected;
+	}
 
 	/**
 	 * Installs this UI delegate on the specified component.

@@ -74,17 +74,17 @@ public class Editor extends JFrame implements ChangeListener, ActionListener {
 	private JButton btCrop;
 
 	private JTable tbCoords;
-	
+
 	private JSpinner spLower;
 	private JSpinner spUpper;
 
 	private RangeSlider slCrop;
 	private Comp comp;
+	private Comp.Modification modification;
 
 	private boolean saved;
 	private float[][][] coords;
 
-	private int cropLowerValue, cropUpperValue;
 	public Editor() {
 		this(null);
 	}
@@ -106,6 +106,7 @@ public class Editor extends JFrame implements ChangeListener, ActionListener {
 	private void openFile(File arquivo) {
 		currentFile = arquivo;
 		setTitle("Editor - " + arquivo.getAbsolutePath());
+
 		float[][][] c = new Load().loadFile(arquivo);
 		history = new HistoryCoordinate(c);
 		if (mUndo != null) {
@@ -114,13 +115,20 @@ public class Editor extends JFrame implements ChangeListener, ActionListener {
 		if (mRedo != null) {
 			mRedo.setEnabled(!history.isLast());
 		}
+
+		comp = null;
+
 		loadCoords(history.getCurrentState());
 		saved = true;
 	}
 
 	private void loadCoords(float[][][] coords) {
+		if (comp != null) {
+			modification = comp.getModification();
+		}
 		close();
 		getContentPane().add(BorderLayout.CENTER, getMainPanel(coords));
+		
 		revalidate();
 		repaint();
 	}
@@ -292,6 +300,11 @@ public class Editor extends JFrame implements ChangeListener, ActionListener {
 
 		c.setPreferredSize(comp.getPreferredSize());
 
+		if (modification != null) {
+			comp.setModification(modification);
+			comp.applyModification();
+		}
+		
 		pnBody.add(c);
 		return pnBody;
 	}
@@ -333,9 +346,6 @@ public class Editor extends JFrame implements ChangeListener, ActionListener {
 		slCrop.setMinorTickSpacing(5);
 		slCrop.setPaintTicks(true);
 		slCrop.setPaintLabels(true);
-		
-		cropLowerValue = slCrop.getValue();
-		cropUpperValue = slCrop.getUpperValue();
 
 		slCrop.addChangeListener(this);
 
@@ -343,7 +353,7 @@ public class Editor extends JFrame implements ChangeListener, ActionListener {
 
 		btCrop = new JButton("Crop");
 		btCrop.addActionListener(this);
-		
+
 		spLower = new JSpinner();
 		spUpper = new JSpinner();
 		createJSpinner();
@@ -361,14 +371,15 @@ public class Editor extends JFrame implements ChangeListener, ActionListener {
 		pnCropArea.add(slCrop);
 		return pnCropArea;
 	}
-	
-	public void createJSpinner(){
+
+	public void createJSpinner() {
 		SpinnerModel smLower = new SpinnerNumberModel(slCrop.getValue(), 0, slCrop.getUpperValue(), 1);
-		SpinnerModel smUpper = new SpinnerNumberModel(slCrop.getUpperValue(), slCrop.getValue(), slCrop.getMaximum(), 1);
-		
+		SpinnerModel smUpper = new SpinnerNumberModel(slCrop.getUpperValue(), slCrop.getValue(), slCrop.getMaximum(),
+				1);
+
 		spLower.setModel(smLower);
 		spUpper.setModel(smUpper);
-		
+
 	}
 
 	public JPanel getCoordsPanel() {
@@ -463,32 +474,19 @@ public class Editor extends JFrame implements ChangeListener, ActionListener {
 		} else if (e.getSource() == slCrop) {
 			createJSpinner();
 			if (!cbMoveTimeline.isSelected()) {
-				cropLowerValue = slCrop.getValue();
-				cropUpperValue = slCrop.getUpperValue();
 				return;
 			}
-			
-			if(cropLowerValue != slCrop.getValue()){
-				slTimeline.setValue(slCrop.getValue());
-				
-			} else if (cropUpperValue != slCrop.getUpperValue()){
-				slTimeline.setValue(slCrop.getUpperValue());
-				
-			}
-			
-			cropLowerValue = slCrop.getValue();
-			cropUpperValue = slCrop.getUpperValue();
 
-			/*RangeSliderUI r = (RangeSliderUI) slCrop.getUI();
-			if (r.isLowerDragging()) {
+			RangeSliderUI r = (RangeSliderUI) slCrop.getUI();
+			if (r.isLowerSelected()) {
 				slTimeline.setValue(slCrop.getValue());
-			} else if (r.isUpperDragging()) {
+			} else if (r.isUpperSelected()) {
 				slTimeline.setValue(slCrop.getUpperValue());
-			}*/
-			
-		} else if(e.getSource() == spLower){
+			}
+
+		} else if (e.getSource() == spLower) {
 			slCrop.setValue((int) spLower.getValue());
-		} else if(e.getSource() == spUpper){
+		} else if (e.getSource() == spUpper) {
 			slCrop.setUpperValue((int) spUpper.getValue());
 		}
 	}
@@ -536,7 +534,7 @@ public class Editor extends JFrame implements ChangeListener, ActionListener {
 			mRedo.setEnabled(!history.isLast());
 
 		} else if (e.getSource() == mInvert) {
-			comp.invert();
+			comp.invertVertical();
 			comp.repaint();
 
 		} else if (e.getSource() == mZoomIn) {
@@ -548,19 +546,19 @@ public class Editor extends JFrame implements ChangeListener, ActionListener {
 			comp.repaint();
 
 		} else if (e.getSource() == mMoveUp) {
-			comp.moveUp(50);
+			comp.moveUp();
 			comp.repaint();
 
 		} else if (e.getSource() == mMoveDown) {
-			comp.moveDown(50);
+			comp.moveDown();
 			comp.repaint();
 
 		} else if (e.getSource() == mMoveLeft) {
-			comp.moveLeft(50);
+			comp.moveLeft();
 			comp.repaint();
 
 		} else if (e.getSource() == mMoveRight) {
-			comp.moveRight(50);
+			comp.moveRight();
 			comp.repaint();
 
 		} else if (e.getSource() == mCircle) {

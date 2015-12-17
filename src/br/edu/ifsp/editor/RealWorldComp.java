@@ -24,7 +24,7 @@ public class RealWorldComp extends Comp {
 	public RealWorldComp(float[][][] coords) {
 		super(coords);
 		setIndexAt(76);
-		invert();
+		invertVertical();
 		//putCenter();
 		this.addMouseWheelListener(new MouseWheelListener() {
 
@@ -100,7 +100,7 @@ public class RealWorldComp extends Comp {
 		}
 	}
 
-	public void invert() {
+	public void invertVertical() {
 		for (int i = 0; i < data.length; i++) {
 			float maxY = Float.MIN_VALUE;
 			for (int j = 0; j < data[i].length; j++) {

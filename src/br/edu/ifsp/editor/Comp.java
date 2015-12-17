@@ -10,9 +10,8 @@ import java.awt.Component;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.event.KeyEvent;
-import java.util.Arrays;
-
-import javax.swing.ComponentInputMap;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -25,22 +24,26 @@ public class Comp extends Component {
 	private int[][] skelCoor = { { 0, 1 }, { 1, 8 }, { 8, 9 }, { 8, 10 }, { 9, 11 }, { 11, 13 }, { 10, 12 }, { 12, 14 },
 			{ 1, 3 }, { 3, 5 }, { 5, 7 }, { 1, 2 }, { 2, 4 }, { 4, 6 } };
 	private String option = "Skeleton";
+	private int moveFactor = 50;
+	private float zoomFactor = 1.2f;
+	private Modification modification;
 	public static final String SKELETON = "Skeleton", NUMBER = "Number", CIRCLE = "Circle";
 
 	public Comp(float[][][] data) {
 		this.data = new float[data.length][][];
-		for(int i = 0; i < data.length; i++){
-			
+		for (int i = 0; i < data.length; i++) {
+
 			this.data[i] = new float[data[i].length][];
-			for(int j = 0; j < data[i].length; j++){
-				
+			for (int j = 0; j < data[i].length; j++) {
+
 				this.data[i][j] = new float[data[i][j].length];
-				for(int k = 0; k < data[i][j].length; k++){
-					
+				for (int k = 0; k < data[i][j].length; k++) {
+
 					this.data[i][j][k] = data[i][j][k];
 				}
 			}
 		}
+		this.modification = new Modification();
 	}
 
 	@Override
@@ -53,13 +56,13 @@ public class Comp extends Component {
 		g.drawString("Frame: " + index, 0, 15);
 
 		switch (option) {
-		case "Skeleton":
+		case SKELETON:
 			setSkeleton(g);
 			break;
-		case "Number":
+		case NUMBER:
 			setNumbers(g);
 			break;
-		case "Circle":
+		case CIRCLE:
 			setCircles(g);
 			break;
 		default:
@@ -123,52 +126,104 @@ public class Comp extends Component {
 		}
 	}
 
-	public void invert() {
-		for (int i = 0; i < data.length; i++) {
-			float minY = Float.MAX_VALUE;
-			float maxY = Float.MIN_VALUE;
-			for (int j = 0; j < data[i].length; j++) {
-				if (data[i][j][1] > maxY) {
-					maxY = data[i][j][1];
-				}
-				if(data[i][j][1] < minY){
-					minY = data[i][j][1];
-				}
+	public Modification getModification() {
+		return this.modification;
+	}
+
+	public void setModification(Modification m) {
+		this.modification = m;
+	}
+
+	public void applyModification() {
+		this.modification.applyModification(this);
+	}
+
+	public void invertVertical() {
+		invert();
+		modification.addAction(new Action() {
+
+			@Override
+			public void action(Comp c) {
+				c.invert();
 			}
-			for (int j = 0; j < data[i].length; j++) {
-				data[i][j][1] += ((maxY - data[i][j][1]) * 2);
-				data[i][j][1] -= maxY - minY;
-			}
-		}
+		});
 	}
 
 	public void zoomIn() {
-		zoom(-1);
+		int option = -1;
+		zoom(-1, zoomFactor);
+		modification.addAction(new Action() {
+
+			@Override
+			public void action(Comp c) {
+				c.zoom(option, zoomFactor);
+			}
+		});
 	}
 
 	public void zoomOut() {
-		zoom(1);
+		int option = 1;
+		zoom(option, zoomFactor);
+		modification.addAction(new Action() {
+
+			@Override
+			public void action(Comp c) {
+				c.zoom(option, zoomFactor);
+			}
+		});
 	}
-	
-	public void moveUp(int value){
-		moveCoords(KeyEvent.VK_UP, value);
+
+	public void moveUp() {
+		int key = KeyEvent.VK_UP;
+		moveCoords(key, moveFactor);
+		modification.addAction(new Action() {
+
+			@Override
+			public void action(Comp c) {
+				c.moveCoords(key, moveFactor);
+			}
+		});
 	}
-	
-	public void moveDown(int value){
-		moveCoords(KeyEvent.VK_DOWN, value);
+
+	public void moveDown() {
+		int key = KeyEvent.VK_DOWN;
+		moveCoords(key, moveFactor);
+		modification.addAction(new Action() {
+
+			@Override
+			public void action(Comp c) {
+				c.moveCoords(key, moveFactor);
+			}
+		});
 	}
-	
-	public void moveLeft(int value){
-		moveCoords(KeyEvent.VK_LEFT, value);
+
+	public void moveLeft() {
+		int key = KeyEvent.VK_LEFT;
+		moveCoords(key, moveFactor);
+		modification.addAction(new Action() {
+
+			@Override
+			public void action(Comp c) {
+				c.moveCoords(key, moveFactor);
+			}
+		});
 	}
-	
-	public void moveRight(int value){
-		moveCoords(KeyEvent.VK_RIGHT, value);
+
+	public void moveRight() {
+		int key = KeyEvent.VK_RIGHT;
+		moveCoords(key, moveFactor);
+		modification.addAction(new Action() {
+
+			@Override
+			public void action(Comp c) {
+				c.moveCoords(key, moveFactor);
+			}
+		});
 	}
 
 	private void moveCoords(int key, int value) {
-		for(int i = 0; i < data.length; i++){
-			for(int j = 0; j < data[i].length; j++){
+		for (int i = 0; i < data.length; i++) {
+			for (int j = 0; j < data[i].length; j++) {
 				if (key == KeyEvent.VK_UP) {
 					// System.out.println("UP");
 					data[i][j][1] -= value;
@@ -187,21 +242,66 @@ public class Comp extends Component {
 				}
 			}
 		}
-		
+
 	}
 
-	private void zoom(int value) {
-		float f = 1.2f;
+	private void zoom(int option, float factor) {
 		for (float[][] c : data) {
 			for (float[] c1 : c) {
 				for (int i = 0; i < c1.length - 1; i++) {
-					if (value == 1) {
-						c1[i] = c1[i] / f;
-					} else if (value == -1) {
-						c1[i] = c1[i] * f;
+					if (option == 1) {
+						c1[i] = c1[i] / factor;
+					} else if (option == -1) {
+						c1[i] = c1[i] * factor;
 					}
 				}
 			}
 		}
 	}
+
+	private void invert() {
+		for (int i = 0; i < data.length; i++) {
+			float minY = Float.MAX_VALUE;
+			float maxY = Float.MIN_VALUE;
+			for (int j = 0; j < data[i].length; j++) {
+				if (data[i][j][1] > maxY) {
+					maxY = data[i][j][1];
+				}
+				if (data[i][j][1] < minY) {
+					minY = data[i][j][1];
+				}
+			}
+			for (int j = 0; j < data[i].length; j++) {
+				data[i][j][1] += ((maxY - data[i][j][1]) * 2);
+				data[i][j][1] -= maxY - minY;
+			}
+		}
+	}
+
+	public class Modification {
+
+		private List<Action> actions;
+
+		private Modification() {
+			actions = new ArrayList<>();
+		}
+
+		private void addAction(Action e) {
+			actions.add(e);
+		}
+
+		public void applyModification(Comp c) {
+			for (Action a : actions) {
+				a.action(c);
+			}
+			c.repaint();
+
+			return;
+		}
+	}
+
+	private interface Action {
+		public void action(Comp c);
+	}
+
 }
