@@ -5,28 +5,19 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
-import java.awt.dnd.DropTarget;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.io.File;
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
-import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -38,14 +29,13 @@ import javax.swing.JSlider;
 import javax.swing.JSpinner;
 import javax.swing.JTable;
 import javax.swing.KeyStroke;
+import javax.swing.SpinnerModel;
+import javax.swing.SpinnerNumberModel;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import javax.swing.event.TableModelListener;
-import javax.swing.plaf.basic.BasicBorders.RadioButtonBorder;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableModel;
 
 import br.edu.ifsp.util.Load;
 import br.edu.ifsp.util.Save;
@@ -84,6 +74,9 @@ public class Editor extends JFrame implements ChangeListener, ActionListener {
 	private JButton btCrop;
 
 	private JTable tbCoords;
+	
+	private JSpinner spLower;
+	private JSpinner spUpper;
 
 	private RangeSlider slCrop;
 	private Comp comp;
@@ -91,6 +84,7 @@ public class Editor extends JFrame implements ChangeListener, ActionListener {
 	private boolean saved;
 	private float[][][] coords;
 
+	private int cropLowerValue, cropUpperValue;
 	public Editor() {
 		this(null);
 	}
@@ -339,6 +333,9 @@ public class Editor extends JFrame implements ChangeListener, ActionListener {
 		slCrop.setMinorTickSpacing(5);
 		slCrop.setPaintTicks(true);
 		slCrop.setPaintLabels(true);
+		
+		cropLowerValue = slCrop.getValue();
+		cropUpperValue = slCrop.getUpperValue();
 
 		slCrop.addChangeListener(this);
 
@@ -346,15 +343,32 @@ public class Editor extends JFrame implements ChangeListener, ActionListener {
 
 		btCrop = new JButton("Crop");
 		btCrop.addActionListener(this);
+		
+		spLower = new JSpinner();
+		spUpper = new JSpinner();
+		createJSpinner();
+		spLower.addChangeListener(this);
+		spUpper.addChangeListener(this);
 
-		pnCropTolls.add(new JSpinner());
-		pnCropTolls.add(new JSpinner());
+		pnCropTolls.add(new JLabel("Lower: "));
+		pnCropTolls.add(spLower);
+		pnCropTolls.add(new JLabel("Upper: "));
+		pnCropTolls.add(spUpper);
 		pnCropTolls.add(cbMoveTimeline);
 		pnCropTolls.add(btCrop);
 
 		pnCropArea.add(pnCropTolls);
 		pnCropArea.add(slCrop);
 		return pnCropArea;
+	}
+	
+	public void createJSpinner(){
+		SpinnerModel smLower = new SpinnerNumberModel(slCrop.getValue(), 0, slCrop.getUpperValue(), 1);
+		SpinnerModel smUpper = new SpinnerNumberModel(slCrop.getUpperValue(), slCrop.getValue(), slCrop.getMaximum(), 1);
+		
+		spLower.setModel(smLower);
+		spUpper.setModel(smUpper);
+		
 	}
 
 	public JPanel getCoordsPanel() {
@@ -447,16 +461,35 @@ public class Editor extends JFrame implements ChangeListener, ActionListener {
 			comp.repaint();
 			loadTableCoords(coords);
 		} else if (e.getSource() == slCrop) {
+			createJSpinner();
 			if (!cbMoveTimeline.isSelected()) {
+				cropLowerValue = slCrop.getValue();
+				cropUpperValue = slCrop.getUpperValue();
 				return;
 			}
+			
+			if(cropLowerValue != slCrop.getValue()){
+				slTimeline.setValue(slCrop.getValue());
+				
+			} else if (cropUpperValue != slCrop.getUpperValue()){
+				slTimeline.setValue(slCrop.getUpperValue());
+				
+			}
+			
+			cropLowerValue = slCrop.getValue();
+			cropUpperValue = slCrop.getUpperValue();
 
-			RangeSliderUI r = (RangeSliderUI) slCrop.getUI();
+			/*RangeSliderUI r = (RangeSliderUI) slCrop.getUI();
 			if (r.isLowerDragging()) {
 				slTimeline.setValue(slCrop.getValue());
 			} else if (r.isUpperDragging()) {
 				slTimeline.setValue(slCrop.getUpperValue());
-			}
+			}*/
+			
+		} else if(e.getSource() == spLower){
+			slCrop.setValue((int) spLower.getValue());
+		} else if(e.getSource() == spUpper){
+			slCrop.setUpperValue((int) spUpper.getValue());
 		}
 	}
 
