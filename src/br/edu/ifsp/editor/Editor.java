@@ -81,6 +81,7 @@ public class Editor extends JFrame implements ChangeListener, ActionListener {
 	private RangeSlider slCrop;
 	private Comp comp;
 	private Comp.Modification modification;
+	private int cropLowerValue, cropUpperValue;
 
 	private boolean saved;
 	private float[][][] coords;
@@ -380,6 +381,8 @@ public class Editor extends JFrame implements ChangeListener, ActionListener {
 		spLower.setModel(smLower);
 		spUpper.setModel(smUpper);
 
+		cropLowerValue = slCrop.getValue();
+		cropUpperValue = slCrop.getUpperValue();
 	}
 
 	public JPanel getCoordsPanel() {
@@ -472,17 +475,26 @@ public class Editor extends JFrame implements ChangeListener, ActionListener {
 			comp.repaint();
 			loadTableCoords(coords);
 		} else if (e.getSource() == slCrop) {
+			int tempLowerValue = cropLowerValue;
+			int tempUpperValue = cropUpperValue;
+			
 			createJSpinner();
 			if (!cbMoveTimeline.isSelected()) {
 				return;
 			}
 
-			RangeSliderUI r = (RangeSliderUI) slCrop.getUI();
+			if(tempLowerValue != cropLowerValue){
+				slTimeline.setValue(slCrop.getValue());
+			} else if(tempUpperValue != cropUpperValue){
+				slTimeline.setValue(slCrop.getUpperValue());
+			}
+			
+			/*RangeSliderUI r = (RangeSliderUI) slCrop.getUI();
 			if (r.isLowerSelected()) {
 				slTimeline.setValue(slCrop.getValue());
 			} else if (r.isUpperSelected()) {
 				slTimeline.setValue(slCrop.getUpperValue());
-			}
+			}*/
 
 		} else if (e.getSource() == spLower) {
 			slCrop.setValue((int) spLower.getValue());
