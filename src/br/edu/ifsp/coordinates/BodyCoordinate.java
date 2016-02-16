@@ -17,6 +17,14 @@ import com.primesense.nite.UserData;
 import com.primesense.nite.UserTracker;
 import com.primesense.nite.UserTrackerFrameRef;;
 
+/**
+ * This is the class responsible for recording the movements of the users. It
+ * receives the coordinates of the users supplied by the middleware NiTE, and
+ * stores this coordinates for posterior use.
+ * 
+ * @author Matheus da Silva Ferreira
+ *
+ */
 public class BodyCoordinate implements InterfaceCoordinate, UserTracker.NewFrameListener {
 
 	public static final int X = 0, Y = 1, Z = 2;
@@ -626,26 +634,30 @@ public class BodyCoordinate implements InterfaceCoordinate, UserTracker.NewFrame
 		public void run() {
 			/* If the seconds remaining are greater than 0 */
 			while (secondsRemaining > 0) {
-				
-				/* Call the client's listener that are waiting for some events. */
+
+				/*
+				 * Call the client's listener that are waiting for some events.
+				 */
 				if (stateChanged != null) {
 					stateChanged.stateChanged(StateChangedListener.TIMER_CHANGED);
 				}
-				
+
 				/* This thread will sleep for one second */
 				try {
 					Thread.sleep(1_000);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
-				
+
 				/* Decrease 1 second of the seconds remaining. */
 				secondsRemaining--;
 			}
 		}
 	}
-	
+
 	/**
+	 * This class is a listener that allows the client to know every time that a
+	 * new event happens.
 	 * 
 	 * @author Matheus da Silva Ferreira
 	 *
@@ -657,6 +669,20 @@ public class BodyCoordinate implements InterfaceCoordinate, UserTracker.NewFrame
 		public static final int TIMER_CHANGED = 2;
 		public static final int NEW_SKELETON_STORED = 3;
 
+		/**
+		 * The method that will be called every time that a new event happens.
+		 * 
+		 * @param value
+		 *            An int value which informs what kind of event happend.
+		 *            <br>
+		 *            It can be:
+		 *            <ul>
+		 *            <li>BodyCoordinate.StateChangedListener.RECORDING_STARTED</li>
+		 *            <li>BodyCoordinate.StateChangedListener.RECORDING_STOPPED</li>
+		 *            <li>BodyCoordinate.StateChangedListener.TIMER_CHANGED</li>
+		 *            <li>BodyCoordinate.StateChangedListener.NEW_SKELETON_STORED</li>
+		 *            </ul>
+		 */
 		public void stateChanged(int value);
 
 	}
