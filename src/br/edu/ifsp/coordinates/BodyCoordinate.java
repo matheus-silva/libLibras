@@ -581,17 +581,28 @@ public class BodyCoordinate implements InterfaceCoordinate, UserTracker.NewFrame
 		/* Get the skeleton of the current user */
 		Skeleton skeleton = user.getSkeleton();
 
+		/* Temporary structure */
 		JointType[] jointTypes = JointType.values();
 		Float[][] joints = new Float[jointTypes.length][3];
 		Float[][] depth = new Float[jointTypes.length][3];
 
+		/* For each joint available in the middleware NiTE */
 		for (int i = 0; i < jointTypes.length; i++) {
+
+			/* Get the current joint of the current user */
 			SkeletonJoint joint = skeleton.getJoint(jointTypes[i]);
 
 			// Float[] system = converterCoordinateSystem(joint.getPosition());
 
 			Float[] system;
 			Point2D<Float> pointDepth;
+
+			/*
+			 * Check if it is necessary to convert the coordinate system. It is
+			 * necessary when the client request the data in depth format, or
+			 * when a {@link ComponentViewer} object has been supplied. The
+			 * converted values will be stored in a temporary structure.
+			 */
 			if (!realWorld || view != null) {
 				pointDepth = userTracker.convertJointCoordinatesToDepth(joint.getPosition());
 				depth[i][X] = pointDepth.getX();
@@ -599,6 +610,12 @@ public class BodyCoordinate implements InterfaceCoordinate, UserTracker.NewFrame
 				depth[i][Z] = joint.getPosition().getZ();
 			}
 
+			/*
+			 * Return the data in the coordinate format that the client wanted.
+			 * If it is in real world, the system will return the values
+			 * received by the middleware NiTE. Otherwise, it will return the
+			 * converted values which are stored in the temporary structure.
+			 */
 			if (realWorld) {
 				system = new Float[3];
 				system[X] = joint.getPosition().getX();
@@ -613,6 +630,10 @@ public class BodyCoordinate implements InterfaceCoordinate, UserTracker.NewFrame
 			joints[i][Z] = system[Z];
 		}
 
+		/*
+		 * If a {@link ComponentViewer} object has been supplied, the system
+		 * will feed this object with the newest data.
+		 */
 		if (view != null) {
 			view.addUserMoviments(depth);
 		}
@@ -677,10 +698,13 @@ public class BodyCoordinate implements InterfaceCoordinate, UserTracker.NewFrame
 		 *            <br>
 		 *            It can be:
 		 *            <ul>
-		 *            <li>BodyCoordinate.StateChangedListener.RECORDING_STARTED</li>
-		 *            <li>BodyCoordinate.StateChangedListener.RECORDING_STOPPED</li>
+		 *            <li>BodyCoordinate.StateChangedListener.RECORDING_STARTED
+		 *            </li>
+		 *            <li>BodyCoordinate.StateChangedListener.RECORDING_STOPPED
+		 *            </li>
 		 *            <li>BodyCoordinate.StateChangedListener.TIMER_CHANGED</li>
-		 *            <li>BodyCoordinate.StateChangedListener.NEW_SKELETON_STORED</li>
+		 *            <li>BodyCoordinate.StateChangedListener.
+		 *            NEW_SKELETON_STORED</li>
 		 *            </ul>
 		 */
 		public void stateChanged(int value);
