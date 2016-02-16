@@ -246,8 +246,8 @@ public class Editor extends JFrame implements ChangeListener, ActionListener {
 		view.add(zoom);
 		view.add(option);
 		view.addSeparator();
-		view.add(mCenter);
-		view.addSeparator();
+		//view.add(mCenter);
+		//view.addSeparator();
 		view.add(mAdjust);
 
 		menu.add(file);
