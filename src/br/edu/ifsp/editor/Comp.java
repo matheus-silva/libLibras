@@ -12,6 +12,7 @@ import java.awt.Graphics;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  *
@@ -20,13 +21,15 @@ import java.util.List;
 public class Comp extends Component {
 
 	protected float[][][] data;
+	private float[] zeroPoint = { 0, 0 };
 	private int index = 0;
 	private int[][] skelCoor = { { 0, 1 }, { 1, 8 }, { 8, 9 }, { 8, 10 }, { 9, 11 }, { 11, 13 }, { 10, 12 }, { 12, 14 },
 			{ 1, 3 }, { 3, 5 }, { 5, 7 }, { 1, 2 }, { 2, 4 }, { 4, 6 } };
 	private String option = "Skeleton";
-	private int moveFactor = 50;
+	private int moveFactor = 25;
 	private float zoomFactor = 1.2f;
 	private Modification modification;
+	private boolean isCenterVisible = false;
 	public static final String SKELETON = "Skeleton", NUMBER = "Number", CIRCLE = "Circle";
 
 	public Comp(float[][][] data) {
@@ -46,10 +49,108 @@ public class Comp extends Component {
 		this.modification = new Modification();
 	}
 
+	public void adjustView() {
+		// Invert
+		if (data[0][0][1] > ((data[0][13][1] + data[0][14][1]) / 2)) {
+			Action invert = new Action() {
+
+				@Override
+				public void action(Comp c) {
+					c.invert();
+				}
+			};
+			modification.addAction(invert);
+			invert.action(this);
+		}
+
+		float maxY = Float.MIN_VALUE, minY = Float.MAX_VALUE;
+
+		for (int i = 0; i < data.length; i++) {
+
+			for (int j = 0; j < data[i].length; j++) {
+				if (data[i][j][1] > maxY) {
+					maxY = data[i][j][1];
+				}
+				if (data[i][j][1] < minY) {
+					minY = data[i][j][1];
+				}
+			}
+		}
+
+		// Size
+		while (true) {
+			float sizeCoords = maxY - minY;
+			if (sizeCoords >= getPreferredSize().height) {
+				maxY /= zoomFactor;
+				minY /= zoomFactor;
+
+				Action e = new Action() {
+
+					@Override
+					public void action(Comp c) {
+						c.zoom(1, zoomFactor);
+					}
+				};
+
+				modification.addAction(e);
+				e.action(this);
+			} else {
+				break;
+			}
+		}
+
+		// Move
+		float currentX = (data[0][10][0] + data[0][9][0]) / 2;
+		float currentY = (data[0][10][1] + data[0][9][1]) / 2;
+		int valueX = getPreferredSize().width / 2;
+		int valueY = getPreferredSize().height / 2;
+
+		if (currentX != valueX) {
+			final int keyX, vX;
+			if (currentX > valueX) {
+				keyX = KeyEvent.VK_LEFT;
+				vX = (int) (currentX - valueX);
+			} else {
+				keyX = KeyEvent.VK_RIGHT;
+				vX = (int) (valueX - currentX);
+			}
+			Action eX = new Action() {
+
+				@Override
+				public void action(Comp c) {
+					c.moveCoords(keyX, vX);
+				}
+			};
+			modification.addAction(eX);
+			eX.action(this);
+
+			final int keyY, vY;
+			if (currentY > valueY) {
+				keyY = KeyEvent.VK_UP;
+				vY = (int) (currentY - valueY);
+			} else {
+				keyY = KeyEvent.VK_DOWN;
+				vY = (int) (valueY - currentY);
+			}
+			Action eY = new Action() {
+
+				@Override
+				public void action(Comp c) {
+					c.moveCoords(keyY, vY);
+				}
+			};
+			modification.addAction(eY);
+			eY.action(this);
+		}
+	}
+
 	@Override
 	public void paint(Graphics g) {
 		g.setColor(Color.white);
 		g.fillRect(0, 0, getPreferredSize().width, getPreferredSize().height);
+
+		// drawCenter(g);
+
 		g.setColor(Color.red);
 		g.drawRect(-1, -1, getPreferredSize().width, getPreferredSize().height);
 		g.setFont(new Font("serif", Font.BOLD, 15));
@@ -71,8 +172,24 @@ public class Comp extends Component {
 		}
 	}
 
+	public void setCenter(boolean value) {
+		this.isCenterVisible = value;
+	}
+
 	public void setOption(String option) {
 		this.option = option;
+	}
+
+	private void drawCenter(Graphics g) {
+		if (!isCenterVisible) {
+			return;
+		}
+		int size = 10;
+
+		g.setColor(Color.black);
+		g.drawString("(0, 0)", (int) zeroPoint[0] + size, (int) zeroPoint[1] - 5);
+		g.drawLine((int) zeroPoint[0] - size, (int) zeroPoint[1], (int) zeroPoint[0] + size, (int) zeroPoint[1]);
+		g.drawLine((int) zeroPoint[0], (int) zeroPoint[1] - size, (int) zeroPoint[0], (int) zeroPoint[1] + size);
 	}
 
 	private void setCircles(Graphics g) {
@@ -225,24 +342,35 @@ public class Comp extends Component {
 		for (int i = 0; i < data.length; i++) {
 			for (int j = 0; j < data[i].length; j++) {
 				if (key == KeyEvent.VK_UP) {
-					// System.out.println("UP");
 					data[i][j][1] -= value;
+					// System.out.println("UP " + data[i][j][1]);
 				}
 				if (key == KeyEvent.VK_DOWN) {
-					// System.out.println("Down");
 					data[i][j][1] += value;
+					// System.out.println("Down " + data[i][j][1]);
 				}
 				if (key == KeyEvent.VK_LEFT) {
-					// System.out.println("Left");
 					data[i][j][0] -= value;
+					// System.out.println("Left " + data[i][j][0]);
 				}
 				if (key == KeyEvent.VK_RIGHT) {
-					// System.out.println("Right");
 					data[i][j][0] += value;
+					// System.out.println("Right " + data[i][j][0]);
 				}
 			}
 		}
-
+		if (key == KeyEvent.VK_UP) {
+			zeroPoint[1] -= value;
+		}
+		if (key == KeyEvent.VK_DOWN) {
+			zeroPoint[1] += value;
+		}
+		if (key == KeyEvent.VK_LEFT) {
+			zeroPoint[0] -= value;
+		}
+		if (key == KeyEvent.VK_RIGHT) {
+			zeroPoint[0] += value;
+		}
 	}
 
 	private void zoom(int option, float factor) {
@@ -256,6 +384,13 @@ public class Comp extends Component {
 					}
 				}
 			}
+		}
+		if (option == 1) {
+			zeroPoint[0] /= factor;
+			zeroPoint[1] /= factor;
+		} else if (option == -1) {
+			zeroPoint[0] *= factor;
+			zeroPoint[1] *= factor;
 		}
 	}
 
@@ -275,7 +410,10 @@ public class Comp extends Component {
 				data[i][j][1] += ((maxY - data[i][j][1]) * 2);
 				data[i][j][1] -= maxY - minY;
 			}
+			zeroPoint[1] += ((maxY - zeroPoint[1]) * 2);
+			zeroPoint[1] -= maxY - minY;
 		}
+
 	}
 
 	public class Modification {
@@ -283,6 +421,7 @@ public class Comp extends Component {
 		private List<Action> actions;
 
 		private Modification() {
+			// actions = new CopyOnWriteArrayList<>();
 			actions = new ArrayList<>();
 		}
 

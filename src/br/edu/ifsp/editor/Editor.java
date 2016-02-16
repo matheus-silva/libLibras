@@ -16,6 +16,7 @@ import java.util.logging.Logger;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
@@ -70,6 +71,8 @@ public class Editor extends JFrame implements ChangeListener, ActionListener {
 	private JRadioButtonMenuItem mSkeleton;
 	private JRadioButtonMenuItem mCircle;
 	private JRadioButtonMenuItem mNumber;
+	private JCheckBoxMenuItem mCenter;
+	private JMenuItem mAdjust;
 
 	private JButton btCrop;
 
@@ -124,12 +127,9 @@ public class Editor extends JFrame implements ChangeListener, ActionListener {
 	}
 
 	private void loadCoords(float[][][] coords) {
-		if (comp != null) {
-			modification = comp.getModification();
-		}
 		close();
 		getContentPane().add(BorderLayout.CENTER, getMainPanel(coords));
-		
+
 		revalidate();
 		repaint();
 	}
@@ -157,6 +157,10 @@ public class Editor extends JFrame implements ChangeListener, ActionListener {
 		mCircle = new JRadioButtonMenuItem("Circle");
 		mNumber = new JRadioButtonMenuItem("Number");
 		mSkeleton = new JRadioButtonMenuItem("Skeleton");
+		
+		mCenter = new JCheckBoxMenuItem("Show Center");
+
+		mAdjust = new JMenuItem("Adjust View");
 
 		ButtonGroup viewGroup = new ButtonGroup();
 		viewGroup.add(mCircle);
@@ -181,6 +185,8 @@ public class Editor extends JFrame implements ChangeListener, ActionListener {
 		mCircle.addActionListener(this);
 		mNumber.addActionListener(this);
 		mSkeleton.addActionListener(this);
+		mCenter.addActionListener(this);
+		mAdjust.addActionListener(this);
 
 		JMenu file = new JMenu("File");
 		JMenu edit = new JMenu("Edit");
@@ -239,6 +245,10 @@ public class Editor extends JFrame implements ChangeListener, ActionListener {
 		view.add(move);
 		view.add(zoom);
 		view.add(option);
+		view.addSeparator();
+		view.add(mCenter);
+		view.addSeparator();
+		view.add(mAdjust);
 
 		menu.add(file);
 		menu.add(edit);
@@ -292,6 +302,10 @@ public class Editor extends JFrame implements ChangeListener, ActionListener {
 		pnBody = new JPanel(new GridLayout(0, 1));
 		pnBody.setBorder(new TitledBorder("Coordinates"));
 
+		if (comp != null) {
+			modification = comp.getModification();
+		}
+		
 		comp = new Comp(coords);
 		comp.setPreferredSize(new Dimension(640, 480));
 		comp.setOption(Comp.SKELETON);
@@ -305,7 +319,7 @@ public class Editor extends JFrame implements ChangeListener, ActionListener {
 			comp.setModification(modification);
 			comp.applyModification();
 		}
-		
+
 		pnBody.add(c);
 		return pnBody;
 	}
@@ -477,24 +491,24 @@ public class Editor extends JFrame implements ChangeListener, ActionListener {
 		} else if (e.getSource() == slCrop) {
 			int tempLowerValue = cropLowerValue;
 			int tempUpperValue = cropUpperValue;
-			
+
 			createJSpinner();
 			if (!cbMoveTimeline.isSelected()) {
 				return;
 			}
 
-			if(tempLowerValue != cropLowerValue){
+			if (tempLowerValue != cropLowerValue) {
 				slTimeline.setValue(slCrop.getValue());
-			} else if(tempUpperValue != cropUpperValue){
+			} else if (tempUpperValue != cropUpperValue) {
 				slTimeline.setValue(slCrop.getUpperValue());
 			}
-			
-			/*RangeSliderUI r = (RangeSliderUI) slCrop.getUI();
-			if (r.isLowerSelected()) {
-				slTimeline.setValue(slCrop.getValue());
-			} else if (r.isUpperSelected()) {
-				slTimeline.setValue(slCrop.getUpperValue());
-			}*/
+
+			/*
+			 * RangeSliderUI r = (RangeSliderUI) slCrop.getUI(); if
+			 * (r.isLowerSelected()) { slTimeline.setValue(slCrop.getValue()); }
+			 * else if (r.isUpperSelected()) {
+			 * slTimeline.setValue(slCrop.getUpperValue()); }
+			 */
 
 		} else if (e.getSource() == spLower) {
 			slCrop.setValue((int) spLower.getValue());
@@ -585,6 +599,14 @@ public class Editor extends JFrame implements ChangeListener, ActionListener {
 			comp.setOption(Comp.SKELETON);
 			comp.repaint();
 
+		} else if (e.getSource() == mAdjust) {
+			comp.adjustView();
+			comp.repaint();
+			
+		} else if(e.getSource() == mCenter) {
+			comp.setCenter(mCenter.isSelected());
+			comp.repaint();
+			
 		} else if (e.getSource() == btCrop) {
 
 			int startIndex = slCrop.getValue(), endIndex = slCrop.getUpperValue();
@@ -612,7 +634,7 @@ public class Editor extends JFrame implements ChangeListener, ActionListener {
 			}
 		}
 		// Editor e = new Editor();
-		Editor e = new Editor(new File("data/Dados - Juntas 10.txt"));
+		Editor e = new Editor(new File("data/Dados - Juntas 12.txt"));
 		// Editor e = new Editor("data/Dados - Real World.txt");
 		e.setVisible(true);
 	}
