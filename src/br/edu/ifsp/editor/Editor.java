@@ -8,6 +8,8 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.File;
 import java.util.Arrays;
 import java.util.logging.Level;
@@ -105,6 +107,15 @@ public class Editor extends JFrame implements ChangeListener, ActionListener {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setSize(800, 600);
 		setLocationRelativeTo(this);
+		
+		addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosing(WindowEvent evt) {
+				if(!saved){
+					
+				}
+			}
+		});
 	}
 
 	private void openFile(File arquivo) {
@@ -622,7 +633,6 @@ public class Editor extends JFrame implements ChangeListener, ActionListener {
 
 	public static void main(String args[]) {
 		for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-			System.out.println(info.getName());
 			if ("Metal".equals(info.getName())) {
 				try {
 					javax.swing.UIManager.setLookAndFeel(info.getClassName());
