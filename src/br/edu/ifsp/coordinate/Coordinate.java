@@ -42,7 +42,7 @@ public class Coordinate implements InterfaceCoordinate, UserTracker.NewFrameList
 	private boolean realWorld = true;
 	private boolean startRecordingUsers = false;
 	private ComponentViewer view = null;
-	
+
 	/**
 	 * Default Constructor
 	 */
@@ -65,7 +65,9 @@ public class Coordinate implements InterfaceCoordinate, UserTracker.NewFrameList
 		this.coordinates = this.createMapStructure();
 		this.userTracker = UserTracker.create();
 		this.view = view;
+	}
 
+	public void startCapture() {
 		userTracker.addNewFrameListener(this);
 	}
 
@@ -106,11 +108,11 @@ public class Coordinate implements InterfaceCoordinate, UserTracker.NewFrameList
 			}
 
 			getUserJoints(user);
-			
+
 		}
 	}
-	
-	public synchronized void getUserJoints(UserData user){
+
+	public synchronized void getUserJoints(UserData user) {
 		/* Get the joints of the current user */
 		Float[][] joints = trackingUser(user);
 
@@ -129,8 +131,8 @@ public class Coordinate implements InterfaceCoordinate, UserTracker.NewFrameList
 		List<Float[][]> userMoves = coordinates.get(user.getId());
 
 		/*
-		 * If there is no list which stores the movements of the current
-		 * user, so a new one will be created.
+		 * If there is no list which stores the movements of the current user,
+		 * so a new one will be created.
 		 */
 		if (userMoves == null) {
 			userMoves = this.createListStructure();
@@ -169,9 +171,7 @@ public class Coordinate implements InterfaceCoordinate, UserTracker.NewFrameList
 	 */
 	@Override
 	public void startRecordingUsers() {
-		for (UserData user : frame.getUsers()) {
-			startRecording(user);
-		}
+		startRecording(null);
 	}
 
 	/**
@@ -179,9 +179,7 @@ public class Coordinate implements InterfaceCoordinate, UserTracker.NewFrameList
 	 */
 	@Override
 	public void stopRecordingUsers() {
-		for (UserData user : frame.getUsers()) {
-			stopRecording(user);
-		}
+		stopRecording(null);
 	}
 
 	@Override
@@ -237,16 +235,11 @@ public class Coordinate implements InterfaceCoordinate, UserTracker.NewFrameList
 	 *            {@link BodyCoordinate}.REAL_WORLD or {@link BodyCoordinate}
 	 *            .DEPTH.
 	 */
-	/*public void setCoordinateSystem(int coordinate) {
-		switch (coordinate) {
-		case REAL_WORLD:
-			realWorld = true;
-			break;
-		case DEPTH:
-			realWorld = false;
-			break;
-		}
-	}*/
+	/*
+	 * public void setCoordinateSystem(int coordinate) { switch (coordinate) {
+	 * case REAL_WORLD: realWorld = true; break; case DEPTH: realWorld = false;
+	 * break; } }
+	 */
 
 	/**
 	 * Method used to create the default structure to store the movements of a
