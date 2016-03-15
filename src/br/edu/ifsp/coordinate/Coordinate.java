@@ -105,12 +105,12 @@ public class Coordinate implements InterfaceCoordinate, UserTracker.NewFrameList
 				continue;
 			}
 
-			extractJoints(user);
+			getUserJoints(user);
 			
 		}
 	}
 	
-	public synchronized void extractJoints(UserData user){
+	public synchronized void getUserJoints(UserData user){
 		/* Get the joints of the current user */
 		Float[][] joints = trackingUser(user);
 
