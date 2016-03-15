@@ -40,14 +40,9 @@ public class BodyCoordinate implements InterfaceCoordinate, UserTracker.NewFrame
 	private UserTrackerFrameRef frame;
 	private Map<Short, List<Float[][]>> coordinates = null;
 	private boolean realWorld = true;
-	private PoseType startingPose = null, stoppingPose = null;
-	private boolean startRecordingUsers = false, startTimer = false;
+	private boolean startRecordingUsers = false;
 	private ComponentViewer view = null;
-	private Integer seconds, secondsRemaining = 0;
-	private int delay;
-
-	private StateChangedListener stateChanged = null;
-
+	
 	/**
 	 * Default Constructor
 	 */
@@ -110,18 +105,12 @@ public class BodyCoordinate implements InterfaceCoordinate, UserTracker.NewFrame
 				continue;
 			}
 
-			/* Call the method that has the policy of the startingPose */
-			detectingStartingPose(user);
-
-			/* Call the method that has the policy of the stoppingPose */
-			detectingStoppingPose(user);
-
 			extractJoints(user);
 			
 		}
 	}
 	
-	private void extractJoints(UserData user){
+	public synchronized void extractJoints(UserData user){
 		/* Get the joints of the current user */
 		Float[][] joints = trackingUser(user);
 
@@ -154,90 +143,6 @@ public class BodyCoordinate implements InterfaceCoordinate, UserTracker.NewFrame
 	}
 
 	/**
-	 * Method that has the policy of the startingPose.
-	 * 
-	 * @param user
-	 *            The user to check.
-	 */
-	private void detectingStartingPose(UserData user) {
-		/* If there is not a startingPose */
-		if (startingPose == null) {
-			return;
-		}
-
-		/* If the system is already recording the user movements */
-		if (startRecordingUsers) {
-			return;
-		}
-
-		/*
-		 * If the delay still not arrived at the value 0. Used to create a time
-		 * between the detection of the startingPose and the stoppingPose
-		 */
-		if (delay > 0) {
-			delay--;
-			return;
-		}
-
-		if (user.getPoses(startingPose).isHeld()) {
-			System.out.println("Start: " + startingPose + " is Held");
-		}
-
-		/*
-		 * If the seconds remaining are lower than 1, it means that it is time
-		 * to record the user movements. However, it will only start the
-		 * recording of the current user if he is holding the startingPose, or
-		 * the chronometer has been started.
-		 */
-		if (secondsRemaining <= 0 && (user.getPoses(startingPose).isHeld() || startTimer)) {
-			startRecording(user);
-		}
-
-		/*
-		 * If the user is holding the startingPose, the seconds remaining are
-		 * greater than 0 and the chronometer has not been started, the system
-		 * will create a new {@link Timer} object, that will count the seconds;
-		 * start the chronometer and then it will stop detecting the
-		 * startingPose.
-		 */
-		if (user.getPoses(startingPose).isHeld() && secondsRemaining > 0 && !startTimer) {
-			new Thread(new Timer()).start();
-			startTimer = true;
-			userTracker.stopPoseDetection(user.getId(), startingPose);
-		}
-
-	}
-
-	/**
-	 * Method that has the policy of the stoppingPose.
-	 * 
-	 * @param user
-	 *            The user to check.
-	 */
-	private void detectingStoppingPose(UserData user) {
-		/* If there is not a stoppingPose */
-		if (stoppingPose == null) {
-			return;
-		}
-
-		/* If the system is not recording the user movements */
-		if (!startRecordingUsers) {
-			return;
-		}
-
-		if (user.getPoses(stoppingPose).isHeld()) {
-			System.out.println("Stop: " + stoppingPose + " is Held");
-		}
-
-		/* If the user is helding the startingPose */
-		if (user.getPoses(stoppingPose).isHeld()) {
-			userTracker.stopPoseDetection(user.getId(), stoppingPose);
-
-			stopRecording(user);
-		}
-	}
-
-	/**
 	 * Method responsible for starting recording the user movements.
 	 * 
 	 * @param user
@@ -245,33 +150,7 @@ public class BodyCoordinate implements InterfaceCoordinate, UserTracker.NewFrame
 	 *            defined.
 	 */
 	private void startRecording(UserData user) {
-
-		/*
-		 * If there is a pose detection defined to start recording, the system
-		 * will stop detecting this pose.
-		 */
-		if (startingPose != null) {
-			userTracker.stopPoseDetection(user.getId(), startingPose);
-		}
-
-		/* Turn off the chronometer */
-		startTimer = false;
-
-		secondsRemaining = 0;
 		startRecordingUsers = true;
-
-		/* Call the client's listener that are waiting for some events. */
-		if (stateChanged != null) {
-			stateChanged.stateChanged(StateChangedListener.RECORDING_STARTED);
-		}
-
-		/*
-		 * If there is a pose detection defined to stop recording, the system
-		 * will start detecting this pose.
-		 */
-		if (stoppingPose != null) {
-			userTracker.startPoseDetection(user.getId(), stoppingPose);
-		}
 	}
 
 	/**
@@ -283,30 +162,6 @@ public class BodyCoordinate implements InterfaceCoordinate, UserTracker.NewFrame
 	 */
 	private void stopRecording(UserData user) {
 		startRecordingUsers = false;
-
-		/* The amount of frames to wait before allowing the recording. */
-		delay = 60;
-
-		/* Call the client's listener that are waiting for some events. */
-		if (stateChanged != null) {
-			stateChanged.stateChanged(StateChangedListener.RECORDING_STOPPED);
-		}
-
-		/*
-		 * If there is a pose detection defined to start recording, the system
-		 * will stop detecting this pose and prepare the seconds of the
-		 * chronometer.
-		 */
-		if (startingPose != null) {
-
-			if (user.getPoses(startingPose).isHeld()) {
-				System.out.println("Start: " + startingPose + " is Held");
-			}
-
-			userTracker.startPoseDetection(user.getId(), startingPose);
-			secondsRemaining = seconds;
-		}
-
 	}
 
 	/**
@@ -327,50 +182,6 @@ public class BodyCoordinate implements InterfaceCoordinate, UserTracker.NewFrame
 		for (UserData user : frame.getUsers()) {
 			stopRecording(user);
 		}
-	}
-
-	/**
-	 * Start recording the user movements. When an user held the pose informed,
-	 * the system will wait the amount of seconds informed before start the
-	 * recording.
-	 * 
-	 * @param pose
-	 *            Pose to be detected
-	 * @param seconds
-	 *            The amount of seconds to wait before start the recording.
-	 */
-	public void startRecordingUsers(PoseType pose, int seconds) {
-		this.seconds = seconds;
-		this.secondsRemaining = seconds;
-		for (UserData user : frame.getUsers()) {
-			if (this.startingPose != null) {
-				userTracker.stopPoseDetection(user.getId(), startingPose);
-			}
-			if (pose != null)
-				if (!startRecordingUsers) {
-					userTracker.startPoseDetection(user.getId(), pose);
-				}
-		}
-		this.startingPose = pose;
-	}
-
-	/**
-	 * Stop recording the user movements when an user held the pose informed.
-	 * 
-	 * @param pose
-	 *            Pose to be detected
-	 */
-	public void stopRecordingUsers(PoseType pose) {
-		for (UserData user : frame.getUsers()) {
-			if (this.stoppingPose != null) {
-				userTracker.stopPoseDetection(user.getId(), stoppingPose);
-			}
-			if (pose != null)
-				if (startRecordingUsers) {
-					userTracker.startPoseDetection(user.getId(), pose);
-				}
-		}
-		this.stoppingPose = pose;
 	}
 
 	@Override
@@ -426,7 +237,7 @@ public class BodyCoordinate implements InterfaceCoordinate, UserTracker.NewFrame
 	 *            {@link BodyCoordinate}.REAL_WORLD or {@link BodyCoordinate}
 	 *            .DEPTH.
 	 */
-	public void setCoordinateSystem(int coordinate) {
+	/*public void setCoordinateSystem(int coordinate) {
 		switch (coordinate) {
 		case REAL_WORLD:
 			realWorld = true;
@@ -435,40 +246,7 @@ public class BodyCoordinate implements InterfaceCoordinate, UserTracker.NewFrame
 			realWorld = false;
 			break;
 		}
-	}
-
-	/**
-	 * Get the seconds remaining to start storing the movements. Useful when a
-	 * chronometer has already been started. Use the class
-	 * {@link BodyCoordinate.StateChangedListener} to receive more informations.
-	 * 
-	 * @return The seconds remaining to start storing the movements.
-	 */
-	public Integer getSeconds() {
-		return secondsRemaining;
-	}
-
-	/**
-	 * Check a chronometer is activated.
-	 * 
-	 * @return true if there is a chronometer counting the time, false
-	 *         otherwise.
-	 */
-	public boolean isTimerActivated() {
-		return startTimer;
-	}
-
-	/**
-	 * Set a listener which will be called every time that something happens.
-	 * 
-	 * @param stateChanged
-	 *            Object {@link StateChangedListener} which method will be
-	 *            called every time that something new happens.
-	 * @see StateChangedListener
-	 */
-	public void setStateChanged(StateChangedListener stateChanged) {
-		this.stateChanged = stateChanged;
-	}
+	}*/
 
 	/**
 	 * Method used to create the default structure to store the movements of a
@@ -510,21 +288,6 @@ public class BodyCoordinate implements InterfaceCoordinate, UserTracker.NewFrame
 			/* Stop tracking this user */
 			userTracker.stopSkeletonTracking(user.getId());
 
-			/*
-			 * If there is a startingPose, stop detecting this pose for this
-			 * user
-			 */
-			if (startingPose != null) {
-				userTracker.stopPoseDetection(user.getId(), startingPose);
-			}
-
-			/*
-			 * If there is a stoppingPose, stop detecting this pose for this
-			 * user
-			 */
-			if (stoppingPose != null) {
-				userTracker.stopPoseDetection(user.getId(), stoppingPose);
-			}
 			return false;
 		}
 
@@ -541,22 +304,6 @@ public class BodyCoordinate implements InterfaceCoordinate, UserTracker.NewFrame
 
 			/* Start tracking this user */
 			userTracker.startSkeletonTracking(user.getId());
-
-			/*
-			 * If there is a startingPose and the system is not recording the
-			 * user moves
-			 */
-			if (startingPose != null && !startRecordingUsers) {
-				userTracker.startPoseDetection(user.getId(), startingPose);
-			}
-
-			/*
-			 * If there is a stoppingPose and the system is recording the user
-			 * moves
-			 */
-			if (stoppingPose != null && startRecordingUsers) {
-				userTracker.startPoseDetection(user.getId(), stoppingPose);
-			}
 
 			return false;
 		}
@@ -645,73 +392,4 @@ public class BodyCoordinate implements InterfaceCoordinate, UserTracker.NewFrame
 		return joints;
 	}
 
-	/**
-	 * This class is an implementation of the class {@link Runnable}. It is used
-	 * as a chronometer, which will decrease the seconds of the seconds
-	 * remaining.
-	 * 
-	 * @author Matheus da Silva Ferreira
-	 *
-	 */
-	private class Timer implements Runnable {
-
-		@Override
-		public void run() {
-			/* If the seconds remaining are greater than 0 */
-			while (secondsRemaining > 0) {
-
-				/*
-				 * Call the client's listener that are waiting for some events.
-				 */
-				if (stateChanged != null) {
-					stateChanged.stateChanged(StateChangedListener.TIMER_CHANGED);
-				}
-
-				/* This thread will sleep for one second */
-				try {
-					Thread.sleep(1_000);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-
-				/* Decrease 1 second of the seconds remaining. */
-				secondsRemaining--;
-			}
-		}
-	}
-
-	/**
-	 * This class is a listener that allows the client to know every time that a
-	 * new event happens.
-	 * 
-	 * @author Matheus da Silva Ferreira
-	 *
-	 */
-	public static interface StateChangedListener {
-
-		public static final int RECORDING_STARTED = 0;
-		public static final int RECORDING_STOPPED = 1;
-		public static final int TIMER_CHANGED = 2;
-		public static final int NEW_SKELETON_STORED = 3;
-
-		/**
-		 * The method that will be called every time that a new event happens.
-		 * 
-		 * @param value
-		 *            An int value which informs what kind of event happend.
-		 *            <br>
-		 *            It can be:
-		 *            <ul>
-		 *            <li>BodyCoordinate.StateChangedListener.RECORDING_STARTED
-		 *            </li>
-		 *            <li>BodyCoordinate.StateChangedListener.RECORDING_STOPPED
-		 *            </li>
-		 *            <li>BodyCoordinate.StateChangedListener.TIMER_CHANGED</li>
-		 *            <li>BodyCoordinate.StateChangedListener.
-		 *            NEW_SKELETON_STORED</li>
-		 *            </ul>
-		 */
-		public void stateChanged(int value);
-
-	}
 }
