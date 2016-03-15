@@ -1,4 +1,4 @@
-package br.com.ifsp.coordinate;
+package br.edu.ifsp.coordinate;
 
 import java.util.ArrayList;
 import java.util.Arrays;
