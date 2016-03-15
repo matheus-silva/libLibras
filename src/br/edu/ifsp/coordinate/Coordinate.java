@@ -28,7 +28,7 @@ import br.edu.ifsp.coordinates.InterfaceCoordinate;;
  * @author Matheus da Silva Ferreira
  *
  */
-public class BodyCoordinate implements InterfaceCoordinate, UserTracker.NewFrameListener {
+public class Coordinate implements InterfaceCoordinate, UserTracker.NewFrameListener {
 
 	public static final int X = 0, Y = 1, Z = 2;
 	public static final int REAL_WORLD = 10, DEPTH = 11;
@@ -46,7 +46,7 @@ public class BodyCoordinate implements InterfaceCoordinate, UserTracker.NewFrame
 	/**
 	 * Default Constructor
 	 */
-	public BodyCoordinate() {
+	public Coordinate() {
 		this(null);
 	}
 
@@ -58,7 +58,7 @@ public class BodyCoordinate implements InterfaceCoordinate, UserTracker.NewFrame
 	 * @param view
 	 *            The object used to show the images created by the sensor.
 	 */
-	public BodyCoordinate(ComponentViewer view) {
+	public Coordinate(ComponentViewer view) {
 		// OpenNI.initialize();
 		NiTE.initialize();
 
