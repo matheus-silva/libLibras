@@ -1,15 +1,17 @@
 package br.edu.ifsp.capture;
 
+import java.awt.EventQueue;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.swing.JFrame;
+
 import com.primesense.nite.JointType;
 import com.primesense.nite.NiTE;
 import com.primesense.nite.Point2D;
-import com.primesense.nite.PoseType;
 import com.primesense.nite.Skeleton;
 import com.primesense.nite.SkeletonJoint;
 import com.primesense.nite.SkeletonState;
@@ -17,8 +19,7 @@ import com.primesense.nite.UserData;
 import com.primesense.nite.UserTracker;
 import com.primesense.nite.UserTrackerFrameRef;
 
-import br.edu.ifsp.coordinates.ComponentViewer;
-import br.edu.ifsp.coordinates.InterfaceCoordinate;;
+import br.edu.ifsp.coordinates.ComponentViewer;;
 
 /**
  * This is the class responsible for recording the movements of the users. It
@@ -41,7 +42,7 @@ public class Coordinate implements UserTracker.NewFrameListener {
 	private Map<Short, List<Float[][]>> coordinates = null;
 	private boolean realWorld = true;
 	private boolean startRecordingUsers = false;
-	private ComponentViewer view = null;
+	private ShowObject view = null;
 
 	/**
 	 * Default Constructor
@@ -58,7 +59,7 @@ public class Coordinate implements UserTracker.NewFrameListener {
 	 * @param view
 	 *            The object used to show the images created by the sensor.
 	 */
-	public Coordinate(ComponentViewer view) {
+	public Coordinate(ShowObject view) {
 		this.coordinates = this.createMapStructure();
 		this.view = view;
 	}
@@ -80,7 +81,7 @@ public class Coordinate implements UserTracker.NewFrameListener {
 	 *            The object used to show the images created by the sensor. Set
 	 *            null to remove the object.
 	 */
-	public void setView(ComponentViewer view) {
+	public void setView(ShowObject view) {
 		this.view = view;
 	}
 
@@ -107,25 +108,66 @@ public class Coordinate implements UserTracker.NewFrameListener {
 				continue;
 			}
 
-			getUserJoints(user);
+			getUserJoints(user, this.frame.getDepthFrame().getWidth(), this.frame.getDepthFrame().getHeight());
+			
+			if(view != null){
+				view.repaint();
+			}
 
 		}
 	}
 
-	public synchronized void getUserJoints(UserData user) {
+	public synchronized void getUserJoints(UserData user, int width, int height) {
 		/* Get the joints of the current user */
-		Float[][] joints = trackingUser(user);
 
-		/* If the recording is not allowed. */
-		if (!startRecordingUsers) {
-			return;
+		/* Get the skeleton of the current user */
+		Skeleton skeleton = user.getSkeleton();
+
+		/* Temporary structure */
+		JointType[] jointTypes = JointType.values();
+		Float[][] depth = new Float[jointTypes.length][3];
+		Float[][] realWorld = new Float[jointTypes.length][3];
+
+		/* For each joint available in the middleware NiTE */
+		for (int i = 0; i < jointTypes.length; i++) {
+
+			/* Get the current joint of the current user */
+			SkeletonJoint joint = skeleton.getJoint(jointTypes[i]);
+
+			// Float[] system = converterCoordinateSystem(joint.getPosition());
+
+			/*
+			 * Check if it is necessary to convert the coordinate system. It is
+			 * necessary when the client request the data in depth format, or
+			 * when a {@link ComponentViewer} object has been supplied. The
+			 * converted values will be stored in a temporary structure.
+			 */
+			Point2D<Float> pointDepth = userTracker.convertJointCoordinatesToDepth(joint.getPosition());
+			depth[i][X] = pointDepth.getX();
+			depth[i][Y] = pointDepth.getY();
+			depth[i][Z] = joint.getPosition().getZ();
+
+			/*
+			 * Return the data in the coordinate format that the client wanted.
+			 * If it is in real world, the system will return the values
+			 * received by the middleware NiTE. Otherwise, it will return the
+			 * converted values which are stored in the temporary structure.
+			 */
+
+			realWorld[i][X] = joint.getPosition().getX();
+			realWorld[i][Y] = joint.getPosition().getY();
+			realWorld[i][Z] = joint.getPosition().getZ();
 		}
 
 		System.out.print("");
-		for (Float[] fs : joints) {
+		for (Float[] fs : depth) {
 			System.out.print(Arrays.toString(fs));
 		}
 		System.out.println();
+		
+		if(view != null){
+			view.setUserCoordinate(depth, width, height);
+		}
 
 		/* Get the movements recorded of the current user. */
 		List<Float[][]> userMoves = coordinates.get(user.getId());
@@ -140,7 +182,7 @@ public class Coordinate implements UserTracker.NewFrameListener {
 		}
 
 		/* Insert the new joints detected in the current frame. */
-		userMoves.add(joints);
+		userMoves.add(depth);
 
 	}
 
@@ -296,70 +338,24 @@ public class Coordinate implements UserTracker.NewFrameListener {
 	 *         and Z
 	 */
 	private Float[][] trackingUser(UserData user) {
-		/* Get the skeleton of the current user */
-		Skeleton skeleton = user.getSkeleton();
-
-		/* Temporary structure */
-		JointType[] jointTypes = JointType.values();
-		Float[][] joints = new Float[jointTypes.length][3];
-		Float[][] depth = new Float[jointTypes.length][3];
-
-		/* For each joint available in the middleware NiTE */
-		for (int i = 0; i < jointTypes.length; i++) {
-
-			/* Get the current joint of the current user */
-			SkeletonJoint joint = skeleton.getJoint(jointTypes[i]);
-
-			// Float[] system = converterCoordinateSystem(joint.getPosition());
-
-			Float[] system;
-			Point2D<Float> pointDepth;
-
-			/*
-			 * Check if it is necessary to convert the coordinate system. It is
-			 * necessary when the client request the data in depth format, or
-			 * when a {@link ComponentViewer} object has been supplied. The
-			 * converted values will be stored in a temporary structure.
-			 */
-			if (!realWorld || view != null) {
-				pointDepth = userTracker.convertJointCoordinatesToDepth(joint.getPosition());
-				depth[i][X] = pointDepth.getX();
-				depth[i][Y] = pointDepth.getY();
-				depth[i][Z] = joint.getPosition().getZ();
-			}
-
-			/*
-			 * Return the data in the coordinate format that the client wanted.
-			 * If it is in real world, the system will return the values
-			 * received by the middleware NiTE. Otherwise, it will return the
-			 * converted values which are stored in the temporary structure.
-			 */
-			if (realWorld) {
-				system = new Float[3];
-				system[X] = joint.getPosition().getX();
-				system[Y] = joint.getPosition().getY();
-				system[Z] = joint.getPosition().getZ();
-			} else {
-				system = depth[i];
-			}
-
-			joints[i][X] = system[X];
-			joints[i][Y] = system[Y];
-			joints[i][Z] = system[Z];
-		}
-
-		/*
-		 * If a {@link ComponentViewer} object has been supplied, the system
-		 * will feed this object with the newest data.
-		 */
-		if (view != null) {
-			view.addUserMoviments(depth);
-		}
-
-		return joints;
+		return null;
 	}
 
-	public static void main(String args[]){
-		
+	public static void main(String args[]) {
+		EventQueue.invokeLater(new Runnable() {
+
+			@Override
+			public void run() {
+				ShowObject view = new ShowObject();
+				Coordinate coordinate = new Coordinate(view);
+				coordinate.startCapture();
+				
+				JFrame frame = new JFrame();
+				frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+				frame.setSize(640, 480);
+				frame.add(view);
+				frame.setVisible(true);				
+			}
+		});
 	}
 }
