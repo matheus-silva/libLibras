@@ -1,4 +1,4 @@
-package br.edu.ifsp.coordinate;
+package br.edu.ifsp.capture;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,7 +28,7 @@ import br.edu.ifsp.coordinates.InterfaceCoordinate;;
  * @author Matheus da Silva Ferreira
  *
  */
-public class Coordinate implements InterfaceCoordinate, UserTracker.NewFrameListener {
+public class Coordinate implements UserTracker.NewFrameListener {
 
 	public static final int X = 0, Y = 1, Z = 2;
 	public static final int REAL_WORLD = 10, DEPTH = 11;
@@ -59,15 +59,15 @@ public class Coordinate implements InterfaceCoordinate, UserTracker.NewFrameList
 	 *            The object used to show the images created by the sensor.
 	 */
 	public Coordinate(ComponentViewer view) {
-		// OpenNI.initialize();
-		NiTE.initialize();
-
 		this.coordinates = this.createMapStructure();
-		this.userTracker = UserTracker.create();
 		this.view = view;
 	}
 
 	public void startCapture() {
+		// OpenNI.initialize();
+		NiTE.initialize();
+
+		this.userTracker = UserTracker.create();
 		userTracker.addNewFrameListener(this);
 	}
 
@@ -146,48 +146,22 @@ public class Coordinate implements InterfaceCoordinate, UserTracker.NewFrameList
 
 	/**
 	 * Method responsible for starting recording the user movements.
-	 * 
-	 * @param user
-	 *            Current user. It is used when a pose detection has been
-	 *            defined.
 	 */
-	private void startRecording(UserData user) {
+	public void startRecording() {
 		startRecordingUsers = true;
 	}
 
 	/**
 	 * Method responsible for stopping recording the user movements.
-	 * 
-	 * @param user
-	 *            Current user. It is used when a pose detection has been
-	 *            defined.
 	 */
-	private void stopRecording(UserData user) {
+	public void stopRecording() {
 		startRecordingUsers = false;
 	}
 
-	/**
-	 * Start recording the user movements right away
-	 */
-	@Override
-	public void startRecordingUsers() {
-		startRecording(null);
-	}
-
-	/**
-	 * Stop recording the user movements right away
-	 */
-	@Override
-	public void stopRecordingUsers() {
-		stopRecording(null);
-	}
-
-	@Override
 	public Map<Short, List<Float[][]>> getMovimentsList() {
 		return coordinates;
 	}
 
-	@Override
 	public Map<Short, Float[][][]> getMovimentsArray() {
 		Map<Short, Float[][][]> newCoordinates = new HashMap<>();
 		List<Float[][]> list;
@@ -385,4 +359,7 @@ public class Coordinate implements InterfaceCoordinate, UserTracker.NewFrameList
 		return joints;
 	}
 
+	public static void main(String args[]){
+		
+	}
 }
