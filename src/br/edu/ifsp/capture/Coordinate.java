@@ -115,6 +115,8 @@ public class Coordinate implements UserTracker.NewFrameListener {
 			}
 
 		}
+		
+		this.frame.release();
 	}
 
 	public synchronized void getUserJoints(UserData user, int width, int height) {

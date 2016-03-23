@@ -1,5 +1,11 @@
 package br.edu.ifsp.capture;
 
+import java.awt.EventQueue;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+
+import javax.swing.JFrame;
+
 import com.primesense.nite.NiTE;
 import com.primesense.nite.UserMap;
 import com.primesense.nite.UserTracker;
@@ -10,6 +16,15 @@ public class Segmentation implements UserTracker.NewFrameListener {
 	private UserTracker user;
 	private UserTrackerFrameRef frame;
 	private boolean startRecording = false;
+	private ShowObject view;
+	
+	public Segmentation(){
+		this(null);
+	}
+	
+	public Segmentation(ShowObject view){
+		this.view = view;
+	}
 	
 	public void captureData(){
 		NiTE.initialize();
@@ -23,10 +38,17 @@ public class Segmentation implements UserTracker.NewFrameListener {
 		this.frame = user.readFrame();
 		
 		setUserMap(frame.getUserMap());
+		
+		this.frame.release();
 	}
 	
 	public synchronized void setUserMap(UserMap user){
+		ByteBuffer buff = user.getPixels().order(ByteOrder.LITTLE_ENDIAN);
 		
+		if(view != null){
+			view.setUserMap(buff);
+			view.repaint();
+		}
 	}
 	
 	public void startRecording(){
@@ -35,6 +57,25 @@ public class Segmentation implements UserTracker.NewFrameListener {
 	
 	public void stopRecording(){
 		this.startRecording = false;
+	}
+	
+	public static void main(String args[]){
+		EventQueue.invokeLater(new Runnable() {
+			
+			@Override
+			public void run() {
+				ShowObject view = new ShowObject();
+				Segmentation seg = new Segmentation(view);
+				seg.captureData();
+				
+				JFrame frame = new JFrame();
+				frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+				frame.setSize(640, 480);
+				frame.add(view);
+				frame.setVisible(true);
+				
+			}
+		});
 	}
 
 }
