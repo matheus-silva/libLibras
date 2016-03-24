@@ -68,7 +68,7 @@ public class Segmentation implements UserTracker.NewFrameListener {
 				Segmentation seg = new Segmentation(view);
 				seg.captureData();
 				
-				JFrame frame = new JFrame();
+				JFrame frame = new JFrame("Segmentation");
 				frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 				frame.setSize(640, 480);
 				frame.add(view);

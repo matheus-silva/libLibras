@@ -352,7 +352,7 @@ public class Coordinate implements UserTracker.NewFrameListener {
 				Coordinate coordinate = new Coordinate(view);
 				coordinate.startCapture();
 				
-				JFrame frame = new JFrame();
+				JFrame frame = new JFrame("Coordinate");
 				frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 				frame.setSize(640, 480);
 				frame.add(view);
