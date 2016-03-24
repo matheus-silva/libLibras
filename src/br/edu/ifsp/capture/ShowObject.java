@@ -47,18 +47,19 @@ public class ShowObject extends Component {
 
 		int[] background = getBackgroundImage();
 
-		int[] user = getUserMapImage();
+		int[] userBackground = getUserMapImage(background);
 
 		drawUserSkeleton(g2d);
 
-		drawBackground(g, background, user);
+		drawBackground(g, userBackground);
 
 		coordinate = new ArrayList<>();
 	}
 
-	private void drawBackground(Graphics g, int[] background, int[] user) {
-		int pixels[];
-
+	private void drawBackground(Graphics g, int[] background) {
+		if(background == null){
+			
+		}
 		BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
 		img.setRGB(0, 0, width, height, background, 0, width);
 		g.drawImage(img, 0, 0, getWidth(), getHeight(), null);
@@ -85,9 +86,9 @@ public class ShowObject extends Component {
 		}
 	}
 
-	private int[] getUserMapImage() {
+	private int[] getUserMapImage(int background[]) {
 		if (buffUser == null) {
-			return null;
+			return background;
 		}
 
 		int pixels[] = new int[buffUser.limit()];
@@ -97,10 +98,10 @@ public class ShowObject extends Component {
 
 	private int[] getBackgroundImage() {
 		if (buffBackground == null) {
-			return null;
+			return new int[] { 0 };
 		}
 
-		int pixels[] = new int[] { 0 };
+		int pixels[];
 
 		if (camera == COLOR) {
 			pixels = getColorPixel();
