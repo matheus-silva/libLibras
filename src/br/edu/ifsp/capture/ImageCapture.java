@@ -87,7 +87,7 @@ public class ImageCapture implements VideoStream.NewFrameListener {
 			@Override
 			public void run() {
 				ShowObject view = new ShowObject();
-				ImageCapture img = new ImageCapture(view, COLOR);
+				ImageCapture img = new ImageCapture(view, DEPTH);
 				img.captureData();
 				
 				JFrame frame = new JFrame("Image Capture");
