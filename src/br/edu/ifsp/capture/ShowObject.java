@@ -2,6 +2,7 @@ package br.edu.ifsp.capture;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
@@ -23,8 +24,13 @@ public class ShowObject extends Component {
 	private ByteBuffer buffBackground, buffUser;
 	private int[] pixels;
 	private List<Float[][]> coordinate = new ArrayList<>();
-	int[] mColors = new int[] { 0xFFFF0000, 0xFF00FF00, 0xFF0000FF, 0xFFFFFF00, 0xFFFF00FF, 0xFF00FFFF };
+	private int[] mColors = new int[] { 0xFFFF0000, 0xFF00FF00, 0xFF0000FF, 0xFFFFFF00, 0xFFFF00FF, 0xFF00FFFF };
+	private String status;
 
+	public void setStatus(String status) {
+		this.status = status;
+	}
+	
 	public void setCamera(int camera) {
 		this.camera = camera;
 	}
@@ -55,7 +61,17 @@ public class ShowObject extends Component {
 
 		drawBackground(g, userBackground);
 
+		drawStatus(g2d);
+		
 		coordinate = new ArrayList<>();
+	}
+	
+	private void drawStatus(Graphics2D g) {
+		if (!(status == null || status.equals(""))) {
+			g.setFont(new Font("Serif", Font.BOLD, 46));
+			g.setColor(Color.red);
+			g.drawString(status, 10, 46);
+		}
 	}
 
 	private void drawBackground(Graphics g, int[] background) {

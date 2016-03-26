@@ -72,6 +72,11 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 		// OpenNI.initialize();
 		NiTE.initialize();
 
+		coor = new Coordinate(view);
+		seg = new Segmentation(view);
+		imgColor = new ImageCapture(view, ShowObject.COLOR);
+		imgDepth = new ImageCapture(view, ShowObject.DEPTH);
+		
 		this.userTracker = UserTracker.create();
 		this.view = view;
 
@@ -85,18 +90,13 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 			System.out.println("Make sure that there is a sensor connected and try again.");
 			System.exit(0);
 		}
-		
+
 		d.setImageRegistrationMode(ImageRegistrationMode.DEPTH_TO_COLOR);
 
 		VideoStream video = VideoStream.create(d, SensorType.COLOR);
 
 		video.addNewFrameListener(this);
 		video.start();
-
-		coor = new Coordinate(view);
-		seg = new Segmentation(view);
-		imgColor = new ImageCapture(view, ShowObject.COLOR);
-		imgDepth = new ImageCapture(view, ShowObject.DEPTH);
 	}
 
 	@Override
@@ -113,14 +113,22 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 		}
 
 		new Thread(new Runnable() {
-			
+
 			@Override
 			public void run() {
 				imgColor.setImageData(frameColor);
+				view.repaint();
 			}
 		}).start();
-		
-		timestamp.add(frameColor.getTimestamp());
+
+		if (startRecordingUsers) {
+			timestamp.add(frameColor.getTimestamp());
+
+			/* Call the client's listener that are waiting for some events. */
+			if (stateChanged != null) {
+				stateChanged.stateChanged(Capture.StateChangedListener.NEW_DATA_ARRIVED);
+			}
+		}
 	}
 
 	/**
@@ -164,23 +172,18 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 			new Thread(new Runnable() {
 				@Override
 				public void run() {
-					coor.getUserJoints(userTracker, user, frameDepth.getTimestamp(), frameDepth.getWidth(), frameDepth.getHeight());
+					coor.getUserJoints(userTracker, user, frameDepth.getTimestamp(), frameDepth.getWidth(),
+							frameDepth.getHeight());
 				}
 			}).start();
-			
-			/* Call the client's listener that are waiting for some events. */
-			if (stateChanged != null) {
-				stateChanged.stateChanged(Capture.StateChangedListener.NEW_SKELETON_STORED);
-			}
+
 		}
 
 		/* If the recording is not allowed. */
 		if (!startRecordingUsers) {
-			coor.stopRecording();
 			seg.stopRecording();
 			imgDepth.stopRecording();
 		} else {
-			coor.startRecording();
 			seg.startRecording();
 			imgDepth.startRecording();
 		}
@@ -196,10 +199,18 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 			@Override
 			public void run() {
 				imgDepth.setImageData(frameDepth);
+				view.repaint();
 			}
 		}).start();
-		
-		timestamp.add(frameDepth.getTimestamp());
+
+		if (startRecordingUsers) {
+			timestamp.add(frameDepth.getTimestamp());
+
+			/* Call the client's listener that are waiting for some events. */
+			if (stateChanged != null) {
+				stateChanged.stateChanged(Capture.StateChangedListener.NEW_DATA_ARRIVED);
+			}
+		}
 	}
 
 	/**
@@ -365,15 +376,17 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 		for (UserData user : frame.getUsers()) {
 			startRecording(user);
 		}
+		startRecordingUsers = true;
 	}
 
 	/**
 	 * Stop recording the user movements right away
 	 */
-	public void stopRecordingUsers() {
+	public void stopRecordingUsers() {		
 		for (UserData user : frame.getUsers()) {
 			stopRecording(user);
 		}
+		startRecordingUsers = false;
 	}
 
 	/**
@@ -419,26 +432,26 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 		}
 		this.stoppingPose = pose;
 	}
-	
-	public CaptureData getRecordedData(){
+
+	public CaptureData getRecordedData() {
 		CaptureData data = new CaptureData();
-		
+
 		data.setTimestamp(timestamp);
-		
+
 		data.setSegmentation(seg.getRecordedData());
-		
+
 		data.setImageDepth(imgDepth.getRecordedData());
 		data.setImageColor(imgColor.getRecordedData());
-		
+
 		Map<Short, Map<Long, Float[][]>> depth = coor.getRecordedDepthData();
 		Short idShort = null;
 		int maxValue = -1;
-		for (Short id: depth.keySet()){
-			if (depth.get(id).size() > maxValue){
+		for (Short id : depth.keySet()) {
+			if (depth.get(id).size() > maxValue) {
 				idShort = id;
 			}
 		}
-		
+
 		data.setCoordinateDepth(coor.getRecordedDepthData().get(idShort));
 		data.setCoordinateReal(coor.getRecordedRealData().get(idShort));
 		return data;
@@ -451,7 +464,7 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 	 * @return The amount of frames stored to the user who has more frames
 	 */
 	public int getFramesCount() {
-		return 0;
+		return timestamp.size();
 	}
 
 	/**
@@ -622,7 +635,7 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 		public static final int RECORDING_STARTED = 0;
 		public static final int RECORDING_STOPPED = 1;
 		public static final int TIMER_CHANGED = 2;
-		public static final int NEW_SKELETON_STORED = 3;
+		public static final int NEW_DATA_ARRIVED = 3;
 
 		/**
 		 * The method that will be called every time that a new event happens.
