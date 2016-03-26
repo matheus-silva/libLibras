@@ -1,10 +1,10 @@
 package br.edu.ifsp.coordinates;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.openni.Device;
 import org.openni.ImageRegistrationMode;
@@ -12,13 +12,9 @@ import org.openni.SensorType;
 import org.openni.VideoFrameRef;
 import org.openni.VideoStream;
 
-import com.primesense.nite.HandTracker.NewFrameListener;
 import com.primesense.nite.JointType;
 import com.primesense.nite.NiTE;
-import com.primesense.nite.Point2D;
 import com.primesense.nite.PoseType;
-import com.primesense.nite.Skeleton;
-import com.primesense.nite.SkeletonJoint;
 import com.primesense.nite.SkeletonState;
 import com.primesense.nite.UserData;
 import com.primesense.nite.UserTracker;
@@ -44,13 +40,13 @@ public class Capture implements InterfaceCoordinate, UserTracker.NewFrameListene
 	private VideoStream videoColor;
 	private VideoFrameRef frameColor, frameDepth;
 	private Map<Short, List<Float[][]>> coordinates = null;
-	private boolean realWorld = true;
 	private PoseType startingPose = null, stoppingPose = null;
 	private boolean startRecordingUsers = false, startTimer = false;
 	private ShowObject view = null;
 	private Coordinate coor = null;
 	private Segmentation seg = null;
 	private ImageCapture imgColor = null, imgDepth = null;
+	private Set<Long> timestamp = new HashSet<>();
 	private Integer seconds, secondsRemaining = 0;
 	private int delay;
 
@@ -106,7 +102,15 @@ public class Capture implements InterfaceCoordinate, UserTracker.NewFrameListene
 			imgColor.startRecording();
 		}
 
-		imgColor.setImageData(frameColor);
+		new Thread(new Runnable() {
+			
+			@Override
+			public void run() {
+				imgColor.setImageData(frameColor);
+			}
+		}).start();
+		
+		timestamp.add(frameColor.getTimestamp());
 	}
 
 	/**
@@ -184,6 +188,8 @@ public class Capture implements InterfaceCoordinate, UserTracker.NewFrameListene
 				imgDepth.setImageData(frameDepth);
 			}
 		}).start();
+		
+		timestamp.add(frameDepth.getTimestamp());
 	}
 
 	/**
