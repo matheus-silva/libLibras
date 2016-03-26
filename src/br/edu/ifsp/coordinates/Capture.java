@@ -23,7 +23,8 @@ import com.primesense.nite.UserTrackerFrameRef;
 import br.edu.ifsp.capture.Coordinate;
 import br.edu.ifsp.capture.ImageCapture;
 import br.edu.ifsp.capture.Segmentation;
-import br.edu.ifsp.capture.ShowObject;;
+import br.edu.ifsp.capture.ShowObject;
+import br.edu.ifsp.util.CaptureData;;
 
 /**
  * This is the class responsible for recording the movements of the users. It
@@ -33,13 +34,12 @@ import br.edu.ifsp.capture.ShowObject;;
  * @author Matheus da Silva Ferreira
  *
  */
-public class Capture implements InterfaceCoordinate, UserTracker.NewFrameListener, VideoStream.NewFrameListener {
+public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFrameListener {
 
 	private UserTracker userTracker = null;
 	private UserTrackerFrameRef frame;
 	private VideoStream videoColor;
 	private VideoFrameRef frameColor, frameDepth;
-	private Map<Short, List<Float[][]>> coordinates = null;
 	private PoseType startingPose = null, stoppingPose = null;
 	private boolean startRecordingUsers = false, startTimer = false;
 	private ShowObject view = null;
@@ -351,7 +351,6 @@ public class Capture implements InterfaceCoordinate, UserTracker.NewFrameListene
 	/**
 	 * Start recording the user movements right away
 	 */
-	@Override
 	public void startRecordingUsers() {
 		for (UserData user : frame.getUsers()) {
 			startRecording(user);
@@ -361,7 +360,6 @@ public class Capture implements InterfaceCoordinate, UserTracker.NewFrameListene
 	/**
 	 * Stop recording the user movements right away
 	 */
-	@Override
 	public void stopRecordingUsers() {
 		for (UserData user : frame.getUsers()) {
 			stopRecording(user);
@@ -411,24 +409,29 @@ public class Capture implements InterfaceCoordinate, UserTracker.NewFrameListene
 		}
 		this.stoppingPose = pose;
 	}
-
-	@Override
-	public Map<Short, List<Float[][]>> getMovimentsList() {
-		return coordinates;
-	}
-
-	@Override
-	public Map<Short, Float[][][]> getMovimentsArray() {
-		Map<Short, Float[][][]> newCoordinates = new HashMap<>();
-		List<Float[][]> list;
-		Float[][][] array;
-
-		for (Short userID : coordinates.keySet()) {
-			list = coordinates.get(userID);
-			array = list.toArray(new Float[list.size()][JointType.values().length][3]);
-			newCoordinates.put(userID, array);
+	
+	public CaptureData getRecordedData(){
+		CaptureData data = new CaptureData();
+		
+		data.setTimestamp(timestamp);
+		
+		data.setSegmentation(seg.getRecordedData());
+		
+		data.setImageDepth(imgDepth.getRecordedData());
+		data.setImageColor(imgColor.getRecordedData());
+		
+		Map<Short, Map<Long, Float[][]>> depth = coor.getRecordedDepthData();
+		Short idShort = null;
+		int maxValue = -1;
+		for (Short id: depth.keySet()){
+			if (depth.get(id).size() > maxValue){
+				idShort = id;
+			}
 		}
-		return newCoordinates;
+		
+		data.setCoordinateDepth(coor.getRecordedDepthData().get(idShort));
+		data.setCoordinateReal(coor.getRecordedRealData().get(idShort));
+		return data;
 	}
 
 	/**
@@ -438,13 +441,7 @@ public class Capture implements InterfaceCoordinate, UserTracker.NewFrameListene
 	 * @return The amount of frames stored to the user who has more frames
 	 */
 	public int getFramesCount() {
-		int max = 0;
-		for (List<Float[][]> userFrames : coordinates.values()) {
-			if (max < userFrames.size()) {
-				max = userFrames.size();
-			}
-		}
-		return max;
+		return 0;
 	}
 
 	/**

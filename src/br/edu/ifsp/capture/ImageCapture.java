@@ -91,6 +91,10 @@ public class ImageCapture implements VideoStream.NewFrameListener {
 	public void stopRecording() {
 		this.startRecording = false;
 	}
+	
+	public Map<Long, ByteBuffer> getRecordedData(){
+		return imageCapture;
+	}
 
 	public static void main(String args[]){
 		EventQueue.invokeLater(new Runnable() {

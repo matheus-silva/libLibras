@@ -74,6 +74,10 @@ public class Segmentation implements UserTracker.NewFrameListener {
 	public void stopRecording() {
 		this.startRecording = false;
 	}
+	
+	public Map<Long, ByteBuffer> getRecordedData(){
+		return segmentation;
+	}
 
 	public static void main(String args[]) {
 		EventQueue.invokeLater(new Runnable() {

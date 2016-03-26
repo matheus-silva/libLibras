@@ -225,11 +225,11 @@ public class Coordinate implements UserTracker.NewFrameListener {
 		startRecordingUsers = false;
 	}
 
-	public Map<Short, Map<Long, Float[][]>> getRecordedDataDepth() {
+	public Map<Short, Map<Long, Float[][]>> getRecordedDepthData() {
 		return coordinatesDepth;
 	}
 
-	public Map<Short, Map<Long, Float[][]>> getRecordedDataReal() {
+	public Map<Short, Map<Long, Float[][]>> getRecordedRealData() {
 		return coordinatesReal;
 	}
 
