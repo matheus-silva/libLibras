@@ -1,8 +1,12 @@
 package br.edu.ifsp.util;
 
 import java.awt.Component;
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -30,6 +34,30 @@ public class Load {
 			return f;
 		}
 		return null;
+	}
+	
+	private static ByteBuffer loadBuffer(String caminho) {
+		BufferedInputStream in;
+		List<Byte> bytes = new ArrayList<>();
+
+		try {
+			in = new BufferedInputStream(new FileInputStream(new File(caminho)));
+			int valor;
+
+			while ((valor = in.read()) != -1) {
+				bytes.add((byte) valor);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		byte b[] = new byte[bytes.size()];
+
+		for (int i = 0; i < b.length; i++) {
+			b[i] = bytes.get(i);
+		}
+
+		return ByteBuffer.wrap(b).order(ByteOrder.LITTLE_ENDIAN);
 	}
 
 	public float[][][] loadFile(File arquivo) {

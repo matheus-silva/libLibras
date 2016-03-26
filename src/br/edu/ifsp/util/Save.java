@@ -2,11 +2,19 @@ package br.edu.ifsp.util;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
@@ -29,6 +37,22 @@ public class Save extends Thread {
 		return null;
 	}
 
+	private static void saveBuffer(ByteBuffer buff, String caminho) {
+		BufferedOutputStream out;
+		byte b[] = new byte[buff.limit()];
+		
+		buff.get(b);
+
+		try {
+			out = new BufferedOutputStream(new FileOutputStream(new File(caminho)));
+			out.write(b);
+			out.flush();
+			out.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
 	public void saveFile(Component father, File file, Float[][][] moviments) {
 		float[][][] data = new float[moviments.length][][];
 		for (int i = 0; i < moviments.length; i++) {
