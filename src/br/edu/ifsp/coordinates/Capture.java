@@ -449,7 +449,11 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 	 * stored.
 	 */
 	public void clearMoviments() {
-
+		timestamp = new HashSet<>();
+		coor.clearRecordedData();
+		seg.clearRecordedData();
+		imgColor.clearRecordedData();
+		imgDepth.clearRecordedData();
 	}
 
 	/**

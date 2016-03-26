@@ -92,6 +92,10 @@ public class ImageCapture implements VideoStream.NewFrameListener {
 		this.startRecording = false;
 	}
 	
+	public void clearRecordedData(){
+		imageCapture = createMapStructure();
+	}
+	
 	public Map<Long, ByteBuffer> getRecordedData(){
 		return imageCapture;
 	}

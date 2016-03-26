@@ -75,6 +75,10 @@ public class Segmentation implements UserTracker.NewFrameListener {
 		this.startRecording = false;
 	}
 	
+	public void clearRecordedData(){
+		segmentation = createMapStructure();
+	}
+	
 	public Map<Long, ByteBuffer> getRecordedData(){
 		return segmentation;
 	}
