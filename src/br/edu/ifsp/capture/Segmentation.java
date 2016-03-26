@@ -7,6 +7,7 @@ import java.nio.ByteOrder;
 import javax.swing.JFrame;
 
 import org.openni.OpenNI;
+import org.openni.VideoFrameRef;
 
 import com.primesense.nite.NiTE;
 import com.primesense.nite.UserData;
@@ -44,6 +45,9 @@ public class Segmentation implements UserTracker.NewFrameListener {
 		
 		if (frame != null && frame.getUserMap() != null) {
 			setUserMap(frame.getUserMap());
+			//VideoFrameRef d = frame.getDepthFrame();
+			//view.setBackground(d.getData().order(ByteOrder.LITTLE_ENDIAN), d.getWidth(), d.getHeight());
+			//view.repaint();
 		}
 		
 		this.frame.release();
@@ -51,8 +55,9 @@ public class Segmentation implements UserTracker.NewFrameListener {
 
 	public synchronized void setUserMap(UserMap user) {
 		ByteBuffer buff = user.getPixels().order(ByteOrder.LITTLE_ENDIAN);
-
+		//ByteBuffer usersFrame = frame.getUserMap().getPixels().order(ByteOrder.LITTLE_ENDIAN);
 		if (view != null) {
+			//view.setUserMap(usersFrame);
 			view.setUserMap(buff);
 		}
 	}

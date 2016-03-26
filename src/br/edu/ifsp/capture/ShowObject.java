@@ -23,6 +23,7 @@ public class ShowObject extends Component {
 	private ByteBuffer buffBackground, buffUser;
 	private int[] pixels;
 	private List<Float[][]> coordinate = new ArrayList<>();
+	int[] mColors = new int[] { 0xFFFF0000, 0xFF00FF00, 0xFF0000FF, 0xFFFFFF00, 0xFFFF00FF, 0xFF00FFFF };
 
 	public void setCamera(int camera) {
 		this.camera = camera;
@@ -91,15 +92,21 @@ public class ShowObject extends Component {
 		if (buffUser == null) {
 			return background;
 		}
-
-		// byte pixels[] = new byte[buffUser.limit()];
-
-		/*
-		 * System.out.println("Limit: " + buffUser.limit()); while
-		 * (buffUser.remaining() > 0) { long id = buffUser.getShort(); int color
-		 * = 0; if (id != 0) System.out.println(id + " " + buffUser.position());
-		 * }
-		 */
+		
+		//int pos = 0;
+		//while (buffBackground.remaining() > 0) {
+			//short depth = buffBackground.getShort();
+			//short userId = buffUser.getShort();
+			//short pixel = (short) mHistogram[depth<0?0:depth];
+			//int color = 0xFFFFFFFF;
+			//if (userId > 0) {
+				//color = 0xFF00FF00; //mColors[userId % mColors.length];
+			//}
+			
+			//int p = background[pos];
+			//background[pos] = color & (0xFF000000 | (p << 16) | (p << 8) | p);
+			//pos++;
+		//}
 
 		return background;
 	}
@@ -123,10 +130,8 @@ public class ShowObject extends Component {
 	private int[] getDepthPixel() {
 		ShortBuffer data = buffBackground.asShortBuffer();
 
-		float mHistogram[] = getHistogram(data);
+		float mHistogram[] = getHistogram(buffBackground);
 		int pixels[] = new int[buffBackground.limit()];
-
-		int[] mColors = new int[] { 0xFFFF0000, 0xFF00FF00, 0xFF0000FF, 0xFFFFFF00, 0xFFFF00FF, 0xFF00FFFF };
 
 		buffBackground.rewind();
 
@@ -141,23 +146,27 @@ public class ShowObject extends Component {
 				// pixels[pos] = depth;
 			}
 		} else {
-			buffBackground.rewind();
-			buffUser.rewind();
-			
-            int pos = 0;
-            while(buffBackground.remaining() > 0) {
-                short depth = buffBackground.getShort();
-                short userId = buffUser.getShort();
-                short pixel = (short)mHistogram[depth];
-                int color = 0xFFFFFFFF;
-                if (userId > 0) {
-                	color = mColors[userId % mColors.length];
-                }
-                
-                pixels[pos] = color & (0xFF000000 | (pixel << 16) | (pixel << 8) | pixel);
-                pos++;
-            }
+			//ByteBufefer back = buffBackground.duplicate();
+			//ByteBuffer user = buffUser.duplicate();
 
+			buffBackground.rewind();
+			
+			int pos = 0;
+			System.out.println("Background: " + buffBackground.limit() + " | Segmentation: " + buffUser.limit());
+			while (buffBackground.remaining() > 0) {
+				short depth = buffBackground.getShort();
+				short userId = buffUser.getShort();
+				short pixel = (short) mHistogram[depth];
+				//short pixel = (short) mHistogram[depth<0?0:depth];
+				int color = 0xFFFFFFFF;
+				if (userId > 0) {
+					color = mColors[userId % mColors.length];
+				}
+
+				pixels[pos] = color & (0xFF000000 | (pixel << 16) | (pixel << 8) | pixel);
+				pos++;
+			}
+			System.out.println(buffBackground.remaining() + " " + buffUser.remaining());
 		}
 
 		return pixels;
@@ -178,8 +187,8 @@ public class ShowObject extends Component {
 		return pixels;
 	}
 
-	private float[] getHistogram(ShortBuffer data) {
-		float mHistogram[] = new float[width * height];
+	private float[] getHistogram(ByteBuffer data) {
+		float mHistogram[] = new float[width * height * 4];
 
 		// reset
 		for (int i = 0; i < mHistogram.length; ++i)
@@ -187,7 +196,7 @@ public class ShowObject extends Component {
 
 		int points = 0;
 		while (data.remaining() > 0) {
-			int pixel = data.get() & 0xFFFF;
+			int pixel = data.getShort() & 0xFFFF;
 			if (pixel != 0) {
 				mHistogram[pixel]++;
 				points++;
