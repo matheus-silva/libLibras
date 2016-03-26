@@ -12,6 +12,7 @@ import javax.swing.JFrame;
 import com.primesense.nite.JointType;
 import com.primesense.nite.NiTE;
 import com.primesense.nite.Point2D;
+import com.primesense.nite.Point3D;
 import com.primesense.nite.Skeleton;
 import com.primesense.nite.SkeletonJoint;
 import com.primesense.nite.SkeletonState;
@@ -131,7 +132,7 @@ public class Coordinate implements UserTracker.NewFrameListener {
 				continue;
 			}
 
-			getUserJoints(user, this.frame.getTimestamp(), frame.getDepthFrame().getWidth(), frame.getDepthFrame().getHeight());
+			getUserJoints(userTracker, user, this.frame.getTimestamp(), frame.getDepthFrame().getWidth(), frame.getDepthFrame().getHeight());
 
 			if (view != null) {
 				view.repaint();
@@ -142,7 +143,7 @@ public class Coordinate implements UserTracker.NewFrameListener {
 		this.frame.release();
 	}
 
-	public synchronized void getUserJoints(UserData user, long timestamp, int width, int height) {
+	public synchronized void getUserJoints(UserTracker userTracker, UserData user, long timestamp, int width, int height) {
 		/* Get the joints of the current user */
 
 		/* Get the skeleton of the current user */
@@ -167,7 +168,8 @@ public class Coordinate implements UserTracker.NewFrameListener {
 			 * when a {@link ComponentViewer} object has been supplied. The
 			 * converted values will be stored in a temporary structure.
 			 */
-			Point2D<Float> pointDepth = userTracker.convertJointCoordinatesToDepth(joint.getPosition());
+			Point3D<Float> point3D = joint.getPosition();
+			Point2D<Float> pointDepth = userTracker.convertJointCoordinatesToDepth(point3D);
 			depth[i][X] = pointDepth.getX();
 			depth[i][Y] = pointDepth.getY();
 			depth[i][Z] = joint.getPosition().getZ();
@@ -183,17 +185,24 @@ public class Coordinate implements UserTracker.NewFrameListener {
 			realWorld[i][Y] = joint.getPosition().getY();
 			realWorld[i][Z] = joint.getPosition().getZ();
 		}
-
+		
+		/*
 		System.out.print("");
 		for (Float[] fs : depth) {
 			System.out.print(Arrays.toString(fs));
 		}
-		System.out.println();
+		System.out.println();*/
 
 		if (view != null) {
 			view.setUserCoordinate(depth, width, height);
 		}
+		
+		if(!startRecordingUsers){
+			return;
+		}
 
+		//System.out.println("Skeleton Received");
+		
 		Map<Long, Float[][]> userDepth = coordinatesDepth.get(user.getId());
 		if (userDepth == null) {
 			userDepth = createMapStructure();

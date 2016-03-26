@@ -8,6 +8,7 @@ import java.util.Set;
 
 import org.openni.Device;
 import org.openni.ImageRegistrationMode;
+import org.openni.OpenNI;
 import org.openni.SensorType;
 import org.openni.VideoFrameRef;
 import org.openni.VideoStream;
@@ -76,12 +77,21 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 
 		userTracker.addNewFrameListener(this);
 
-		Device d = Device.open();
+		Device d = null;
+		try {
+			d = Device.open(OpenNI.enumerateDevices().get(0).getUri());
+		} catch (Exception e) {
+			System.out.println("Error during the loading of the sensor.");
+			System.out.println("Make sure that there is a sensor connected and try again.");
+			System.exit(0);
+		}
+		
 		d.setImageRegistrationMode(ImageRegistrationMode.DEPTH_TO_COLOR);
 
 		VideoStream video = VideoStream.create(d, SensorType.COLOR);
 
 		video.addNewFrameListener(this);
+		video.start();
 
 		coor = new Coordinate(view);
 		seg = new Segmentation(view);
@@ -154,7 +164,7 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 			new Thread(new Runnable() {
 				@Override
 				public void run() {
-					coor.getUserJoints(user, frameDepth.getTimestamp(), frameDepth.getWidth(), frameDepth.getHeight());
+					coor.getUserJoints(userTracker, user, frameDepth.getTimestamp(), frameDepth.getWidth(), frameDepth.getHeight());
 				}
 			}).start();
 			

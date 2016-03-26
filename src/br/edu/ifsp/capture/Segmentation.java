@@ -64,6 +64,7 @@ public class Segmentation implements UserTracker.NewFrameListener {
 		
 		if(startRecording){
 			segmentation.put(timestamp, buff);
+			//System.out.println("Segmentation Received");
 		}
 	}
 
