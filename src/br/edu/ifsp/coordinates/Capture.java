@@ -174,7 +174,7 @@ public class Capture implements InterfaceCoordinate, UserTracker.NewFrameListene
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
-				seg.setUserMap(frame.getUserMap());
+				seg.setUserMap(frame.getUserMap(), frame.getTimestamp());
 			}
 		}).start();
 

@@ -3,14 +3,14 @@ package br.edu.ifsp.capture;
 import java.awt.EventQueue;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.swing.JFrame;
 
-import org.openni.OpenNI;
-import org.openni.VideoFrameRef;
-
 import com.primesense.nite.NiTE;
-import com.primesense.nite.UserData;
 import com.primesense.nite.UserMap;
 import com.primesense.nite.UserTracker;
 import com.primesense.nite.UserTrackerFrameRef;
@@ -21,6 +21,7 @@ public class Segmentation implements UserTracker.NewFrameListener {
 	private UserTrackerFrameRef frame;
 	private boolean startRecording = false;
 	private ShowObject view;
+	private Map<Long, ByteBuffer> segmentation;
 
 	public Segmentation() {
 		this(null);
@@ -29,9 +30,12 @@ public class Segmentation implements UserTracker.NewFrameListener {
 	public Segmentation(ShowObject view) {
 		this.view = view;
 	}
-
+	
+	public static Map<Long, ByteBuffer> createMapStructure(){
+		return new HashMap<>();
+	}
+	
 	public void captureData() {
-		OpenNI.initialize();
 		NiTE.initialize();
 		user = UserTracker.create();
 		user.addNewFrameListener(this);
@@ -44,21 +48,24 @@ public class Segmentation implements UserTracker.NewFrameListener {
 		
 		
 		if (frame != null && frame.getUserMap() != null) {
-			setUserMap(frame.getUserMap());
-			//VideoFrameRef d = frame.getDepthFrame();
-			//view.setBackground(d.getData().order(ByteOrder.LITTLE_ENDIAN), d.getWidth(), d.getHeight());
-			//view.repaint();
+			setUserMap(frame.getUserMap(), frame.getTimestamp());
 		}
 		
 		this.frame.release();
 	}
 
-	public synchronized void setUserMap(UserMap user) {
+	public synchronized void setUserMap(UserMap user, long timestamp) {
 		ByteBuffer buff = user.getPixels().order(ByteOrder.LITTLE_ENDIAN);
-		//ByteBuffer usersFrame = frame.getUserMap().getPixels().order(ByteOrder.LITTLE_ENDIAN);
+		
 		if (view != null) {
-			//view.setUserMap(usersFrame);
 			view.setUserMap(buff);
+		}
+		
+		if(startRecording){
+			if(segmentation == null){
+				segmentation = Segmentation.createMapStructure();
+			}
+			segmentation.put(timestamp, buff);
 		}
 	}
 
