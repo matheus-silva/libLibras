@@ -3,7 +3,8 @@ package br.edu.ifsp.capture;
 import java.awt.EventQueue;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.swing.JFrame;
 
@@ -23,6 +24,7 @@ public class ImageCapture implements VideoStream.NewFrameListener {
 	private int camera;
 	private ShowObject view;
 	private ByteBuffer buff;
+	private Map<Long, ByteBuffer> imageCapture;
 
 	public ImageCapture(int camera) {
 		this(null, camera);
@@ -31,6 +33,11 @@ public class ImageCapture implements VideoStream.NewFrameListener {
 	public ImageCapture(ShowObject view, int camera) {
 		this.view = view;
 		this.camera = camera;
+		this.imageCapture = createMapStructure();
+	}
+	
+	public static Map<Long, ByteBuffer> createMapStructure(){
+		return new HashMap<>();
 	}
 
 	public void captureData() {
@@ -70,6 +77,10 @@ public class ImageCapture implements VideoStream.NewFrameListener {
 			view.setCamera(camera);
 			view.setBackground(this.buff, frame.getWidth(), frame.getHeight());
 			view.repaint();
+		}
+		
+		if(startRecording){
+			imageCapture.put(frame.getTimestamp(), buff);
 		}
 	}
 

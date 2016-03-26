@@ -39,7 +39,8 @@ public class Coordinate implements UserTracker.NewFrameListener {
 
 	private UserTracker userTracker = null;
 	private UserTrackerFrameRef frame;
-	private Map<Short, List<Float[][]>> coordinates = null;
+	private Map<Short, Map<Long, Float[][]>> coordinatesDepth = null;
+	private Map<Short, Map<Long, Float[][]>> coordinatesReal = null;
 	private boolean realWorld = true;
 	private boolean startRecordingUsers = false;
 	private ShowObject view = null;
@@ -60,8 +61,30 @@ public class Coordinate implements UserTracker.NewFrameListener {
 	 *            The object used to show the images created by the sensor.
 	 */
 	public Coordinate(ShowObject view) {
-		this.coordinates = this.createMapStructure();
+		this.coordinatesDepth = createUserStructure();
+		this.coordinatesReal = createUserStructure();
 		this.view = view;
+	}
+
+	/**
+	 * Method used to create the default structure to store the movements of a
+	 * user.
+	 * 
+	 * @return The Map which store the movements of only one user.
+	 */
+	public static Map<Long, Float[][]> createMapStructure() {
+		// return new ConcurrentHashMap<Short, List<Float[][]>>();
+		return new HashMap<>();
+	}
+
+	/**
+	 * Method used to create the default structure to store the movements of all
+	 * user.
+	 * 
+	 * @return The Map which store the movements of all user.
+	 */
+	public static Map<Short, Map<Long, Float[][]>> createUserStructure() {
+		return new HashMap<>();
 	}
 
 	public void startCapture() {
@@ -108,18 +131,18 @@ public class Coordinate implements UserTracker.NewFrameListener {
 				continue;
 			}
 
-			getUserJoints(user, this.frame.getDepthFrame().getWidth(), this.frame.getDepthFrame().getHeight());
-			
-			if(view != null){
+			getUserJoints(user, this.frame.getTimestamp(), frame.getDepthFrame().getWidth(), frame.getDepthFrame().getHeight());
+
+			if (view != null) {
 				view.repaint();
 			}
 
 		}
-		
+
 		this.frame.release();
 	}
 
-	public synchronized void getUserJoints(UserData user, int width, int height) {
+	public synchronized void getUserJoints(UserData user, long timestamp, int width, int height) {
 		/* Get the joints of the current user */
 
 		/* Get the skeleton of the current user */
@@ -166,26 +189,26 @@ public class Coordinate implements UserTracker.NewFrameListener {
 			System.out.print(Arrays.toString(fs));
 		}
 		System.out.println();
-		
-		if(view != null){
+
+		if (view != null) {
 			view.setUserCoordinate(depth, width, height);
 		}
 
-		/* Get the movements recorded of the current user. */
-		List<Float[][]> userMoves = coordinates.get(user.getId());
-
-		/*
-		 * If there is no list which stores the movements of the current user,
-		 * so a new one will be created.
-		 */
-		if (userMoves == null) {
-			userMoves = this.createListStructure();
-			coordinates.put(user.getId(), userMoves);
+		Map<Long, Float[][]> userDepth = coordinatesDepth.get(user.getId());
+		if (userDepth == null) {
+			userDepth = createMapStructure();
+			coordinatesDepth.put(user.getId(), userDepth);
 		}
-
-		/* Insert the new joints detected in the current frame. */
-		userMoves.add(depth);
-
+		
+		userDepth.put(timestamp, depth);
+		
+		Map<Long, Float[][]> userReal = coordinatesReal.get(user.getId());
+		if(userReal == null){
+			userReal = createMapStructure();
+			coordinatesReal.put(user.getId(), userReal);
+		}
+		
+		userReal.put(timestamp, realWorld);
 	}
 
 	/**
@@ -202,21 +225,12 @@ public class Coordinate implements UserTracker.NewFrameListener {
 		startRecordingUsers = false;
 	}
 
-	public Map<Short, List<Float[][]>> getMovimentsList() {
-		return coordinates;
+	public Map<Short, Map<Long, Float[][]>> getRecordedDataDepth() {
+		return coordinatesDepth;
 	}
 
-	public Map<Short, Float[][][]> getMovimentsArray() {
-		Map<Short, Float[][][]> newCoordinates = new HashMap<>();
-		List<Float[][]> list;
-		Float[][][] array;
-
-		for (Short userID : coordinates.keySet()) {
-			list = coordinates.get(userID);
-			array = list.toArray(new Float[list.size()][JointType.values().length][3]);
-			newCoordinates.put(userID, array);
-		}
-		return newCoordinates;
+	public Map<Short, Map<Long, Float[][]>> getRecordedDataReal() {
+		return coordinatesReal;
 	}
 
 	/**
@@ -226,21 +240,16 @@ public class Coordinate implements UserTracker.NewFrameListener {
 	 * @return The amount of frames stored to the user who has more frames
 	 */
 	public int getFramesCount() {
-		int max = 0;
-		for (List<Float[][]> userFrames : coordinates.values()) {
-			if (max < userFrames.size()) {
-				max = userFrames.size();
-			}
-		}
-		return max;
+		return 0;
 	}
 
 	/**
 	 * Delete all the movements stored. This method clean the movements that was
 	 * stored.
 	 */
-	public void clearMoviments() {
-		coordinates = createMapStructure();
+	public void clearRecordedData() {
+		coordinatesDepth = createUserStructure();
+		coordinatesReal = createUserStructure();
 	}
 
 	/**
@@ -258,28 +267,6 @@ public class Coordinate implements UserTracker.NewFrameListener {
 	 * case REAL_WORLD: realWorld = true; break; case DEPTH: realWorld = false;
 	 * break; } }
 	 */
-
-	/**
-	 * Method used to create the default structure to store the movements of a
-	 * user.
-	 * 
-	 * @return The List which store the movements of only one user.
-	 */
-	private List<Float[][]> createListStructure() {
-		// return new CopyOnWriteArrayList<>();
-		return new ArrayList<Float[][]>();
-	}
-
-	/**
-	 * Method used to create the default structure to store the movements of all
-	 * user.
-	 * 
-	 * @return The Map which store the movements of all user.
-	 */
-	private Map<Short, List<Float[][]>> createMapStructure() {
-		// return new ConcurrentHashMap<Short, List<Float[][]>>();
-		return new HashMap<Short, List<Float[][]>>();
-	}
 
 	/**
 	 * Check if the user informed was already tracked.
@@ -351,12 +338,12 @@ public class Coordinate implements UserTracker.NewFrameListener {
 				ShowObject view = new ShowObject();
 				Coordinate coordinate = new Coordinate(view);
 				coordinate.startCapture();
-				
+
 				JFrame frame = new JFrame("Coordinate");
 				frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 				frame.setSize(640, 480);
 				frame.add(view);
-				frame.setVisible(true);				
+				frame.setVisible(true);
 			}
 		});
 	}

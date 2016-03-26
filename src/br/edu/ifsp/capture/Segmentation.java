@@ -28,6 +28,7 @@ public class Segmentation implements UserTracker.NewFrameListener {
 	}
 
 	public Segmentation(ShowObject view) {
+		this.segmentation = createMapStructure();
 		this.view = view;
 	}
 	
@@ -62,9 +63,6 @@ public class Segmentation implements UserTracker.NewFrameListener {
 		}
 		
 		if(startRecording){
-			if(segmentation == null){
-				segmentation = Segmentation.createMapStructure();
-			}
 			segmentation.put(timestamp, buff);
 		}
 	}

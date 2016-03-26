@@ -150,7 +150,7 @@ public class Capture implements InterfaceCoordinate, UserTracker.NewFrameListene
 			new Thread(new Runnable() {
 				@Override
 				public void run() {
-					coor.getUserJoints(user, frameDepth.getWidth(), frameDepth.getHeight());
+					coor.getUserJoints(user, frameDepth.getTimestamp(), frameDepth.getWidth(), frameDepth.getHeight());
 				}
 			}).start();
 			
