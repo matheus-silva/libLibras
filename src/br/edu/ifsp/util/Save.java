@@ -83,6 +83,28 @@ public class Save extends Thread {
 
 	}
 
+	private void saveByte(File file, byte[] b) {
+		BufferedOutputStream out;
+		try {
+			out = new BufferedOutputStream(new FileOutputStream(file));
+			out.write(b);
+			out.flush();
+			out.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private void saveBytes(File file, Map<Long, byte[]> map) {
+		String caminho = file.getAbsolutePath();
+
+		for (Long timestamp : map.keySet()) {
+			byte[] b = map.get(timestamp);
+			saveByte(new File(caminho + File.separator + timestamp + ".bin"), b);
+		}
+
+	}
+
 	public void saveFile(Component father, File file, CaptureData data) {
 		this.father = father;
 		this.file = file;
@@ -171,8 +193,8 @@ public class Save extends Thread {
 			saveCoords(new File(coordinates.toFile().getAbsolutePath() + File.separator + "Depth.txt"), data.getCoordinateDepth());
 			saveCoords(new File(coordinates.toFile().getAbsolutePath() + File.separator + "Real.txt"), data.getCoordinateReal());
 
-			saveBuffers(depth.toFile(), data.getImageDepth());
-			saveBuffers(color.toFile(), data.getImageColor());
+			saveBytes(depth.toFile(), data.getImageDepth());
+			saveBytes(color.toFile(), data.getImageColor());
 			saveBuffers(segmentation.toFile(), data.getSegmentation());
 
 			// saveCoords(null, 0L, null);

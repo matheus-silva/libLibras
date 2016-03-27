@@ -23,8 +23,7 @@ public class ImageCapture implements VideoStream.NewFrameListener {
 	private boolean startRecording = false;
 	private int camera;
 	private ShowObject view;
-	private ByteBuffer buff;
-	private Map<Long, ByteBuffer> imageCapture;
+	private Map<Long, byte[]> imageCapture;
 
 	public ImageCapture(int camera) {
 		this(null, camera);
@@ -38,7 +37,7 @@ public class ImageCapture implements VideoStream.NewFrameListener {
 		view.setCamera(camera);
 	}
 
-	public static Map<Long, ByteBuffer> createMapStructure() {
+	public static Map<Long, byte[]> createMapStructure() {
 		return new HashMap<>();
 	}
 
@@ -73,22 +72,31 @@ public class ImageCapture implements VideoStream.NewFrameListener {
 
 	public void setImageData(VideoFrameRef frame) {
 		this.frame = frame;
-		this.buff = frame.getData().order(ByteOrder.LITTLE_ENDIAN);
-
+		ByteBuffer buff = frame.getData().order(ByteOrder.LITTLE_ENDIAN);
+		buff.rewind();
+		byte b[] = new byte[buff.limit()];
+		buff.get(b);
+		
 		if (view != null) {
 			// view.setCamera(camera);
 			if (view.getCamera() == camera) {
-				view.setBackground(this.buff, frame.getWidth(), frame.getHeight());
-				view.repaint();
+
+				new Thread(new Runnable() {
+
+					@Override
+					public void run() {
+						buff.rewind();
+						view.setBackground(buff, frame.getWidth(), frame.getHeight());
+						view.repaint();
+					}
+				}).start();
 			}
 		}
 
 		if (startRecording) {
-			buff.rewind();
-			byte b[] = new byte[buff.limit()];
-			buff.get(b);
-			imageCapture.put(frame.getTimestamp(), ByteBuffer.wrap(b));
-			System.out.println("Image " + (camera == COLOR ? "Color" : "Depth") + " Received");
+			imageCapture.put(frame.getTimestamp(), b);
+			System.out.println("Image " + (camera == COLOR ? "Color" :
+			 "Depth") + " Received");
 		}
 	}
 
@@ -104,7 +112,7 @@ public class ImageCapture implements VideoStream.NewFrameListener {
 		imageCapture = createMapStructure();
 	}
 
-	public Map<Long, ByteBuffer> getRecordedData() {
+	public Map<Long, byte[]> getRecordedData() {
 		return imageCapture;
 	}
 
@@ -114,7 +122,7 @@ public class ImageCapture implements VideoStream.NewFrameListener {
 			@Override
 			public void run() {
 				ShowObject view = new ShowObject();
-				ImageCapture img = new ImageCapture(view, DEPTH);
+				ImageCapture img = new ImageCapture(view, COLOR);
 				img.captureData();
 
 				JFrame frame = new JFrame("Image Capture");

@@ -113,13 +113,13 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 			imgColor.startRecording();
 		}
 
-		new Thread(new Runnable() {
+		//new Thread(new Runnable() {
 
-			@Override
-			public void run() {
+			//@Override
+			//public void run() {
 				imgColor.setImageData(frameColor);
-			}
-		}).start();
+			//}
+		//}).start();
 
 		if (startRecordingUsers) {
 			timestamp.add(frameColor.getTimestamp());
@@ -169,13 +169,13 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 				coor.startRecording();
 			}
 
-			new Thread(new Runnable() {
-				@Override
-				public void run() {
+			//new Thread(new Runnable() {
+				//@Override
+				//public void run() {
 					coor.getUserJoints(userTracker, user, frameDepth.getTimestamp(), frameDepth.getWidth(),
 							frameDepth.getHeight());
-				}
-			}).start();
+				//}
+			//}).start();
 
 		}
 
@@ -188,19 +188,19 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 			imgDepth.startRecording();
 		}
 
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
+		//new Thread(new Runnable() {
+			//@Override
+			//public void run() {
 				seg.setUserMap(frame.getUserMap(), frame.getTimestamp());
-			}
-		}).start();
+			//}
+		//}).start();
 
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
+		//new Thread(new Runnable() {
+			//@Override
+			//public void run() {
 				imgDepth.setImageData(frameDepth);				
-			}
-		}).start();
+			//}
+		//}).start();
 
 		if (startRecordingUsers) {
 			timestamp.add(frameDepth.getTimestamp());
@@ -480,6 +480,8 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 		seg.clearRecordedData();
 		imgColor.clearRecordedData();
 		imgDepth.clearRecordedData();
+		
+		System.gc();
 	}
 
 	/**

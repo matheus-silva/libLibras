@@ -7,12 +7,9 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.nio.ShortBuffer;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
 public class ShowObject extends Component {
 
@@ -21,7 +18,8 @@ public class ShowObject extends Component {
 			{ 1, 3 }, { 3, 5 }, { 5, 7 }, { 1, 2 }, { 2, 4 }, { 4, 6 } };
 	private int width = 1, height = 1;
 	private int camera = COLOR;
-	private ByteBuffer buffBackground, buffUser;
+	private ByteBuffer buffBackground;
+	private ByteBuffer buffUser;
 	private int[] pixels;
 	private List<Float[][]> coordinate = new ArrayList<>();
 	private int[] mColors = new int[] { 0xFFFF0000, 0xFF00FF00, 0xFF0000FF, 0xFFFFFF00, 0xFFFF00FF, 0xFF00FFFF };
@@ -191,7 +189,7 @@ public class ShowObject extends Component {
 			// System.out.println(buffBackground.remaining() + " " +
 			// buffUser.remaining());
 		}
-
+		
 		return pixels;
 	}
 

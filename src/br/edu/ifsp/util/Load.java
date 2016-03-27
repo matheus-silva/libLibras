@@ -43,7 +43,7 @@ public class Load {
 
 	public static void main(String args[]) {
 		ByteBuffer buff = new Load().loadBuffer(new File("/home/matheus/Música/Olá/Depth/3608575622.bin"));
-
+		
 		ShowObject view = new ShowObject();
 		view.setCamera(ShowObject.DEPTH);
 		view.setBackground(buff, 640, 480);
@@ -103,6 +103,47 @@ public class Load {
 				ByteBuffer buff = loadBuffer(f);
 				System.out.println(timestamp + " " + (buff != null));
 				map.put(timestamp, buff);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+
+		return map;
+	}
+
+	public byte[] loadByte(File file) {
+		BufferedInputStream in;
+		List<Byte> bytes = new ArrayList<>();
+
+		try {
+			in = new BufferedInputStream(new FileInputStream(file));
+			int valor;
+
+			while ((valor = in.read()) != -1) {
+				bytes.add((byte) valor);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		byte b[] = new byte[bytes.size()];
+
+		for (int i = 0; i < b.length; i++) {
+			b[i] = bytes.get(i);
+		}
+
+		return b;
+	}
+	
+	private Map<Long, byte[]> loadBytes(File file, Map<Long, byte[]> map) {
+		File[] files = file.listFiles();
+
+		for (File f : files) {
+			try {
+				long timestamp = Long.parseLong(f.getName().replaceAll("[^0-9]", ""));
+				byte[] b = loadByte(f);
+				System.out.println(timestamp + " " + (b != null));
+				map.put(timestamp, b);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -172,8 +213,8 @@ public class Load {
 					File segmentation = new File(file.getAbsoluteFile() + File.separator + "Segmentation");
 					File coor = new File(file.getAbsoluteFile() + File.separator + "Coordinates");
 
-					data.setImageDepth(loadBuffers(depth, ImageCapture.createMapStructure()));
-					data.setImageColor(loadBuffers(color, ImageCapture.createMapStructure()));
+					data.setImageDepth(loadBytes(depth, ImageCapture.createMapStructure()));
+					data.setImageColor(loadBytes(color, ImageCapture.createMapStructure()));
 					data.setSegmentation(loadBuffers(segmentation, Segmentation.createMapStructure()));
 
 					data.setCoordinateDepth(loadCoords(new File(coor.getAbsolutePath() + File.separator + "Depth.txt"),
