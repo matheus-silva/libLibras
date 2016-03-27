@@ -132,7 +132,7 @@ public class ShowObject extends Component {
 		int pixels[] = new int[] { 0 };
 
 		if (buffBackground == null) {
-			return pixels;
+			return null;
 		}
 
 		if (camera == COLOR) {

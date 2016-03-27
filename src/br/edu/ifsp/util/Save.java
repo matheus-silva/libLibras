@@ -78,7 +78,7 @@ public class Save extends Thread {
 
 		for (Long timestamp : map.keySet()) {
 			ByteBuffer buff = map.get(timestamp);
-			saveBuffer(new File(caminho + File.separator + timestamp), buff);
+			saveBuffer(new File(caminho + File.separator + timestamp + ".bin"), buff);
 		}
 
 	}

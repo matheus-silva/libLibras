@@ -14,6 +14,17 @@ public class CaptureData {
 	private Map<Long, ByteBuffer> imageDepth;
 	private Map<Long, ByteBuffer> imageColor;
 	
+	public Long getTimestampByIndex(int index){
+		int pos = 0;
+		for(Long l: timestamp){
+			if(pos == index){
+				return l; 
+			}
+			pos++;
+		}
+		return null;
+	}
+	
 	public int getWidth(){
 		return width;
 	}

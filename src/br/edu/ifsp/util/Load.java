@@ -16,6 +16,8 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -28,15 +30,34 @@ import javax.swing.JProgressBar;
 import br.edu.ifsp.capture.Coordinate;
 import br.edu.ifsp.capture.ImageCapture;
 import br.edu.ifsp.capture.Segmentation;
+import br.edu.ifsp.capture.ShowObject;
 import br.edu.ifsp.editor.Editor;
 
-public class Load extends Thread {
+public class Load {
 
 	private JDialog d;
 	private Component father;
 	private File file;
 	private CaptureData data;
 	private boolean loaded;
+
+	public static void main(String args[]) {
+		ByteBuffer buff = new Load().loadBuffer(new File("/home/matheus/Música/Olá/Depth/3608575622.bin"));
+
+		ShowObject view = new ShowObject();
+		view.setCamera(ShowObject.DEPTH);
+		view.setBackground(buff, 640, 480);
+		view.repaint();
+
+		JFrame frame = new JFrame();
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setSize(640, 480);
+		frame.setVisible(true);
+
+		frame.getContentPane().add(BorderLayout.CENTER, view);
+		frame.getContentPane().revalidate();
+		frame.getContentPane().repaint();
+	}
 
 	public File open(Component father) {
 		JFileChooser chooser = new JFileChooser();
@@ -49,7 +70,7 @@ public class Load extends Thread {
 		return null;
 	}
 
-	private ByteBuffer loadBuffer(File file) {
+	public ByteBuffer loadBuffer(File file) {
 		BufferedInputStream in;
 		List<Byte> bytes = new ArrayList<>();
 
@@ -78,11 +99,12 @@ public class Load extends Thread {
 
 		for (File f : files) {
 			try {
-				long timestamp = Long.parseLong(f.getName());
+				long timestamp = Long.parseLong(f.getName().replaceAll("[^0-9]", ""));
 				ByteBuffer buff = loadBuffer(f);
+				System.out.println(timestamp + " " + (buff != null));
 				map.put(timestamp, buff);
 			} catch (Exception e) {
-
+				e.printStackTrace();
 			}
 		}
 
@@ -98,13 +120,13 @@ public class Load extends Thread {
 			try {
 				timestamp = Long.parseLong(temp[0]);
 			} catch (Exception e) {
-
+				e.printStackTrace();
 			}
 
 			Float[][] coords = new Float[15][3];
-			String temp2[] = temp[1].split("][");
+			String temp2[] = temp[1].split("]\\[");
 			for (int j = 0; j < temp2.length; j++) {
-				temp2[j] = temp2[j].replaceAll("[", "").replaceAll("]", "");
+				temp2[j] = temp2[j].replaceAll("\\[", "").replaceAll("]", "");
 
 				String temp3[] = temp2[j].split(", ");
 				try {
@@ -121,7 +143,7 @@ public class Load extends Thread {
 
 	}
 
-	public CaptureData loadFile(Component father, File file) {
+	public synchronized CaptureData loadFile(Component father, File file) {
 		this.father = father;
 		this.file = file;
 
@@ -139,13 +161,49 @@ public class Load extends Thread {
 		pb.setIndeterminate(true);
 		d.getContentPane().add(BorderLayout.CENTER, pb);
 
-		this.start();
+		new Thread(new Runnable() {
+
+			@Override
+			public void run() {
+				System.out.println("Loading");
+				try {
+					File depth = new File(file.getAbsoluteFile() + File.separator + "Depth");
+					File color = new File(file.getAbsoluteFile() + File.separator + "Color");
+					File segmentation = new File(file.getAbsoluteFile() + File.separator + "Segmentation");
+					File coor = new File(file.getAbsoluteFile() + File.separator + "Coordinates");
+
+					data.setImageDepth(loadBuffers(depth, ImageCapture.createMapStructure()));
+					data.setImageColor(loadBuffers(color, ImageCapture.createMapStructure()));
+					data.setSegmentation(loadBuffers(segmentation, Segmentation.createMapStructure()));
+
+					data.setCoordinateDepth(loadCoords(new File(coor.getAbsolutePath() + File.separator + "Depth.txt"),
+							Coordinate.createMapStructure()));
+					data.setCoordinateReal(loadCoords(new File(coor.getAbsolutePath() + File.separator + "Real.txt"),
+							Coordinate.createMapStructure()));
+
+					Set<Long> time = new TreeSet<>();
+					for (Long l : data.getCoordinateDepth().keySet()) {
+						time.add(l);
+					}
+					data.setTimestamp(time);
+
+				} catch (Exception e) {
+					JOptionPane.showMessageDialog(father,
+							"An error happened. Try again later!\n" + "Message: " + e.getMessage(), "Error",
+							JOptionPane.ERROR_MESSAGE);
+					e.printStackTrace();
+				}
+
+				loaded = true;
+				d.dispose();
+			}
+		}).start();
 
 		d.setVisible(true);
 
 		while (!loaded) {
 			try {
-				this.wait();
+				Thread.sleep(250);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -153,34 +211,6 @@ public class Load extends Thread {
 		}
 
 		return data;
-	}
-
-	@Override
-	public void run() {
-		System.out.println("Loading");
-		try {
-			File depth = new File(file.getAbsoluteFile() + File.separator + "Depth");
-			File color = new File(file.getAbsoluteFile() + File.separator + "Color");
-			File segmentation = new File(file.getAbsoluteFile() + File.separator + "Segmentation");
-			File coor = new File(file.getAbsoluteFile() + File.separator + "Coordinates");
-
-			data.setImageDepth(loadBuffers(depth, ImageCapture.createMapStructure()));
-			data.setImageColor(loadBuffers(color, ImageCapture.createMapStructure()));
-			data.setSegmentation(loadBuffers(segmentation, Segmentation.createMapStructure()));
-			
-			data.setCoordinateDepth(loadCoords(new File(coor.getAbsolutePath() + File.separator + "Depth.txt"), Coordinate.createMapStructure()));
-			data.setCoordinateReal(loadCoords(new File(coor.getAbsolutePath() + File.separator + "Real.txt"), Coordinate.createMapStructure()));
-
-		} catch (Exception e) {
-			JOptionPane.showMessageDialog(father,
-					"An error happened. Try again later!\n" + "Message: " + e.getMessage(), "Error",
-					JOptionPane.ERROR_MESSAGE);
-			e.printStackTrace();
-		}
-
-		loaded = true;
-		notifyAll();
-		d.dispose();
 	}
 
 	public float[][][] loadFile(File arquivo) {

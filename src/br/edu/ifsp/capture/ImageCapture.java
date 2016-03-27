@@ -84,9 +84,11 @@ public class ImageCapture implements VideoStream.NewFrameListener {
 		}
 
 		if (startRecording) {
-			imageCapture.put(frame.getTimestamp(), buff);
-			// System.out.println("Image " + (camera == COLOR ? "Color" :
-			// "Depth") + " Received");
+			buff.rewind();
+			byte b[] = new byte[buff.limit()];
+			buff.get(b);
+			imageCapture.put(frame.getTimestamp(), ByteBuffer.wrap(b));
+			System.out.println("Image " + (camera == COLOR ? "Color" : "Depth") + " Received");
 		}
 	}
 
