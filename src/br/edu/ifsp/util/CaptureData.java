@@ -6,12 +6,37 @@ import java.util.Set;
 
 public class CaptureData {
 
+	private int width, height, fps;
 	private Set<Long> timestamp;
 	private Map<Long, Float[][]> coordinateReal;
 	private Map<Long, Float[][]> coordinateDepth;
 	private Map<Long, ByteBuffer> segmentation;
 	private Map<Long, ByteBuffer> imageDepth;
 	private Map<Long, ByteBuffer> imageColor;
+	
+	public int getWidth(){
+		return width;
+	}
+	
+	public void setWidth(int width){
+		this.width = width;
+	}
+	
+	public int getHeight(){
+		return height;
+	}
+	
+	public void setHeight(int height){
+		this.height = height;
+	}
+	
+	public int getFps(){
+		return fps;
+	}
+	
+	public void setFps(int fps){
+		this.fps = fps;
+	}
 	
 	public Set<Long> getTimestamp() {
 		return timestamp;

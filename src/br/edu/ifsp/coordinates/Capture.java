@@ -1,19 +1,18 @@
 package br.edu.ifsp.coordinates;
 
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 import org.openni.Device;
 import org.openni.ImageRegistrationMode;
 import org.openni.OpenNI;
 import org.openni.SensorType;
 import org.openni.VideoFrameRef;
+import org.openni.VideoMode;
 import org.openni.VideoStream;
 
-import com.primesense.nite.JointType;
 import com.primesense.nite.NiTE;
 import com.primesense.nite.PoseType;
 import com.primesense.nite.SkeletonState;
@@ -47,7 +46,7 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 	private Coordinate coor = null;
 	private Segmentation seg = null;
 	private ImageCapture imgColor = null, imgDepth = null;
-	private Set<Long> timestamp = new HashSet<>();
+	private Set<Long> timestamp = new TreeSet<>();
 	private Integer seconds, secondsRemaining = 0;
 	private int delay;
 
@@ -97,6 +96,8 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 
 		video.addNewFrameListener(this);
 		video.start();
+		
+		VideoMode mode = video.getVideoMode();
 	}
 
 	@Override
@@ -433,7 +434,11 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 
 	public CaptureData getRecordedData() {
 		CaptureData data = new CaptureData();
-
+		
+		data.setWidth(videoColor.getVideoMode().getResolutionX());
+		data.setHeight(videoColor.getVideoMode().getResolutionY());
+		data.setFps(videoColor.getVideoMode().getFps());
+		
 		data.setTimestamp(timestamp);
 
 		data.setSegmentation(seg.getRecordedData());
@@ -470,7 +475,7 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 	 * stored.
 	 */
 	public void clearMoviments() {
-		timestamp = new HashSet<>();
+		timestamp = new TreeSet<>();
 		coor.clearRecordedData();
 		seg.clearRecordedData();
 		imgColor.clearRecordedData();

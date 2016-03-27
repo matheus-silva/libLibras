@@ -29,7 +29,7 @@ public class Save extends Thread {
 
 	public File getFile(Component father) {
 		JFileChooser chooser = new JFileChooser();
-		//chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+		// chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 		if (chooser.showSaveDialog(father) == JFileChooser.APPROVE_OPTION) {
 			return chooser.getSelectedFile();
 		}
@@ -42,10 +42,10 @@ public class Save extends Thread {
 
 	private void saveCoords(File file, Map<Long, Float[][]> coords) throws IOException {
 		StringBuilder sb = new StringBuilder();
-		
+
 		for (Long timestamp : coords.keySet()) {
 			sb.append(timestamp + " ");
-			for(Float[] f: coords.get(timestamp)){
+			for (Float[] f : coords.get(timestamp)) {
 				sb.append(Arrays.toString(f));
 			}
 			sb.append("\n");
@@ -59,7 +59,7 @@ public class Save extends Thread {
 	private void saveBuffer(File file, ByteBuffer buff) {
 		BufferedOutputStream out;
 		byte b[] = new byte[buff.limit()];
-		
+
 		buff.rewind();
 		buff.get(b);
 
@@ -72,15 +72,15 @@ public class Save extends Thread {
 			e.printStackTrace();
 		}
 	}
-	
-	private void saveBuffers(File file, Map<Long, ByteBuffer> map){
+
+	private void saveBuffers(File file, Map<Long, ByteBuffer> map) {
 		String caminho = file.getAbsolutePath();
-		
-		for(Long timestamp: map.keySet()){
+
+		for (Long timestamp : map.keySet()) {
 			ByteBuffer buff = map.get(timestamp);
-			saveBuffer(new File(caminho + "/" + timestamp), buff);
+			saveBuffer(new File(caminho + File.separator + timestamp), buff);
 		}
-		
+
 	}
 
 	public void saveFile(Component father, File file, CaptureData data) {
@@ -155,32 +155,34 @@ public class Save extends Thread {
 		try {
 
 			Path directory = Files.createDirectory(file.toPath());
-			Path depth = Files.createDirectory(new File(directory.toFile().getAbsolutePath() + "/Depth").toPath());
-			Path color = Files.createDirectory(new File(directory.toFile().getAbsolutePath() + "/Color").toPath());
-			Path segmentation = Files.createDirectory(new File(directory.toFile().getAbsolutePath() + "/Segmentation").toPath());
-			Path coordinates = Files.createDirectory(new File(directory.toFile().getAbsolutePath() + "/Coordinates").toPath());
-			
+			Path depth = Files.createDirectory(new File(directory.toFile().getAbsolutePath() + File.separator + "Depth").toPath());
+			Path color = Files.createDirectory(new File(directory.toFile().getAbsolutePath() + File.separator + "Color").toPath());
+			Path segmentation = Files
+					.createDirectory(new File(directory.toFile().getAbsolutePath() + File.separator + "Segmentation").toPath());
+			Path coordinates = Files
+					.createDirectory(new File(directory.toFile().getAbsolutePath() + File.separator + "Coordinates").toPath());
+
 			StringBuilder sb = new StringBuilder();
-			for(Long s: data.getTimestamp()){
-				sb.append(s + "\n");
-			}
-			
-			saveString(new File(directory.toFile().getAbsolutePath()+"/Config.txt"), sb.toString());
-			saveCoords(new File(coordinates.toFile().getAbsolutePath()+"/Depth.txt"), data.getCoordinateDepth());
-			saveCoords(new File(coordinates.toFile().getAbsolutePath()+"/Real.txt"), data.getCoordinateReal());
-			
+			sb.append("Width: " + data.getWidth() + "\n");
+			sb.append("Height: " + data.getHeight() + "\n");
+			sb.append("FPS: " + data.getFps() + "\n");
+
+			saveString(new File(directory.toFile().getAbsolutePath() + File.separator + "Config.txt"), sb.toString());
+			saveCoords(new File(coordinates.toFile().getAbsolutePath() + File.separator + "Depth.txt"), data.getCoordinateDepth());
+			saveCoords(new File(coordinates.toFile().getAbsolutePath() + File.separator + "Real.txt"), data.getCoordinateReal());
+
 			saveBuffers(depth.toFile(), data.getImageDepth());
 			saveBuffers(color.toFile(), data.getImageColor());
 			saveBuffers(segmentation.toFile(), data.getSegmentation());
-			
-			//saveCoords(null, 0L, null);
+
+			// saveCoords(null, 0L, null);
 		} catch (IOException e) {
 			JOptionPane.showMessageDialog(father,
 					"An error happened. Try again later!\n" + "Message: " + e.getMessage(), "Error",
 					JOptionPane.ERROR_MESSAGE);
 			e.printStackTrace();
 		}
-		
+
 		d.dispose();
 	}
 
