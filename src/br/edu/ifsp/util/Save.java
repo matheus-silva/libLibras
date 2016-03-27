@@ -11,6 +11,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Map;
 
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
@@ -39,14 +40,14 @@ public class Save extends Thread {
 		Files.write(Paths.get(file.toURI()), value.getBytes());
 	}
 
-	private void saveCoords(String caminho, Long timestamp, Float[][] coords) throws IOException {
-		File file = new File(caminho);
-
+	private void saveCoords(File file, Map<Long, Float[][]> coords) throws IOException {
 		StringBuilder sb = new StringBuilder();
-
-		for (Float[] f : coords) {
+		
+		for (Long timestamp : coords.keySet()) {
 			sb.append(timestamp + " ");
-			sb.append(Arrays.toString(f));
+			for(Float[] f: coords.get(timestamp)){
+				sb.append(Arrays.toString(f));
+			}
 			sb.append("\n");
 		}
 
@@ -55,20 +56,31 @@ public class Save extends Thread {
 		// getCoords(moviments).getBytes());
 	}
 
-	private void saveBuffer(String caminho, ByteBuffer buff) {
+	private void saveBuffer(File file, ByteBuffer buff) {
 		BufferedOutputStream out;
 		byte b[] = new byte[buff.limit()];
-
+		
+		buff.rewind();
 		buff.get(b);
 
 		try {
-			out = new BufferedOutputStream(new FileOutputStream(new File(caminho)));
+			out = new BufferedOutputStream(new FileOutputStream(file));
 			out.write(b);
 			out.flush();
 			out.close();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+	
+	private void saveBuffers(File file, Map<Long, ByteBuffer> map){
+		String caminho = file.getAbsolutePath();
+		
+		for(Long timestamp: map.keySet()){
+			ByteBuffer buff = map.get(timestamp);
+			saveBuffer(new File(caminho + "/" + timestamp), buff);
+		}
+		
 	}
 
 	public void saveFile(Component father, File file, CaptureData data) {
@@ -143,11 +155,23 @@ public class Save extends Thread {
 		try {
 
 			Path directory = Files.createDirectory(file.toPath());
+			Path depth = Files.createDirectory(new File(directory.toFile().getAbsolutePath() + "/Depth").toPath());
+			Path color = Files.createDirectory(new File(directory.toFile().getAbsolutePath() + "/Color").toPath());
+			Path segmentation = Files.createDirectory(new File(directory.toFile().getAbsolutePath() + "/Segmentation").toPath());
+			Path coordinates = Files.createDirectory(new File(directory.toFile().getAbsolutePath() + "/Coordinates").toPath());
 			
-			Files.createDirectory(new File(directory.toFile().getAbsolutePath() + "/Depth").toPath());
-			Files.createDirectory(new File(directory.toFile().getAbsolutePath() + "/Color").toPath());
-			Files.createDirectory(new File(directory.toFile().getAbsolutePath() + "/Segmentation").toPath());
-			Files.createDirectory(new File(directory.toFile().getAbsolutePath() + "/Coordinates").toPath());
+			StringBuilder sb = new StringBuilder();
+			for(Long s: data.getTimestamp()){
+				sb.append(s + "\n");
+			}
+			
+			saveString(new File(directory.toFile().getAbsolutePath()+"/Config.txt"), sb.toString());
+			saveCoords(new File(coordinates.toFile().getAbsolutePath()+"/Depth.txt"), data.getCoordinateDepth());
+			saveCoords(new File(coordinates.toFile().getAbsolutePath()+"/Real.txt"), data.getCoordinateReal());
+			
+			saveBuffers(depth.toFile(), data.getImageDepth());
+			saveBuffers(color.toFile(), data.getImageColor());
+			saveBuffers(segmentation.toFile(), data.getSegmentation());
 			
 			//saveCoords(null, 0L, null);
 		} catch (IOException e) {
