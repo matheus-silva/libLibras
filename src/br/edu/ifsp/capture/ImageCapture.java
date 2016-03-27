@@ -34,9 +34,11 @@ public class ImageCapture implements VideoStream.NewFrameListener {
 		this.view = view;
 		this.camera = camera;
 		this.imageCapture = createMapStructure();
+
+		view.setCamera(camera);
 	}
-	
-	public static Map<Long, ByteBuffer> createMapStructure(){
+
+	public static Map<Long, ByteBuffer> createMapStructure() {
 		return new HashMap<>();
 	}
 
@@ -65,23 +67,26 @@ public class ImageCapture implements VideoStream.NewFrameListener {
 		this.frame = video.readFrame();
 
 		setImageData(frame);
-		
+
 		this.frame.release();
 	}
 
 	public void setImageData(VideoFrameRef frame) {
 		this.frame = frame;
 		this.buff = frame.getData().order(ByteOrder.LITTLE_ENDIAN);
-		
-		if (view != null){
-			view.setCamera(camera);
-			view.setBackground(this.buff, frame.getWidth(), frame.getHeight());
-			view.repaint();
+
+		if (view != null) {
+			// view.setCamera(camera);
+			if (view.getCamera() == camera) {
+				view.setBackground(this.buff, frame.getWidth(), frame.getHeight());
+				view.repaint();
+			}
 		}
-		
-		if(startRecording){
+
+		if (startRecording) {
 			imageCapture.put(frame.getTimestamp(), buff);
-			//System.out.println("Image " + (camera == COLOR ? "Color" : "Depth") + " Received");
+			// System.out.println("Image " + (camera == COLOR ? "Color" :
+			// "Depth") + " Received");
 		}
 	}
 
@@ -92,24 +97,24 @@ public class ImageCapture implements VideoStream.NewFrameListener {
 	public void stopRecording() {
 		this.startRecording = false;
 	}
-	
-	public void clearRecordedData(){
+
+	public void clearRecordedData() {
 		imageCapture = createMapStructure();
 	}
-	
-	public Map<Long, ByteBuffer> getRecordedData(){
+
+	public Map<Long, ByteBuffer> getRecordedData() {
 		return imageCapture;
 	}
 
-	public static void main(String args[]){
+	public static void main(String args[]) {
 		EventQueue.invokeLater(new Runnable() {
-			
+
 			@Override
 			public void run() {
 				ShowObject view = new ShowObject();
 				ImageCapture img = new ImageCapture(view, DEPTH);
 				img.captureData();
-				
+
 				JFrame frame = new JFrame("Image Capture");
 				frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 				frame.setSize(640, 480);

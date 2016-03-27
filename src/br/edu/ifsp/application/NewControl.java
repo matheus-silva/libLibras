@@ -148,7 +148,6 @@ public class NewControl extends JFrame implements ItemListener, ActionListener, 
 		sSeconds.addChangeListener(this);
 
 		// Basic configurations
-		camera.setComponentView(NewCamera.COLOR_STREAM);
 		rbColor.setSelected(true);
 		rbDepth.setVisible(true);
 		rbColor.setVisible(true);

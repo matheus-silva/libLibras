@@ -21,6 +21,7 @@ public class NewCamera extends JFrame implements Runnable {
 
 		this.view = componentViewer;
 		initialize();
+		setComponentView(COLOR_STREAM);
 
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setSize(640, 480);
@@ -47,6 +48,7 @@ public class NewCamera extends JFrame implements Runnable {
 			break;
 		}
 
+		c.add(view);
 		c.repaint();
 	}
 }

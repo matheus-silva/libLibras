@@ -117,7 +117,6 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 			@Override
 			public void run() {
 				imgColor.setImageData(frameColor);
-				view.repaint();
 			}
 		}).start();
 
@@ -198,8 +197,7 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
-				imgDepth.setImageData(frameDepth);
-				view.repaint();
+				imgDepth.setImageData(frameDepth);				
 			}
 		}).start();
 

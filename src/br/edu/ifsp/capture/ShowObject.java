@@ -20,7 +20,7 @@ public class ShowObject extends Component {
 	private int[][] skelCoor = { { 0, 1 }, { 1, 8 }, { 8, 9 }, { 8, 10 }, { 9, 11 }, { 11, 13 }, { 10, 12 }, { 12, 14 },
 			{ 1, 3 }, { 3, 5 }, { 5, 7 }, { 1, 2 }, { 2, 4 }, { 4, 6 } };
 	private int width = 1, height = 1;
-	private int camera = DEPTH;
+	private int camera = COLOR;
 	private ByteBuffer buffBackground, buffUser;
 	private int[] pixels;
 	private List<Float[][]> coordinate = new ArrayList<>();
@@ -30,9 +30,13 @@ public class ShowObject extends Component {
 	public void setStatus(String status) {
 		this.status = status;
 	}
-	
+
 	public void setCamera(int camera) {
 		this.camera = camera;
+	}
+
+	public int getCamera() {
+		return camera;
 	}
 
 	public void setUserMap(ByteBuffer buff) {
@@ -57,15 +61,15 @@ public class ShowObject extends Component {
 
 		int[] userBackground = getUserMapImage(background);
 
-		drawUserSkeleton(g2d);
-
 		drawBackground(g, userBackground);
 
+		drawUserSkeleton(g2d);
+
 		drawStatus(g2d);
-		
+
 		coordinate = new ArrayList<>();
 	}
-	
+
 	private void drawStatus(Graphics2D g) {
 		if (!(status == null || status.equals(""))) {
 			g.setFont(new Font("Serif", Font.BOLD, 46));
@@ -108,21 +112,21 @@ public class ShowObject extends Component {
 		if (buffUser == null) {
 			return background;
 		}
-		
-		//int pos = 0;
-		//while (buffBackground.remaining() > 0) {
-			//short depth = buffBackground.getShort();
-			//short userId = buffUser.getShort();
-			//short pixel = (short) mHistogram[depth<0?0:depth];
-			//int color = 0xFFFFFFFF;
-			//if (userId > 0) {
-				//color = 0xFF00FF00; //mColors[userId % mColors.length];
-			//}
-			
-			//int p = background[pos];
-			//background[pos] = color & (0xFF000000 | (p << 16) | (p << 8) | p);
-			//pos++;
-		//}
+
+		// int pos = 0;
+		// while (buffBackground.remaining() > 0) {
+		// short depth = buffBackground.getShort();
+		// short userId = buffUser.getShort();
+		// short pixel = (short) mHistogram[depth<0?0:depth];
+		// int color = 0xFFFFFFFF;
+		// if (userId > 0) {
+		// color = 0xFF00FF00; //mColors[userId % mColors.length];
+		// }
+
+		// int p = background[pos];
+		// background[pos] = color & (0xFF000000 | (p << 16) | (p << 8) | p);
+		// pos++;
+		// }
 
 		return background;
 	}
@@ -136,7 +140,7 @@ public class ShowObject extends Component {
 
 		if (camera == COLOR) {
 			pixels = getColorPixel();
-		} else {
+		} else if (camera == DEPTH) {
 			pixels = getDepthPixel();
 		}
 
@@ -162,27 +166,33 @@ public class ShowObject extends Component {
 				// pixels[pos] = depth;
 			}
 		} else {
-			//ByteBufefer back = buffBackground.duplicate();
-			//ByteBuffer user = buffUser.duplicate();
+			// ByteBufefer back = buffBackground.duplicate();
+			// ByteBuffer user = buffUser.duplicate();
 
 			buffBackground.rewind();
-			
-			int pos = 0;
-			System.out.println("Background: " + buffBackground.limit() + " | Segmentation: " + buffUser.limit());
-			while (buffBackground.remaining() > 0) {
-				short depth = buffBackground.getShort();
-				short userId = buffUser.getShort();
-				short pixel = (short) mHistogram[depth];
-				//short pixel = (short) mHistogram[depth<0?0:depth];
-				int color = 0xFFFFFFFF;
-				if (userId > 0) {
-					color = mColors[userId % mColors.length];
-				}
 
-				pixels[pos] = color & (0xFF000000 | (pixel << 16) | (pixel << 8) | pixel);
-				pos++;
+			int pos = 0;
+			// System.out.println("Background: " + buffBackground.limit() + " |
+			// Segmentation: " + buffUser.limit());
+			try {
+				while (buffBackground.remaining() > 0) {
+					short depth = buffBackground.getShort();
+					short userId = buffUser.getShort();
+					short pixel = (short) mHistogram[depth];
+					// short pixel = (short) mHistogram[depth<0?0:depth];
+					int color = 0xFFFFFFFF;
+					if (userId > 0) {
+						color = mColors[userId % mColors.length];
+					}
+
+					pixels[pos] = color & (0xFF000000 | (pixel << 16) | (pixel << 8) | pixel);
+					pos++;
+				}
+			} catch (ArrayIndexOutOfBoundsException e) {
+
 			}
-			System.out.println(buffBackground.remaining() + " " + buffUser.remaining());
+			// System.out.println(buffBackground.remaining() + " " +
+			// buffUser.remaining());
 		}
 
 		return pixels;
