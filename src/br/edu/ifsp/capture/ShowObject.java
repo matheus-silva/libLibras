@@ -112,17 +112,16 @@ public class ShowObject extends Component {
 		}
 
 		// int pos = 0;
-		// while (buffBackground.remaining() > 0) {
-		// short depth = buffBackground.getShort();
+		// while (buffUser.remaining() > 0) {
 		// short userId = buffUser.getShort();
-		// short pixel = (short) mHistogram[depth<0?0:depth];
+
 		// int color = 0xFFFFFFFF;
 		// if (userId > 0) {
-		// color = 0xFF00FF00; //mColors[userId % mColors.length];
+		// color = mColors[userId % mColors.length];
 		// }
 
 		// int p = background[pos];
-		// background[pos] = color & (0xFF000000 | (p << 16) | (p << 8) | p);
+		// background[pos] = color & p;
 		// pos++;
 		// }
 

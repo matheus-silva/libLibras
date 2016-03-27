@@ -2,19 +2,15 @@ package br.edu.ifsp.util;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
-import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
@@ -27,20 +23,42 @@ public class Save extends Thread {
 	private Component father;
 	private File file;
 	private JDialog d;
+	private CaptureData data;
 	private float[][][] moviments;
 
 	public File getFile(Component father) {
 		JFileChooser chooser = new JFileChooser();
+		//chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 		if (chooser.showSaveDialog(father) == JFileChooser.APPROVE_OPTION) {
 			return chooser.getSelectedFile();
 		}
 		return null;
 	}
 
-	private static void saveBuffer(ByteBuffer buff, String caminho) {
+	private void saveString(File file, String value) throws IOException {
+		Files.write(Paths.get(file.toURI()), value.getBytes());
+	}
+
+	private void saveCoords(String caminho, Long timestamp, Float[][] coords) throws IOException {
+		File file = new File(caminho);
+
+		StringBuilder sb = new StringBuilder();
+
+		for (Float[] f : coords) {
+			sb.append(timestamp + " ");
+			sb.append(Arrays.toString(f));
+			sb.append("\n");
+		}
+
+		saveString(file, sb.toString());
+		// Files.write(Paths.get(file.toURI()),
+		// getCoords(moviments).getBytes());
+	}
+
+	private void saveBuffer(String caminho, ByteBuffer buff) {
 		BufferedOutputStream out;
 		byte b[] = new byte[buff.limit()];
-		
+
 		buff.get(b);
 
 		try {
@@ -52,7 +70,28 @@ public class Save extends Thread {
 			e.printStackTrace();
 		}
 	}
-	
+
+	public void saveFile(Component father, File file, CaptureData data) {
+		this.father = father;
+		this.file = file;
+		this.data = data;
+
+		d = new JDialog((JFrame) father, "Saving...", true);
+		d.setSize(300, 75);
+		d.setLocationRelativeTo(father);
+		d.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+		d.setResizable(false);
+
+		JProgressBar pb = new JProgressBar();
+		pb.setIndeterminate(true);
+		d.getContentPane().add(BorderLayout.CENTER, pb);
+
+		this.start();
+
+		d.setVisible(true);
+
+	}
+
 	public void saveFile(Component father, File file, Float[][][] moviments) {
 		float[][][] data = new float[moviments.length][][];
 		for (int i = 0; i < moviments.length; i++) {
@@ -94,16 +133,23 @@ public class Save extends Thread {
 		d.getContentPane().add(BorderLayout.CENTER, pb);
 
 		this.start();
-		
+
 		d.setVisible(true);
 	}
-
 
 	@Override
 	public void run() {
 		System.out.println("Saving");
 		try {
-			Files.write(Paths.get(file.toURI()), getCoords(moviments).getBytes());
+
+			Path directory = Files.createDirectory(file.toPath());
+			
+			Files.createDirectory(new File(directory.toFile().getAbsolutePath() + "/Depth").toPath());
+			Files.createDirectory(new File(directory.toFile().getAbsolutePath() + "/Color").toPath());
+			Files.createDirectory(new File(directory.toFile().getAbsolutePath() + "/Segmentation").toPath());
+			Files.createDirectory(new File(directory.toFile().getAbsolutePath() + "/Coordinates").toPath());
+			
+			//saveCoords(null, 0L, null);
 		} catch (IOException e) {
 			JOptionPane.showMessageDialog(father,
 					"An error happened. Try again later!\n" + "Message: " + e.getMessage(), "Error",

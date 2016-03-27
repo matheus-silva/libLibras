@@ -10,6 +10,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.io.File;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -32,8 +33,7 @@ import com.primesense.nite.PoseType;
 
 import br.edu.ifsp.capture.ShowObject;
 import br.edu.ifsp.coordinates.Capture;
-import br.edu.ifsp.coordinates.ComponentViewer;
-import br.edu.ifsp.coordinates.Viewer;
+import br.edu.ifsp.util.Save;
 
 public class NewControl extends JFrame implements ItemListener, ActionListener, ChangeListener {
 
@@ -252,16 +252,11 @@ public class NewControl extends JFrame implements ItemListener, ActionListener, 
 		} else if (ae.getSource() == btStop) {
 			capture.stopRecordingUsers();
 		} else if (ae.getSource() == btSave) {
-			/*Save save = new Save();
+			Save save = new Save();
 			File f = save.getFile(this);
 			if (f != null) {
-				Float[][][] moviments = null;
-				for (Float[][][] userFrames : capture.getMovimentsArray().values()) {
-					moviments = userFrames;
-					break;
-				}
-				save.saveFile(this, f, moviments);
-			}*/
+				save.saveFile(this, f, capture.getRecordedData());
+			}
 		} else if (ae.getSource() == btClear) {
 			capture.clearMoviments();
 			lblCount.setText("Frames: " + capture.getFramesCount());

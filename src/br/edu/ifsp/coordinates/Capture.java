@@ -69,7 +69,7 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 	 *            The object used to show the images created by the sensor.
 	 */
 	public Capture(ShowObject view) {
-		// OpenNI.initialize();
+		OpenNI.initialize();
 		NiTE.initialize();
 
 		coor = new Coordinate(view);
