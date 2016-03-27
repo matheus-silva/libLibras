@@ -97,14 +97,12 @@ public class ShowObject extends Component {
 		g.setColor(Color.red);
 		g.setPaintMode();
 		for (int i = 0; i < skelCoor.length; i++) {
-			/*
-			 * g.drawLine((int) (getWidth() * fs[skelCoor[i][0]][0] / width),
-			 * (int) (getHeight() * fs[skelCoor[i][0]][1] / height), (int)
-			 * (getWidth() * fs[skelCoor[i][1]][0] / width), (int) (getHeight()
-			 * * fs[skelCoor[i][1]][1]) / height);
-			 */
-			g.drawLine(fs[skelCoor[i][0]][0].intValue(), fs[skelCoor[i][0]][1].intValue(),
-					fs[skelCoor[i][1]][0].intValue(), fs[skelCoor[i][1]][1].intValue());
+
+			g.drawLine((int) (getWidth() * fs[skelCoor[i][0]][0] / width),
+					(int) (getHeight() * fs[skelCoor[i][0]][1] / height),
+					(int) (getWidth() * fs[skelCoor[i][1]][0] / width),
+					(int) (getHeight() * fs[skelCoor[i][1]][1]) / height);
+
 		}
 	}
 
