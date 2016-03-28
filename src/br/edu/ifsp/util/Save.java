@@ -35,6 +35,10 @@ public class Save extends Thread {
 		}
 		return null;
 	}
+	
+	public void clearData(){
+		data = null;
+	}
 
 	private void saveString(File file, String value) throws IOException {
 		Files.write(Paths.get(file.toURI()), value.getBytes());

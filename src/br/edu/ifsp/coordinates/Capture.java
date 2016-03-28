@@ -92,6 +92,8 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 
 		d.setImageRegistrationMode(ImageRegistrationMode.DEPTH_TO_COLOR);
 
+		
+		
 		VideoStream video = VideoStream.create(d, SensorType.COLOR);
 
 		video.addNewFrameListener(this);
@@ -376,6 +378,10 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 			startRecording(user);
 		}
 		startRecordingUsers = true;
+		/* Call the client's listener that are waiting for some events. */
+		if (stateChanged != null) {
+			stateChanged.stateChanged(StateChangedListener.RECORDING_STARTED);
+		}
 	}
 
 	/**
@@ -386,6 +392,10 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 			stopRecording(user);
 		}
 		startRecordingUsers = false;
+		/* Call the client's listener that are waiting for some events. */
+		if (stateChanged != null) {
+			stateChanged.stateChanged(StateChangedListener.RECORDING_STOPPED);
+		}
 	}
 
 	/**
@@ -480,8 +490,6 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 		seg.clearRecordedData();
 		imgColor.clearRecordedData();
 		imgDepth.clearRecordedData();
-		
-		System.gc();
 	}
 
 	/**

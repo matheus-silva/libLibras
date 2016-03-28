@@ -103,7 +103,8 @@ public class NewControl extends JFrame implements ItemListener, ActionListener, 
 					btStop.setEnabled(false);
 					break;
 				case Capture.StateChangedListener.NEW_DATA_ARRIVED:
-					lblCount.setText("Frames: " + capture.getFramesCount());
+					Runtime run = Runtime.getRuntime();
+					lblCount.setText("Frames: " + capture.getFramesCount() + " | Free memory:  " + (run.freeMemory()/1_048_576) + " Mb");
 					break;
 				}
 			}
@@ -256,10 +257,15 @@ public class NewControl extends JFrame implements ItemListener, ActionListener, 
 			File f = save.getFile(this);
 			if (f != null) {
 				save.saveFile(this, f, capture.getRecordedData());
+				save.clearData();
 			}
 		} else if (ae.getSource() == btClear) {
 			capture.clearMoviments();
 			lblCount.setText("Frames: " + capture.getFramesCount());
+			
+			Runtime run = Runtime.getRuntime();
+			run.runFinalization();
+			run.gc();
 		}
 	}
 
