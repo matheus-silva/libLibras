@@ -103,14 +103,20 @@ public class NewControl extends JFrame implements ItemListener, ActionListener, 
 					btStop.setEnabled(false);
 					break;
 				case Capture.StateChangedListener.NEW_DATA_ARRIVED:
-					Runtime run = Runtime.getRuntime();
-					lblCount.setText("Frames: " + capture.getFramesCount() + " | Free memory:  " + (run.freeMemory()/1_048_576) + " Mb");
+					statusBar();
 					break;
 				}
 			}
 		};
 		capture.setStateChanged(stateChanged);
 		// new Thread(camera).start();
+	}
+	
+	private void statusBar() {
+		Runtime run = Runtime.getRuntime();
+		long used = (run.maxMemory() - run.freeMemory());
+		double p = (100 * used / run.maxMemory());
+		lblCount.setText("Frames: " + capture.getFramesCount() + " | Memory:  " + (used/1_048_576) + " Mb (" + (p) + "%)");
 	}
 
 	private void initializeComponentsForm() {
@@ -261,11 +267,12 @@ public class NewControl extends JFrame implements ItemListener, ActionListener, 
 			}
 		} else if (ae.getSource() == btClear) {
 			capture.clearMoviments();
-			lblCount.setText("Frames: " + capture.getFramesCount());
 			
 			Runtime run = Runtime.getRuntime();
 			run.runFinalization();
 			run.gc();
+			
+			statusBar();
 		}
 	}
 
