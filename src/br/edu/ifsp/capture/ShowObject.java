@@ -94,8 +94,8 @@ public class ShowObject extends Component {
 	public void drawSkeleton(Graphics2D g, Float[][] fs) {
 		g.setColor(Color.red);
 		g.setPaintMode();
+		
 		for (int i = 0; i < skelCoor.length; i++) {
-
 			g.drawLine((int) (getWidth() * fs[skelCoor[i][0]][0] / width),
 					(int) (getHeight() * fs[skelCoor[i][0]][1] / height),
 					(int) (getWidth() * fs[skelCoor[i][1]][0] / width),
@@ -215,6 +215,8 @@ public class ShowObject extends Component {
 		for (int i = 0; i < mHistogram.length; ++i)
 			mHistogram[i] = 0;
 
+		data.rewind();
+		
 		int points = 0;
 		while (data.remaining() > 0) {
 			int pixel = data.getShort() & 0xFFFF;

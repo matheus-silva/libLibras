@@ -7,6 +7,8 @@ import java.awt.GridLayout;
 import java.io.File;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.Set;
+import java.util.TreeSet;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -69,7 +71,6 @@ public class SimpleEditor extends JFrame implements ChangeListener {
 		seg = new Segmentation(view);
 		imgDepth = new ImageCapture(view, ImageCapture.DEPTH);
 		imgColor = new ImageCapture(view, ImageCapture.COLOR);
-		view.setCamera(ShowObject.DEPTH);
 	}
 
 	private JPanel getComponent() {
@@ -101,15 +102,23 @@ public class SimpleEditor extends JFrame implements ChangeListener {
 	public void stateChanged(ChangeEvent e) {
 		if (e.getSource() == slider) {
 			int index = slider.getValue();
+
+			view.setCamera(ShowObject.COLOR);
+
+			Set<Long> time = new TreeSet<>();
+			for (Long l : data.getCoordinateDepth().keySet()) {
+				time.add(l);
+			}
+			data.setTimestamp(time);
+
 			Long timestamp = data.getTimestampByIndex(index);
 
 			view.setStatus("Time: " + timestamp);
-			// view.setUserCoordinate(data.getCoordinateDepth().get(timestamp),
-			// 0, 0);
+			view.setUserCoordinate(data.getCoordinateDepth().get(timestamp), 0, 0);
 
 			ByteBuffer buffSegmentation = data.getSegmentation().get(timestamp);
 
-			byte[] buffBackground;
+			ByteBuffer buffBackground;
 			if (view.getCamera() == ShowObject.COLOR) {
 				buffBackground = data.getImageColor().get(timestamp);
 			} else if (view.getCamera() == ShowObject.DEPTH) {
@@ -118,12 +127,16 @@ public class SimpleEditor extends JFrame implements ChangeListener {
 				return;
 			}
 
-			if (buffSegmentation != null){
+			if (buffBackground != null) {
+				buffBackground.rewind();
+			}
+
+			if (buffSegmentation != null) {
 				buffSegmentation.rewind();
 			}
 
-			view.setUserMap(buffSegmentation);
-			view.setBackground(ByteBuffer.wrap(buffBackground).order(ByteOrder.LITTLE_ENDIAN), 640, 480);
+			// view.setUserMap(buffSegmentation);
+			view.setBackground(buffBackground, 640, 480);
 			view.repaint();
 
 		}
@@ -134,7 +147,7 @@ public class SimpleEditor extends JFrame implements ChangeListener {
 
 			@Override
 			public void run() {
-				new SimpleEditor(new File("/home/matheus/Música/Olá"));
+				new SimpleEditor(new File("/home/matheus/Música/Arquivo Exemplo"));
 			}
 		});
 	}

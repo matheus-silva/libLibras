@@ -14,6 +14,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -43,7 +44,7 @@ public class Load {
 
 	public static void main(String args[]) {
 		ByteBuffer buff = new Load().loadBuffer(new File("/home/matheus/Música/Olá/Depth/3608575622.bin"));
-		
+
 		ShowObject view = new ShowObject();
 		view.setCamera(ShowObject.DEPTH);
 		view.setBackground(buff, 640, 480);
@@ -97,11 +98,15 @@ public class Load {
 	private Map<Long, ByteBuffer> loadBuffers(File file, Map<Long, ByteBuffer> map) {
 		File[] files = file.listFiles();
 
+		if (files == null) {
+			return null;
+		}
+
 		for (File f : files) {
 			try {
 				long timestamp = Long.parseLong(f.getName().replaceAll("[^0-9]", ""));
 				ByteBuffer buff = loadBuffer(f);
-				System.out.println(timestamp + " " + (buff != null));
+				// System.out.println(timestamp + " " + (buff != null));
 				map.put(timestamp, buff);
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -134,7 +139,7 @@ public class Load {
 
 		return b;
 	}
-	
+
 	private Map<Long, byte[]> loadBytes(File file, Map<Long, byte[]> map) {
 		File[] files = file.listFiles();
 
@@ -142,7 +147,7 @@ public class Load {
 			try {
 				long timestamp = Long.parseLong(f.getName().replaceAll("[^0-9]", ""));
 				byte[] b = loadByte(f);
-				System.out.println(timestamp + " " + (b != null));
+				// System.out.println(timestamp + " " + (b != null));
 				map.put(timestamp, b);
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -156,7 +161,7 @@ public class Load {
 		List<String> lines = Files.readAllLines(Paths.get(file.toURI()));
 
 		for (int i = 0; i < lines.size(); i++) {
-			String temp[] = lines.get(i).split(" ");
+			String temp[] = lines.get(i).split("[0-9] ");
 			Long timestamp = 0L;
 			try {
 				timestamp = Long.parseLong(temp[0]);
@@ -166,18 +171,19 @@ public class Load {
 
 			Float[][] coords = new Float[15][3];
 			String temp2[] = temp[1].split("]\\[");
-			for (int j = 0; j < temp2.length; j++) {
-				temp2[j] = temp2[j].replaceAll("\\[", "").replaceAll("]", "");
-
+			
+			for(int j = 0; j < temp2.length; j++){
+				temp2[j] = temp2[j].replaceAll("]", "").replaceAll("\\[", "");
 				String temp3[] = temp2[j].split(", ");
-				try {
+				try{
 					coords[j][0] = Float.parseFloat(temp3[0]);
 					coords[j][1] = Float.parseFloat(temp3[1]);
 					coords[j][2] = Float.parseFloat(temp3[2]);
-				} catch (Exception e) {
-
+				} catch (Exception e){
+					e.printStackTrace();
 				}
 			}
+			
 			map.put(timestamp, coords);
 		}
 		return map;
@@ -213,19 +219,39 @@ public class Load {
 					File segmentation = new File(file.getAbsoluteFile() + File.separator + "Segmentation");
 					File coor = new File(file.getAbsoluteFile() + File.separator + "Coordinates");
 
-					data.setImageDepth(loadBytes(depth, ImageCapture.createMapStructure()));
-					data.setImageColor(loadBytes(color, ImageCapture.createMapStructure()));
-					data.setSegmentation(loadBuffers(segmentation, Segmentation.createMapStructure()));
-
+					System.out.println("Coordinate Depth");
 					data.setCoordinateDepth(loadCoords(new File(coor.getAbsolutePath() + File.separator + "Depth.txt"),
 							Coordinate.createMapStructure()));
+					System.out.println("Coordinate Real");
 					data.setCoordinateReal(loadCoords(new File(coor.getAbsolutePath() + File.separator + "Real.txt"),
 							Coordinate.createMapStructure()));
+					
+					System.out.println("Depth");
+					data.setImageDepth(loadBuffers(depth, ImageCapture.createMapStructure()));
+					System.out.println("Color");
+					data.setImageColor(loadBuffers(color, ImageCapture.createMapStructure()));
+					System.out.println("Segmentation");
+					data.setSegmentation(loadBuffers(segmentation, Segmentation.createMapStructure()));
+
+					
 
 					Set<Long> time = new TreeSet<>();
-					for (Long l : data.getCoordinateDepth().keySet()) {
+					for (Long l : data.getImageDepth().keySet()) {
 						time.add(l);
 					}
+					for (Long l : data.getImageColor().keySet()) {
+						//time.add(l);
+					}
+					for (Long l : data.getCoordinateDepth().keySet()) {
+						//time.add(l);
+					}
+					for (Long l : data.getCoordinateReal().keySet()) {
+						//time.add(l);
+					}
+					for (Long l : data.getSegmentation().keySet()) {
+						//time.add(l);
+					}
+
 					data.setTimestamp(time);
 
 				} catch (Exception e) {

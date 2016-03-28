@@ -11,8 +11,8 @@ public class CaptureData {
 	private Map<Long, Float[][]> coordinateReal;
 	private Map<Long, Float[][]> coordinateDepth;
 	private Map<Long, ByteBuffer> segmentation;
-	private Map<Long, byte[]> imageDepth;
-	private Map<Long, byte[]> imageColor;
+	private Map<Long, ByteBuffer> imageDepth;
+	private Map<Long, ByteBuffer> imageColor;
 	
 	public Long getTimestampByIndex(int index){
 		int pos = 0;
@@ -73,16 +73,16 @@ public class CaptureData {
 	public void setSegmentation(Map<Long, ByteBuffer> segmentation) {
 		this.segmentation = segmentation;
 	}
-	public Map<Long, byte[]> getImageDepth() {
+	public Map<Long, ByteBuffer> getImageDepth() {
 		return imageDepth;
 	}
-	public void setImageDepth(Map<Long, byte[]> imageDepth) {
+	public void setImageDepth(Map<Long, ByteBuffer> imageDepth) {
 		this.imageDepth = imageDepth;
 	}
-	public Map<Long, byte[]> getImageColor() {
+	public Map<Long, ByteBuffer> getImageColor() {
 		return imageColor;
 	}
-	public void setImageColor(Map<Long, byte[]> imageColor) {
+	public void setImageColor(Map<Long, ByteBuffer> imageColor) {
 		this.imageColor = imageColor;
 	}
 		

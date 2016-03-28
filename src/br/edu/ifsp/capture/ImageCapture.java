@@ -23,7 +23,7 @@ public class ImageCapture implements VideoStream.NewFrameListener {
 	private boolean startRecording = false;
 	private int camera;
 	private ShowObject view;
-	private Map<Long, byte[]> imageCapture;
+	private Map<Long, ByteBuffer> imageCapture;
 
 	public ImageCapture(int camera) {
 		this(null, camera);
@@ -37,7 +37,7 @@ public class ImageCapture implements VideoStream.NewFrameListener {
 		view.setCamera(camera);
 	}
 
-	public static Map<Long, byte[]> createMapStructure() {
+	public static Map<Long, ByteBuffer> createMapStructure() {
 		return new HashMap<>();
 	}
 
@@ -70,12 +70,9 @@ public class ImageCapture implements VideoStream.NewFrameListener {
 		this.frame.release();
 	}
 
-	public void setImageData(VideoFrameRef frame) {
+	public synchronized void setImageData(VideoFrameRef frame) {
 		this.frame = frame;
 		ByteBuffer buff = frame.getData().order(ByteOrder.LITTLE_ENDIAN);
-		buff.rewind();
-		byte b[] = new byte[buff.limit()];
-		buff.get(b);
 		
 		if (view != null) {
 			// view.setCamera(camera);
@@ -94,10 +91,18 @@ public class ImageCapture implements VideoStream.NewFrameListener {
 		}
 
 		if (startRecording) {
-			imageCapture.put(frame.getTimestamp(), b);
-			System.out.println("Image " + (camera == COLOR ? "Color" :
-			 "Depth") + " Received");
+			ByteBuffer newBuffer = ByteBuffer.allocate(buff.capacity());
+			buff.rewind();
+			newBuffer.put(buff);
+			buff.rewind();
+			newBuffer.flip();
+			
+			imageCapture.put(frame.getTimestamp(), newBuffer);
+			//System.out.println("Image " + (camera == COLOR ? "Color" :
+			// "Depth") + " Received");
 		}
+		
+		
 	}
 
 	public void startRecording() {
@@ -112,7 +117,7 @@ public class ImageCapture implements VideoStream.NewFrameListener {
 		imageCapture = createMapStructure();
 	}
 
-	public Map<Long, byte[]> getRecordedData() {
+	public Map<Long, ByteBuffer> getRecordedData() {
 		return imageCapture;
 	}
 

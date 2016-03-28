@@ -193,8 +193,8 @@ public class Save extends Thread {
 			saveCoords(new File(coordinates.toFile().getAbsolutePath() + File.separator + "Depth.txt"), data.getCoordinateDepth());
 			saveCoords(new File(coordinates.toFile().getAbsolutePath() + File.separator + "Real.txt"), data.getCoordinateReal());
 
-			saveBytes(depth.toFile(), data.getImageDepth());
-			saveBytes(color.toFile(), data.getImageColor());
+			saveBuffers(depth.toFile(), data.getImageDepth());
+			saveBuffers(color.toFile(), data.getImageColor());
 			saveBuffers(segmentation.toFile(), data.getSegmentation());
 
 			// saveCoords(null, 0L, null);
