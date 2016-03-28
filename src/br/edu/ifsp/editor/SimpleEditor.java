@@ -4,13 +4,17 @@ import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.EventQueue;
 import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.util.Set;
 import java.util.TreeSet;
 
 import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.border.TitledBorder;
@@ -24,7 +28,7 @@ import br.edu.ifsp.capture.ShowObject;
 import br.edu.ifsp.util.CaptureData;
 import br.edu.ifsp.util.Load;
 
-public class SimpleEditor extends JFrame implements ChangeListener {
+public class SimpleEditor extends JFrame implements ActionListener, ChangeListener {
 
 	private CaptureData data;
 	private Load load;
@@ -35,6 +39,9 @@ public class SimpleEditor extends JFrame implements ChangeListener {
 	private ImageCapture imgColor;
 
 	private JSlider slider;
+	private JMenuBar menu;
+	private JMenu mFile, mView;
+	private JMenuItem mColor, mDepth, mSkeleton, mSegmentation;
 
 	public SimpleEditor() {
 		this(null);
@@ -44,12 +51,15 @@ public class SimpleEditor extends JFrame implements ChangeListener {
 		super("Simple Editor");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setSize(640, 580);
-		setVisible(true);
+		setJMenuBar(getMenu());
 
-		initialize(file);
+		setVisible(true);
 
 		Container c = getContentPane();
 		c.setLayout(new BorderLayout());
+
+		initialize(file);
+
 		c.add(BorderLayout.CENTER, getComponent());
 		c.add(BorderLayout.SOUTH, getControl());
 
@@ -71,6 +81,33 @@ public class SimpleEditor extends JFrame implements ChangeListener {
 		seg = new Segmentation(view);
 		imgDepth = new ImageCapture(view, ImageCapture.DEPTH);
 		imgColor = new ImageCapture(view, ImageCapture.COLOR);
+	}
+
+	private JMenuBar getMenu() {
+		menu = new JMenuBar();
+
+		mFile = new JMenu("File");
+		mView = new JMenu("View");
+
+		mColor = new JMenuItem("Color");
+		mDepth = new JMenuItem("Depth");
+		mSkeleton = new JMenuItem("Skeleton");
+		mSegmentation = new JMenuItem("Segmentation");
+
+		mColor.addActionListener(this);
+		mDepth.addActionListener(this);
+		mSkeleton.addActionListener(this);
+		mSegmentation.addActionListener(this);
+
+		mView.add(mColor);
+		mView.add(mDepth);
+		mView.add(mSkeleton);
+		mView.add(mSegmentation);
+
+		menu.add(mFile);
+		menu.add(mView);
+
+		return menu;
 	}
 
 	private JPanel getComponent() {
@@ -99,17 +136,47 @@ public class SimpleEditor extends JFrame implements ChangeListener {
 	}
 
 	@Override
-	public void stateChanged(ChangeEvent e) {
-		if (e.getSource() == slider) {
-			int index = slider.getValue();
-
+	public void actionPerformed(ActionEvent e) {
+		if (e.getSource() == mColor) {
 			view.setCamera(ShowObject.COLOR);
+			
+			Set<Long> time = new TreeSet<>();
+			for (Long l : data.getImageColor().keySet()) {
+				time.add(l);
+			}
+			data.setTimestamp(time);
 
+			
+		} else if (e.getSource() == mDepth) {
+			view.setCamera(ShowObject.DEPTH);
+
+			Set<Long> time = new TreeSet<>();
+			for (Long l : data.getImageDepth().keySet()) {
+				time.add(l);
+			}
+			data.setTimestamp(time);
+		} else if (e.getSource() == mSkeleton) {
+			
 			Set<Long> time = new TreeSet<>();
 			for (Long l : data.getCoordinateDepth().keySet()) {
 				time.add(l);
 			}
 			data.setTimestamp(time);
+		} else if (e.getSource() == mSegmentation){
+			view.setCamera(ShowObject.DEPTH);
+			
+			Set<Long> time = new TreeSet<>();
+			for (Long l : data.getSegmentation().keySet()) {
+				time.add(l);
+			}
+			data.setTimestamp(time);
+		}
+	}
+
+	@Override
+	public void stateChanged(ChangeEvent e) {
+		if (e.getSource() == slider) {
+			int index = slider.getValue();
 
 			Long timestamp = data.getTimestampByIndex(index);
 
@@ -135,7 +202,7 @@ public class SimpleEditor extends JFrame implements ChangeListener {
 				buffSegmentation.rewind();
 			}
 
-			// view.setUserMap(buffSegmentation);
+			view.setUserMap(buffSegmentation);
 			view.setBackground(buffBackground, 640, 480);
 			view.repaint();
 
