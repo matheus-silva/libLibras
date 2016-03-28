@@ -214,7 +214,7 @@ public class SimpleEditor extends JFrame implements ActionListener, ChangeListen
 
 			@Override
 			public void run() {
-				new SimpleEditor(new File("/home/matheus/Música/Oi"));
+				new SimpleEditor(new File("/home/matheus/Música/Oi - lento"));
 			}
 		});
 	}

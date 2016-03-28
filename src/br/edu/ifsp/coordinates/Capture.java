@@ -75,31 +75,34 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 		seg = new Segmentation(view);
 		imgColor = new ImageCapture(view, ShowObject.COLOR);
 		imgDepth = new ImageCapture(view, ShowObject.DEPTH);
-		
-		this.userTracker = UserTracker.create();
 		this.view = view;
-
-		userTracker.addNewFrameListener(this);
-
+		
 		Device d = null;
 		try {
 			d = Device.open(OpenNI.enumerateDevices().get(0).getUri());
+			
+			this.userTracker = UserTracker.create();
+
+			userTracker.addNewFrameListener(this);
+			
+			if(d.isImageRegistrationModeSupported(ImageRegistrationMode.DEPTH_TO_COLOR)){
+				d.setImageRegistrationMode(ImageRegistrationMode.DEPTH_TO_COLOR);
+			}
+			
+			//d.setDepthColorSyncEnabled(true);
+			
+			VideoStream video = VideoStream.create(d, SensorType.COLOR);
+
+			video.addNewFrameListener(this);
+			video.start();
+			
+			
 		} catch (Exception e) {
 			System.out.println("Error during the loading of the sensor.");
 			System.out.println("Make sure that there is a sensor connected and try again.");
+			e.printStackTrace();
 			System.exit(0);
 		}
-
-		d.setImageRegistrationMode(ImageRegistrationMode.DEPTH_TO_COLOR);
-
-		
-		
-		VideoStream video = VideoStream.create(d, SensorType.COLOR);
-
-		video.addNewFrameListener(this);
-		video.start();
-		
-		VideoMode mode = video.getVideoMode();
 	}
 
 	@Override
@@ -115,13 +118,13 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 			imgColor.startRecording();
 		}
 
-		//new Thread(new Runnable() {
+		// new Thread(new Runnable() {
 
-			//@Override
-			//public void run() {
-				imgColor.setImageData(frameColor);
-			//}
-		//}).start();
+		// @Override
+		// public void run() {
+		imgColor.setImageData(frameColor);
+		// }
+		// }).start();
 
 		if (startRecordingUsers) {
 			timestamp.add(frameColor.getTimestamp());
@@ -171,13 +174,13 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 				coor.startRecording();
 			}
 
-			//new Thread(new Runnable() {
-				//@Override
-				//public void run() {
-					coor.getUserJoints(userTracker, user, frameDepth.getTimestamp(), frameDepth.getWidth(),
-							frameDepth.getHeight());
-				//}
-			//}).start();
+			// new Thread(new Runnable() {
+			// @Override
+			// public void run() {
+			coor.getUserJoints(userTracker, user, frameDepth.getTimestamp(), frameDepth.getWidth(),
+					frameDepth.getHeight());
+			// }
+			// }).start();
 
 		}
 
@@ -190,19 +193,19 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 			imgDepth.startRecording();
 		}
 
-		//new Thread(new Runnable() {
-			//@Override
-			//public void run() {
-				seg.setUserMap(frame.getUserMap(), frame.getTimestamp());
-			//}
-		//}).start();
+		// new Thread(new Runnable() {
+		// @Override
+		// public void run() {
+		seg.setUserMap(frame.getUserMap(), frame.getTimestamp());
+		// }
+		// }).start();
 
-		//new Thread(new Runnable() {
-			//@Override
-			//public void run() {
-				imgDepth.setImageData(frameDepth);				
-			//}
-		//}).start();
+		// new Thread(new Runnable() {
+		// @Override
+		// public void run() {
+		imgDepth.setImageData(frameDepth);
+		// }
+		// }).start();
 
 		if (startRecordingUsers) {
 			timestamp.add(frameDepth.getTimestamp());
@@ -387,7 +390,7 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 	/**
 	 * Stop recording the user movements right away
 	 */
-	public void stopRecordingUsers() {		
+	public void stopRecordingUsers() {
 		for (UserData user : frame.getUsers()) {
 			stopRecording(user);
 		}
@@ -444,11 +447,11 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 
 	public CaptureData getRecordedData() {
 		CaptureData data = new CaptureData();
-		
+
 		data.setWidth(videoColor.getVideoMode().getResolutionX());
 		data.setHeight(videoColor.getVideoMode().getResolutionY());
 		data.setFps(videoColor.getVideoMode().getFps());
-		
+
 		data.setTimestamp(timestamp);
 
 		data.setSegmentation(seg.getRecordedData());

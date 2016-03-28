@@ -41,6 +41,8 @@ public class Load {
 	private File file;
 	private CaptureData data;
 	private boolean loaded;
+	
+	private static String directory = "/home/matheus/Música";
 
 	public static void main(String args[]) {
 		ByteBuffer buff = new Load().loadBuffer(new File("/home/matheus/Música/Olá/Depth/3608575622.bin"));
@@ -61,7 +63,7 @@ public class Load {
 	}
 
 	public File open(Component father) {
-		JFileChooser chooser = new JFileChooser();
+		JFileChooser chooser = new JFileChooser(Load.directory);
 		chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 		if (chooser.showOpenDialog(father) == JFileChooser.APPROVE_OPTION) {
 			File f = chooser.getSelectedFile();
