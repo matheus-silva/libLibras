@@ -58,16 +58,17 @@ public class Segmentation implements UserTracker.NewFrameListener {
 	public synchronized void setUserMap(UserMap user, long timestamp) {
 		ByteBuffer buff = user.getPixels().order(ByteOrder.LITTLE_ENDIAN);
 		
-		if (view != null) {
-			//view.setUserMap(buff);
-		}
-		
 		if(startRecording){
 			//byte b[] = new byte[buff.limit()];
 			//buff.get(b);
 			segmentation.put(timestamp, buff);
 			System.out.println("Segmentation Received");
 		}
+		
+		if (view != null) {
+			//view.setUserMap(buff);
+		}
+		
 	}
 
 	public void startRecording() {

@@ -193,31 +193,30 @@ public class Coordinate implements UserTracker.NewFrameListener {
 		}
 		System.out.println();*/
 
+		if(startRecordingUsers){
+			System.out.println("Skeleton Received");
+			
+			Map<Long, Float[][]> userDepth = coordinatesDepth.get(user.getId());
+			if (userDepth == null) {
+				userDepth = createMapStructure();
+				coordinatesDepth.put(user.getId(), userDepth);
+			}
+			
+			userDepth.put(timestamp, depth);
+			
+			Map<Long, Float[][]> userReal = coordinatesReal.get(user.getId());
+			if(userReal == null){
+				userReal = createMapStructure();
+				coordinatesReal.put(user.getId(), userReal);
+			}
+			
+			userReal.put(timestamp, realWorld);
+		}
+		
 		if (view != null) {
 			view.setUserCoordinate(depth, width, height);
 		}
 		
-		if(!startRecordingUsers){
-			return;
-		}
-
-		System.out.println("Skeleton Received");
-		
-		Map<Long, Float[][]> userDepth = coordinatesDepth.get(user.getId());
-		if (userDepth == null) {
-			userDepth = createMapStructure();
-			coordinatesDepth.put(user.getId(), userDepth);
-		}
-		
-		userDepth.put(timestamp, depth);
-		
-		Map<Long, Float[][]> userReal = coordinatesReal.get(user.getId());
-		if(userReal == null){
-			userReal = createMapStructure();
-			coordinatesReal.put(user.getId(), userReal);
-		}
-		
-		userReal.put(timestamp, realWorld);
 	}
 
 	/**

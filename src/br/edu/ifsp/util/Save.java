@@ -195,12 +195,18 @@ public class Save extends Thread {
 			sb.append("Height: " + data.getHeight() + "\n");
 			sb.append("FPS: " + data.getFps() + "\n");
 
+			System.out.println("Config");
 			saveString(new File(directory.toFile().getAbsolutePath() + File.separator + "Config.txt"), sb.toString());
+			System.out.println("Coordinate Depth");
 			saveCoords(new File(coordinates.toFile().getAbsolutePath() + File.separator + "Depth.txt"), data.getCoordinateDepth());
+			System.out.println("Coordinate Real");
 			saveCoords(new File(coordinates.toFile().getAbsolutePath() + File.separator + "Real.txt"), data.getCoordinateReal());
 
+			System.out.println("Color");
 			saveBuffers(depth.toFile(), data.getImageDepth());
+			System.out.println("Depth");
 			saveBuffers(color.toFile(), data.getImageColor());
+			System.out.println("Segmentation");
 			saveBuffers(segmentation.toFile(), data.getSegmentation());
 
 			// saveCoords(null, 0L, null);

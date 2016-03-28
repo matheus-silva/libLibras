@@ -74,6 +74,18 @@ public class ImageCapture implements VideoStream.NewFrameListener {
 		this.frame = frame;
 		ByteBuffer buff = frame.getData().order(ByteOrder.LITTLE_ENDIAN);
 		
+		if (startRecording) {
+			ByteBuffer newBuffer = ByteBuffer.allocate(buff.capacity());
+			buff.rewind();
+			newBuffer.put(buff);
+			buff.rewind();
+			newBuffer.flip();
+			
+			imageCapture.put(frame.getTimestamp(), newBuffer);
+			//System.out.println("Image " + (camera == COLOR ? "Color" :
+			// "Depth") + " Received");
+		}
+		
 		if (view != null) {
 			// view.setCamera(camera);
 			if (view.getCamera() == camera) {
@@ -88,20 +100,7 @@ public class ImageCapture implements VideoStream.NewFrameListener {
 					}
 				}).start();
 			}
-		}
-
-		if (startRecording) {
-			ByteBuffer newBuffer = ByteBuffer.allocate(buff.capacity());
-			buff.rewind();
-			newBuffer.put(buff);
-			buff.rewind();
-			newBuffer.flip();
-			
-			imageCapture.put(frame.getTimestamp(), newBuffer);
-			//System.out.println("Image " + (camera == COLOR ? "Color" :
-			// "Depth") + " Received");
-		}
-		
+		}		
 		
 	}
 
