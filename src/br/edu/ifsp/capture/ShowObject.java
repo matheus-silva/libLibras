@@ -103,6 +103,10 @@ public class ShowObject extends Component {
 		g.setColor(Color.red);
 		g.setPaintMode();
 		
+		if(fs == null){
+			return;
+		}
+		
 		for (int i = 0; i < skelCoor.length; i++) {
 			g.drawLine((int) (getWidth() * fs[skelCoor[i][0]][0] / width),
 					(int) (getHeight() * fs[skelCoor[i][0]][1] / height),

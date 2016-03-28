@@ -147,7 +147,7 @@ public class SimpleEditor extends JFrame implements ChangeListener {
 
 			@Override
 			public void run() {
-				new SimpleEditor(new File("/home/matheus/Música/Arquivo Exemplo"));
+				new SimpleEditor(new File("/home/matheus/Música/Oi"));
 			}
 		});
 	}
