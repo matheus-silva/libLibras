@@ -8,8 +8,8 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.nio.ByteBuffer;
 import java.nio.ShortBuffer;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class ShowObject extends Component {
 
@@ -21,10 +21,18 @@ public class ShowObject extends Component {
 	private ByteBuffer buffBackground;
 	private ByteBuffer buffUser;
 	private int[] pixels;
-	private List<Float[][]> coordinate = new ArrayList<>();
+	private List<Float[][]> coordinate;
 	private int[] mColors = new int[] { 0xFFFF0000, 0xFF00FF00, 0xFF0000FF, 0xFFFFFF00, 0xFFFF00FF, 0xFF00FFFF };
 	private String status;
 
+	public ShowObject(){
+		this.coordinate = createStructure();
+	}
+	
+	private List<Float[][]> createStructure(){
+		return new CopyOnWriteArrayList<>();
+	}
+	
 	public void setStatus(String status) {
 		this.status = status;
 	}
@@ -65,7 +73,7 @@ public class ShowObject extends Component {
 
 		drawStatus(g2d);
 
-		coordinate = new ArrayList<>();
+		coordinate = createStructure();
 	}
 
 	private void drawStatus(Graphics2D g) {
