@@ -171,6 +171,7 @@ public class SimpleEditor extends JFrame implements ActionListener, ChangeListen
 			}
 			data.setTimestamp(time);
 		}
+		stateChanged(new ChangeEvent(slider));
 	}
 
 	@Override
