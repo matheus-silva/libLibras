@@ -20,6 +20,7 @@ public class ShowObject extends Component {
 	private int camera = COLOR;
 	private ByteBuffer buffBackground;
 	private ByteBuffer buffUser;
+	private ByteBuffer buffNewUser;
 	private int[] pixels;
 	private List<Float[][]> coordinate;
 	private int[] mColors = new int[] { 0xFFFF0000, 0xFF00FF00, 0xFF0000FF, 0xFFFFFF00, 0xFFFF00FF, 0xFF00FFFF };
@@ -177,6 +178,9 @@ public class ShowObject extends Component {
 			// ByteBuffer user = buffUser.duplicate();
 
 			buffBackground.rewind();
+			buffUser.rewind();
+			
+			short[] b = new short[buffUser.limit()];
 
 			int pos = 0;
 			// System.out.println("Background: " + buffBackground.limit() + " |

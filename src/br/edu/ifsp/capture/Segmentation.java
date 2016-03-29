@@ -61,12 +61,32 @@ public class Segmentation implements UserTracker.NewFrameListener {
 		if(startRecording){
 			//byte b[] = new byte[buff.limit()];
 			//buff.get(b);
-			segmentation.put(timestamp, buff);
+			
+			//ByteBuffer newBuffer = ByteBuffer.allocate(buff.capacity());
+			//buff.rewind();
+			//newBuffer.put(buff);
+			//buff.rewind();
+			//newBuffer.flip();
+			
+			
+			//byte b[] = new byte[buff.limit()];
+			//buff.rewind();
+			
+			//while(buff.remaining() > 0){
+				//int pos = buff.position();
+				//b[pos] = buff.get();
+			//}
+			buff.rewind();
+			ByteBuffer newBuffer = buff.duplicate();
+			buff.rewind();
+			segmentation.put(timestamp, newBuffer);
 			System.out.println("Segmentation Received");
 		}
 		
 		if (view != null) {
-			//view.setUserMap(buff);
+			view.setUserMap(buff);
+			
+			
 		}
 		
 	}
