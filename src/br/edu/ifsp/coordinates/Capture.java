@@ -68,35 +68,38 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 	 *            The object used to show the images created by the sensor.
 	 */
 	public Capture(ShowObject view) {
-		OpenNI.initialize();
-		NiTE.initialize();
-
+		try {
+			OpenNI.initialize();
+			NiTE.initialize();
+		} catch (Exception e) {
+			System.out.println("Error during the loading of the dependents libraries.");			
+			e.printStackTrace();
+		}
 		coor = new Coordinate(view);
 		seg = new Segmentation(view);
 		imgColor = new ImageCapture(view, ShowObject.COLOR);
 		imgDepth = new ImageCapture(view, ShowObject.DEPTH);
 		this.view = view;
-		
+
 		Device d = null;
 		try {
 			d = Device.open(OpenNI.enumerateDevices().get(0).getUri());
-			
+
 			this.userTracker = UserTracker.create();
 
 			userTracker.addNewFrameListener(this);
-			
-			if(d.isImageRegistrationModeSupported(ImageRegistrationMode.DEPTH_TO_COLOR)){
+
+			if (d.isImageRegistrationModeSupported(ImageRegistrationMode.DEPTH_TO_COLOR)) {
 				d.setImageRegistrationMode(ImageRegistrationMode.DEPTH_TO_COLOR);
 			}
-			
-			//d.setDepthColorSyncEnabled(true);
-			
+
+			// d.setDepthColorSyncEnabled(true);
+
 			VideoStream video = VideoStream.create(d, SensorType.COLOR);
 
 			video.addNewFrameListener(this);
 			video.start();
-			
-			
+
 		} catch (Exception e) {
 			System.out.println("Error during the loading of the sensor.");
 			System.out.println("Make sure that there is a sensor connected and try again.");
