@@ -622,7 +622,7 @@ public class Editor extends JFrame implements ChangeListener, ActionListener {
 
 	public static void main(String args[]) {
 		for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-			System.out.println(info.getName());
+			//System.out.println(info.getName());
 			if ("Metal".equals(info.getName())) {
 				try {
 					javax.swing.UIManager.setLookAndFeel(info.getClassName());

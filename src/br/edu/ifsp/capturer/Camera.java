@@ -1,4 +1,4 @@
-package br.edu.ifsp.application;
+package br.edu.ifsp.capturer;
 
 import java.awt.Container;
 import java.awt.GridLayout;
