@@ -41,6 +41,7 @@ public class SimpleEditor extends JFrame implements ActionListener, ChangeListen
 	private JSlider slider;
 	private JMenuBar menu;
 	private JMenu mFile, mView;
+	private JMenuItem mOpen;
 	private JMenuItem mColor, mDepth, mSkeleton, mSegmentation;
 
 	public SimpleEditor() {
@@ -52,19 +53,14 @@ public class SimpleEditor extends JFrame implements ActionListener, ChangeListen
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setSize(640, 580);
 		setJMenuBar(getMenu());
-
 		setVisible(true);
+		load = new Load();
 
-		Container c = getContentPane();
-		c.setLayout(new BorderLayout());
+		if (file != null) {
+			initialize(file);
 
-		initialize(file);
-
-		c.add(BorderLayout.CENTER, getComponent());
-		c.add(BorderLayout.SOUTH, getControl());
-
-		c.revalidate();
-		c.repaint();
+			initializeComponents();
+		}
 	}
 
 	private CaptureData load(File file) {
@@ -72,7 +68,6 @@ public class SimpleEditor extends JFrame implements ActionListener, ChangeListen
 	}
 
 	private void initialize(File file) {
-		load = new Load();
 		if (file != null) {
 			data = load(file);
 		}
@@ -83,21 +78,41 @@ public class SimpleEditor extends JFrame implements ActionListener, ChangeListen
 		imgColor = new ImageCapture(view, ImageCapture.COLOR);
 	}
 
+	private void initializeComponents() {
+		Container c = getContentPane();
+		c.setLayout(new BorderLayout());
+		
+		c.removeAll();
+		c.revalidate();
+
+		c.add(BorderLayout.CENTER, getComponent());
+		c.add(BorderLayout.SOUTH, getControl());
+
+		c.revalidate();
+		c.repaint();
+	}
+
 	private JMenuBar getMenu() {
 		menu = new JMenuBar();
 
 		mFile = new JMenu("File");
 		mView = new JMenu("View");
 
+		mOpen = new JMenuItem("Open");
+
 		mColor = new JMenuItem("Color");
 		mDepth = new JMenuItem("Depth");
 		mSkeleton = new JMenuItem("Skeleton");
 		mSegmentation = new JMenuItem("Segmentation");
 
+		mOpen.addActionListener(this);
+
 		mColor.addActionListener(this);
 		mDepth.addActionListener(this);
 		mSkeleton.addActionListener(this);
 		mSegmentation.addActionListener(this);
+
+		mFile.add(mOpen);
 
 		mView.add(mColor);
 		mView.add(mDepth);
@@ -139,14 +154,13 @@ public class SimpleEditor extends JFrame implements ActionListener, ChangeListen
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == mColor) {
 			view.setCamera(ShowObject.COLOR);
-			
+
 			Set<Long> time = new TreeSet<>();
 			for (Long l : data.getImageColor().keySet()) {
 				time.add(l);
 			}
 			data.setTimestamp(time);
 
-			
 		} else if (e.getSource() == mDepth) {
 			view.setCamera(ShowObject.DEPTH);
 
@@ -156,20 +170,26 @@ public class SimpleEditor extends JFrame implements ActionListener, ChangeListen
 			}
 			data.setTimestamp(time);
 		} else if (e.getSource() == mSkeleton) {
-			
+
 			Set<Long> time = new TreeSet<>();
 			for (Long l : data.getCoordinateDepth().keySet()) {
 				time.add(l);
 			}
 			data.setTimestamp(time);
-		} else if (e.getSource() == mSegmentation){
+		} else if (e.getSource() == mSegmentation) {
 			view.setCamera(ShowObject.DEPTH);
-			
+
 			Set<Long> time = new TreeSet<>();
 			for (Long l : data.getSegmentation().keySet()) {
 				time.add(l);
 			}
 			data.setTimestamp(time);
+		} else if (e.getSource() == mOpen) {
+			File file = load.open(this);
+
+			initialize(file);
+			
+			initializeComponents();
 		}
 		stateChanged(new ChangeEvent(slider));
 	}
@@ -215,7 +235,7 @@ public class SimpleEditor extends JFrame implements ActionListener, ChangeListen
 
 			@Override
 			public void run() {
-				new SimpleEditor(new File("/home/matheus/Música/T"));
+				new SimpleEditor(new File("/home/matheus/Música/Teste"));
 			}
 		});
 	}

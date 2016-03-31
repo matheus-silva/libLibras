@@ -214,7 +214,7 @@ public class Load {
 
 			@Override
 			public void run() {
-				System.out.println("Loading");
+				System.out.println("Loading " + file.getAbsolutePath());
 				try {
 					File depth = new File(file.getAbsoluteFile() + File.separator + "Depth");
 					File color = new File(file.getAbsoluteFile() + File.separator + "Color");
