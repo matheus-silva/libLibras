@@ -1,8 +1,6 @@
 package br.edu.ifsp.capture;
 
 import java.awt.EventQueue;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,9 +16,7 @@ import com.primesense.nite.SkeletonJoint;
 import com.primesense.nite.SkeletonState;
 import com.primesense.nite.UserData;
 import com.primesense.nite.UserTracker;
-import com.primesense.nite.UserTrackerFrameRef;
-
-import br.edu.ifsp.coordinates.ComponentViewer;;
+import com.primesense.nite.UserTrackerFrameRef;;
 
 /**
  * This is the class responsible for recording the movements of the users. It

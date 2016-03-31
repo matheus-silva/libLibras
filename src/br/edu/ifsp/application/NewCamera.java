@@ -6,7 +6,6 @@ import java.awt.GridLayout;
 import javax.swing.JFrame;
 
 import br.edu.ifsp.capture.ShowObject;
-import br.edu.ifsp.coordinates.Viewer;
 
 public class NewCamera extends JFrame implements Runnable {
 
