@@ -17,19 +17,34 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.plaf.basic.BasicSliderUI;
 
+/**
+ * An extension of JSlider to select a range of values using two thumb controls.
+ * The thumb controls are used to select the lower and upper value of a range
+ * with predetermined minimum and maximum values.
+ * 
+ * <p>
+ * Note that RangeSlider makes use of the default BoundedRangeModel, which
+ * supports an inner range defined by a value and an extent. The upper value
+ * returned by RangeSlider is simply the lower value plus the extent.
+ * </p>
+ * 
+ * Adapted from: <https://github.com/ernieyu/Swing-range-slider>
+ * 
+ * @author Ernest Yu
+ */
 public class RangeSlider extends JSlider {
 
 	/**
-	 * Constructs a RangeSlider with default minimum and maximum values of 0
-	 * and 100.
+	 * Constructs a RangeSlider with default minimum and maximum values of 0 and
+	 * 100.
 	 */
 	public RangeSlider() {
 		initSlider();
 	}
 
 	/**
-	 * Constructs a RangeSlider with the specified default minimum and
-	 * maximum values.
+	 * Constructs a RangeSlider with the specified default minimum and maximum
+	 * values.
 	 */
 	public RangeSlider(int min, int max) {
 		super(min, max);
@@ -44,8 +59,8 @@ public class RangeSlider extends JSlider {
 	}
 
 	/**
-	 * Overrides the superclass method to install the UI delegate to draw
-	 * two thumbs.
+	 * Overrides the superclass method to install the UI delegate to draw two
+	 * thumbs.
 	 */
 	@Override
 	public void updateUI() {
@@ -105,8 +120,8 @@ public class RangeSlider extends JSlider {
 }
 
 /**
- * UI delegate for the RangeSlider component. RangeSliderUI paints two
- * thumbs, one for the lower value and one for the upper value.
+ * UI delegate for the RangeSlider component. RangeSliderUI paints two thumbs,
+ * one for the lower value and one for the upper value.
  */
 class RangeSliderUI extends BasicSliderUI {
 
@@ -132,20 +147,20 @@ class RangeSliderUI extends BasicSliderUI {
 	public RangeSliderUI(RangeSlider b) {
 		super(b);
 	}
-	
-	public boolean isLowerDragging(){
+
+	public boolean isLowerDragging() {
 		return this.lowerDragging;
 	}
-	
-	public boolean isUpperDragging(){
+
+	public boolean isUpperDragging() {
 		return this.upperDragging;
 	}
-	
-	public boolean isLowerSelected(){
+
+	public boolean isLowerSelected() {
 		return !this.upperThumbSelected;
 	}
-	
-	public boolean isUpperSelected(){
+
+	public boolean isUpperSelected() {
 		return this.upperThumbSelected;
 	}
 
@@ -343,8 +358,7 @@ class RangeSliderUI extends BasicSliderUI {
 	}
 
 	/**
-	 * Paints the thumb for the lower value using the specified graphics
-	 * object.
+	 * Paints the thumb for the lower value using the specified graphics object.
 	 */
 	private void paintLowerThumb(Graphics g) {
 		Rectangle knobBounds = thumbRect;
@@ -372,8 +386,7 @@ class RangeSliderUI extends BasicSliderUI {
 	}
 
 	/**
-	 * Paints the thumb for the upper value using the specified graphics
-	 * object.
+	 * Paints the thumb for the upper value using the specified graphics object.
 	 */
 	private void paintUpperThumb(Graphics g) {
 		Rectangle knobBounds = upperThumbRect;
@@ -410,8 +423,8 @@ class RangeSliderUI extends BasicSliderUI {
 	}
 
 	/**
-	 * Sets the location of the upper thumb, and repaints the slider. This
-	 * is called when the upper thumb is dragged to repaint the slider. The
+	 * Sets the location of the upper thumb, and repaints the slider. This is
+	 * called when the upper thumb is dragged to repaint the slider. The
 	 * <code>setThumbLocation()</code> method performs the same task for the
 	 * lower thumb.
 	 */
@@ -427,9 +440,8 @@ class RangeSliderUI extends BasicSliderUI {
 	}
 
 	/**
-	 * Moves the selected thumb in the specified direction by a block
-	 * increment. This method is called when the user presses the Page Up or
-	 * Down keys.
+	 * Moves the selected thumb in the specified direction by a block increment.
+	 * This method is called when the user presses the Page Up or Down keys.
 	 */
 	public void scrollByBlock(int direction) {
 		synchronized (slider) {
@@ -450,9 +462,8 @@ class RangeSliderUI extends BasicSliderUI {
 	}
 
 	/**
-	 * Moves the selected thumb in the specified direction by a unit
-	 * increment. This method is called when the user presses one of the
-	 * arrow keys.
+	 * Moves the selected thumb in the specified direction by a unit increment.
+	 * This method is called when the user presses one of the arrow keys.
 	 */
 	public void scrollByUnit(int direction) {
 		synchronized (slider) {
@@ -470,8 +481,8 @@ class RangeSliderUI extends BasicSliderUI {
 
 	/**
 	 * Listener to handle model change events. This calculates the thumb
-	 * locations and repaints the slider if the value change is not caused
-	 * by dragging a thumb.
+	 * locations and repaints the slider if the value change is not caused by
+	 * dragging a thumb.
 	 */
 	public class ChangeHandler implements ChangeListener {
 		public void stateChanged(ChangeEvent arg0) {

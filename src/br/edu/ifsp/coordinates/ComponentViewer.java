@@ -16,6 +16,13 @@ import org.openni.SensorType;
 import org.openni.VideoFrameRef;
 import org.openni.VideoStream;
 
+/**
+ * 
+ * Adapted from:
+ * <https://github.com/occipital/OpenNI2/blob/master/Samples/SimpleViewer.java/src/org/openni/Samples/SimpleViewer/SimpleViewer.java>
+ *
+ */
+
 public class ComponentViewer extends Component implements VideoStream.NewFrameListener {
 
 	float mHistogram[];
