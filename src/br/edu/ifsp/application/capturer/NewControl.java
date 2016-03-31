@@ -1,4 +1,4 @@
-package br.edu.ifsp.application;
+package br.edu.ifsp.application.capturer;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -31,8 +31,7 @@ import javax.swing.event.ChangeListener;
 
 import com.primesense.nite.PoseType;
 
-import br.edu.ifsp.capture.ShowObject;
-import br.edu.ifsp.coordinates.Capture;
+import br.edu.ifsp.capturer.ShowObject;
 import br.edu.ifsp.util.Save;
 
 public class NewControl extends JFrame implements ItemListener, ActionListener, ChangeListener {

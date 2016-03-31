@@ -28,10 +28,10 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 
-import br.edu.ifsp.capture.Coordinate;
-import br.edu.ifsp.capture.ImageCapture;
-import br.edu.ifsp.capture.Segmentation;
-import br.edu.ifsp.capture.ShowObject;
+import br.edu.ifsp.capturer.Coordinate;
+import br.edu.ifsp.capturer.ImageCapture;
+import br.edu.ifsp.capturer.Segmentation;
+import br.edu.ifsp.capturer.ShowObject;
 import br.edu.ifsp.editor.Editor;
 
 public class Load {

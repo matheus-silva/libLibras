@@ -1,11 +1,11 @@
-package br.edu.ifsp.application;
+package br.edu.ifsp.application.capturer;
 
 import java.awt.Container;
 import java.awt.GridLayout;
 
 import javax.swing.JFrame;
 
-import br.edu.ifsp.capture.ShowObject;
+import br.edu.ifsp.capturer.ShowObject;
 
 public class NewCamera extends JFrame implements Runnable {
 

@@ -1,4 +1,4 @@
-package br.edu.ifsp.coordinates;
+package br.edu.ifsp.application.capturer;
 
 import java.util.List;
 import java.util.Map;
@@ -20,10 +20,10 @@ import com.primesense.nite.UserData;
 import com.primesense.nite.UserTracker;
 import com.primesense.nite.UserTrackerFrameRef;
 
-import br.edu.ifsp.capture.Coordinate;
-import br.edu.ifsp.capture.ImageCapture;
-import br.edu.ifsp.capture.Segmentation;
-import br.edu.ifsp.capture.ShowObject;
+import br.edu.ifsp.capturer.Coordinate;
+import br.edu.ifsp.capturer.ImageCapture;
+import br.edu.ifsp.capturer.Segmentation;
+import br.edu.ifsp.capturer.ShowObject;
 import br.edu.ifsp.util.CaptureData;;
 
 /**

@@ -1,4 +1,4 @@
-package br.edu.ifsp.capture;
+package br.edu.ifsp.capturer;
 
 import java.awt.Color;
 import java.awt.Component;
