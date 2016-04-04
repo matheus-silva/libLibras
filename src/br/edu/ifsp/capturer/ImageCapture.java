@@ -75,11 +75,24 @@ public class ImageCapture implements VideoStream.NewFrameListener {
 		ByteBuffer buff = frame.getData().order(ByteOrder.LITTLE_ENDIAN);
 		
 		if (startRecording) {
-			ByteBuffer newBuffer = ByteBuffer.allocate(buff.capacity());
+			//byte b[] = new byte[buff.limit()];
+			//buff.get(b);
+			//buff.rewind();
+			//ByteBuffer newBuffer = ByteBuffer.wrap(b).order(ByteOrder.LITTLE_ENDIAN);
+			
+			//ByteBuffer newBuffer = ByteBuffer.allocate(buff.capacity());
+			//buff.rewind();
+			//newBuffer.put(buff);
+			//buff.rewind();
+			//newBuffer.flip();
+			
+			byte b[] = new byte[buff.limit()];
 			buff.rewind();
-			newBuffer.put(buff);
-			buff.rewind();
-			newBuffer.flip();
+			while(buff.remaining() > 0){
+				int pos = buff.position();
+				b[pos] = buff.get();
+			}
+			ByteBuffer newBuffer = ByteBuffer.wrap(b).order(ByteOrder.LITTLE_ENDIAN);
 			
 			imageCapture.put(frame.getTimestamp(), newBuffer);
 			//System.out.println("Image " + (camera == COLOR ? "Color" :

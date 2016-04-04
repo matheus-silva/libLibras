@@ -68,6 +68,7 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 	 *            The object used to show the images created by the sensor.
 	 */
 	public Capture(ShowObject view) {
+		System.out.println("Loading libraries");
 		try {
 			OpenNI.initialize();
 			NiTE.initialize();
@@ -81,6 +82,7 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 		imgDepth = new ImageCapture(view, ShowObject.DEPTH);
 		this.view = view;
 
+		System.out.println("Creating streams");
 		Device d = null;
 		try {
 			d = Device.open(OpenNI.enumerateDevices().get(0).getUri());

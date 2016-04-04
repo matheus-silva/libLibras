@@ -59,10 +59,10 @@ public class Segmentation implements UserTracker.NewFrameListener {
 		ByteBuffer buff = user.getPixels().order(ByteOrder.LITTLE_ENDIAN);
 		
 		if(startRecording){
-			byte b[] = new byte[buff.limit()];
-			buff.get(b);
-			buff.rewind();
-			ByteBuffer newBuffer = ByteBuffer.wrap(b).order(ByteOrder.LITTLE_ENDIAN);
+			//byte b[] = new byte[buff.limit()];
+			//buff.get(b);
+			//buff.rewind();
+			//ByteBuffer newBuffer = ByteBuffer.wrap(b).order(ByteOrder.LITTLE_ENDIAN);
 			
 			//ByteBuffer newBuffer = ByteBuffer.allocate(buff.capacity());
 			//buff.rewind();
@@ -70,20 +70,19 @@ public class Segmentation implements UserTracker.NewFrameListener {
 			//buff.rewind();
 			//newBuffer.flip();
 			
-			
 			//byte b[] = new byte[buff.limit()];
 			//buff.rewind();
-			
 			//while(buff.remaining() > 0){
 				//int pos = buff.position();
 				//b[pos] = buff.get();
 			//}
+			//ByteBuffer newBuffer = ByteBuffer.wrap(b).order(ByteOrder.LITTLE_ENDIAN);
 			
 			//buff.rewind();
 			//ByteBuffer newBuffer = buff.duplicate();
 			//buff.rewind();
 			
-			segmentation.put(timestamp, newBuffer);
+			//segmentation.put(timestamp, newBuffer);
 			System.out.println("Segmentation Received");
 		}
 		
