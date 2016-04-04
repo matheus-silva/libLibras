@@ -2,3 +2,12 @@ The new classes are stored in the package "br.edu.ifsp.capture"
 
 The Virtual Machine arguments for running a main method are:
 -Djava.library.path=/home/matheus/Documentos/OpenNI/OpenNI-Linux-x64-2.2/Tools:/home/matheus/Documentos/NiTE/NiTE-Linux-x64-2.2/Redist
+
+New arguments
+-Djava.library.path=/home/matheus/workspace/libLibras/path/OpenNI:/home/matheus/Documentos/NiTE/NiTE-Linux-x64-2.2/Redist
+
+New arguments
+-Djava.library.path=/usr/java/packages/lib/amd64:/usr/lib/x86_64-linux-gnu/jni:/lib/x86_64-linux-gnu:/usr/lib/x86_64-linux-gnu:/usr/lib/jni:/lib:/usr/lib:/home/matheus/workspace/libLibras/path/OpenNI:/home/matheus/workspace/libLibras/path/NiTE -Xmx4096m -Xms1024m
+
+New arguments:
+-Djava.library.path=/usr/java/packages/lib/amd64:/usr/lib/x86_64-linux-gnu/jni:/lib/x86_64-linux-gnu:/usr/lib/x86_64-linux-gnu:/usr/lib/jni:/lib:/usr/lib:path/OpenNI:path/NiTE -Xmx4096m -Xms1024m

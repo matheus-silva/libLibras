@@ -11,6 +11,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.File;
+import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -77,7 +78,7 @@ public class NewControl extends JFrame implements ItemListener, ActionListener, 
 				case Capture.StateChangedListener.RECORDING_STARTED:
 					lblSeconds.setText("\u25CF");
 					view.setStatus("\u25CF");
-					
+
 					cbStartingPose.setEnabled(false);
 					btStart.setEnabled(false);
 					cbStoppingPose.setEnabled(true);
@@ -86,7 +87,7 @@ public class NewControl extends JFrame implements ItemListener, ActionListener, 
 				case Capture.StateChangedListener.RECORDING_STOPPED:
 					lblSeconds.setText("\u25A0");
 					view.setStatus("\u25A0");
-					
+
 					cbStartingPose.setEnabled(true);
 					btStart.setEnabled(true);
 					cbStoppingPose.setEnabled(false);
@@ -95,7 +96,7 @@ public class NewControl extends JFrame implements ItemListener, ActionListener, 
 				case Capture.StateChangedListener.TIMER_CHANGED:
 					lblSeconds.setText(String.valueOf(capture.getSeconds()));
 					view.setStatus(String.valueOf(capture.getSeconds()));
-					
+
 					cbStartingPose.setEnabled(false);
 					btStart.setEnabled(false);
 					cbStoppingPose.setEnabled(false);
@@ -110,12 +111,13 @@ public class NewControl extends JFrame implements ItemListener, ActionListener, 
 		capture.setStateChanged(stateChanged);
 		// new Thread(camera).start();
 	}
-	
+
 	private void statusBar() {
 		Runtime run = Runtime.getRuntime();
 		long used = (run.maxMemory() - run.freeMemory());
 		double p = (100 * used / run.maxMemory());
-		lblCount.setText("Frames: " + capture.getFramesCount() + " | Memory:  " + (used/1_048_576) + " Mb (" + (p) + "%)");
+		lblCount.setText(
+				"Frames: " + capture.getFramesCount() + " | Memory:  " + (used / 1_048_576) + " Mb (" + (p) + "%)");
 	}
 
 	private void initializeComponentsForm() {
@@ -188,9 +190,9 @@ public class NewControl extends JFrame implements ItemListener, ActionListener, 
 		pnRecord.add(btStop);
 
 		pnTimer.add(lblSeconds);
-		
+
 		pnStatus.add(BorderLayout.CENTER, lblCount);
-		
+
 		lblSeconds.setHorizontalAlignment(SwingConstants.CENTER);
 		c.add(BorderLayout.CENTER, pnTimer);
 		c.add(BorderLayout.EAST, pnSetup);
@@ -217,11 +219,11 @@ public class NewControl extends JFrame implements ItemListener, ActionListener, 
 			camera.setComponentView(NewCamera.IR_STREAM);
 
 		} else if (ie.getSource() == cbStartingPose) {
-			//btStart.setEnabled(cbStartingPose.getSelectedItem().equals("Manual"));
+			// btStart.setEnabled(cbStartingPose.getSelectedItem().equals("Manual"));
 			startingPoseDetection();
 
 		} else if (ie.getSource() == cbStoppingPose) {
-			//btStop.setEnabled(cbStoppingPose.getSelectedItem().equals("Manual"));
+			// btStop.setEnabled(cbStoppingPose.getSelectedItem().equals("Manual"));
 			stoppingPoseDetection();
 		}
 	}
@@ -231,17 +233,17 @@ public class NewControl extends JFrame implements ItemListener, ActionListener, 
 			capture.startRecordingUsers(PoseType.CROSSED_HANDS, (int) sSeconds.getValue());
 		} else if (cbStartingPose.getSelectedItem().equals("PSI")) {
 			capture.startRecordingUsers(PoseType.PSI, (int) sSeconds.getValue());
-		} else if (cbStartingPose.getSelectedItem().equals("Manual")){
+		} else if (cbStartingPose.getSelectedItem().equals("Manual")) {
 			capture.startRecordingUsers(null, (int) sSeconds.getValue());
 		}
 	}
-	
-	private void stoppingPoseDetection(){
+
+	private void stoppingPoseDetection() {
 		if (cbStoppingPose.getSelectedItem().equals("Crossed Hands")) {
 			capture.stopRecordingUsers(PoseType.CROSSED_HANDS);
 		} else if (cbStoppingPose.getSelectedItem().equals("PSI")) {
 			capture.stopRecordingUsers(PoseType.PSI);
-		} else if (cbStoppingPose.getSelectedItem().equals("Manual")){
+		} else if (cbStoppingPose.getSelectedItem().equals("Manual")) {
 			capture.stopRecordingUsers(null);
 		}
 	}
@@ -266,11 +268,11 @@ public class NewControl extends JFrame implements ItemListener, ActionListener, 
 			}
 		} else if (ae.getSource() == btClear) {
 			capture.clearMoviments();
-			
+
 			Runtime run = Runtime.getRuntime();
 			run.runFinalization();
 			run.gc();
-			
+
 			statusBar();
 		}
 	}
@@ -291,4 +293,5 @@ public class NewControl extends JFrame implements ItemListener, ActionListener, 
 
 		new NewControl();
 	}
+
 }
