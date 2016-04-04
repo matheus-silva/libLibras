@@ -26,14 +26,14 @@ public class ShowObject extends Component {
 	private int[] mColors = new int[] { 0xFFFF0000, 0xFF00FF00, 0xFF0000FF, 0xFFFFFF00, 0xFFFF00FF, 0xFF00FFFF };
 	private String status;
 
-	public ShowObject(){
+	public ShowObject() {
 		this.coordinate = createStructure();
 	}
-	
-	private List<Float[][]> createStructure(){
+
+	private List<Float[][]> createStructure() {
 		return new CopyOnWriteArrayList<>();
 	}
-	
+
 	public void setStatus(String status) {
 		this.status = status;
 	}
@@ -103,11 +103,11 @@ public class ShowObject extends Component {
 	public void drawSkeleton(Graphics2D g, Float[][] fs) {
 		g.setColor(Color.red);
 		g.setPaintMode();
-		
-		if(fs == null){
+
+		if (fs == null) {
 			return;
 		}
-		
+
 		for (int i = 0; i < skelCoor.length; i++) {
 			g.drawLine((int) (getWidth() * fs[skelCoor[i][0]][0] / width),
 					(int) (getHeight() * fs[skelCoor[i][0]][1] / height),
@@ -164,48 +164,56 @@ public class ShowObject extends Component {
 		buffBackground.rewind();
 
 		if (buffUser == null) {
-			data.rewind();
-			while (data.remaining() > 0) {
-				int pos = data.position();
-				int depth = data.get();
-				short pixel = (short) mHistogram[depth & 0xFFFF];
-
-				pixels[pos] = 0xFF000000 | (pixel << 16) | (pixel << 8) | pixel;
-				// pixels[pos] = depth;
-			}
+			pixels = getPixelDepthOnly(data, mHistogram, pixels);
 		} else {
-			// ByteBufefer back = buffBackground.duplicate();
-			// ByteBuffer user = buffUser.duplicate();
-
-			buffBackground.rewind();
-			buffUser.rewind();
-			
-			short[] b = new short[buffUser.limit()];
-
-			int pos = 0;
-			// System.out.println("Background: " + buffBackground.limit() + " |
-			// Segmentation: " + buffUser.limit());
-			try {
-				while (buffBackground.remaining() > 0) {
-					short depth = buffBackground.getShort();
-					short userId = buffUser.getShort();
-					short pixel = (short) mHistogram[depth];
-					// short pixel = (short) mHistogram[depth<0?0:depth];
-					int color = 0xFFFFFFFF;
-					if (userId > 0) {
-						color = mColors[userId % mColors.length];
-					}
-
-					pixels[pos] = color & (0xFF000000 | (pixel << 16) | (pixel << 8) | pixel);
-					pos++;
-				}
-			} catch (ArrayIndexOutOfBoundsException e) {
-
-			}
-			// System.out.println(buffBackground.remaining() + " " +
-			// buffUser.remaining());
+			pixels = getPixelDepthSegmentation(data, mHistogram, pixels);
 		}
-		
+
+		return pixels;
+	}
+
+	private int[] getPixelDepthOnly(ShortBuffer data, float mHistogram[], int pixels[]) {
+		data.rewind();
+		while (data.remaining() > 0) {
+			int pos = data.position();
+			int depth = data.get();
+			short pixel = (short) mHistogram[depth & 0xFFFF];
+
+			pixels[pos] = 0xFF000000 | (pixel << 16) | (pixel << 8) | pixel;
+			// pixels[pos] = depth;
+		}
+		return pixels;
+	}
+
+	private int[] getPixelDepthSegmentation(ShortBuffer data, float mHistogram[], int pixels[]) {
+		// ByteBufefer back = buffBackground.duplicate();
+		// ByteBuffer user = buffUser.duplicate();
+
+		buffBackground.rewind();
+		buffUser.rewind();
+
+		short[] b = new short[buffUser.limit()];
+
+		int pos = 0;
+		// System.out.println("Background: " + buffBackground.limit() + " |
+		// Segmentation: " + buffUser.limit());
+		try {
+			while (buffBackground.remaining() > 0) {
+				short depth = buffBackground.getShort();
+				short userId = buffUser.getShort();
+				short pixel = (short) mHistogram[depth];
+				// short pixel = (short) mHistogram[depth<0?0:depth];
+				int color = 0xFFFFFFFF;
+				if (userId > 0) {
+					color = mColors[userId % mColors.length];
+				}
+
+				pixels[pos] = color & (0xFF000000 | (pixel << 16) | (pixel << 8) | pixel);
+				pos++;
+			}
+		} catch (ArrayIndexOutOfBoundsException e) {
+
+		}
 		return pixels;
 	}
 
@@ -232,7 +240,7 @@ public class ShowObject extends Component {
 			mHistogram[i] = 0;
 
 		data.rewind();
-		
+
 		int points = 0;
 		while (data.remaining() > 0) {
 			int pixel = data.getShort() & 0xFFFF;
