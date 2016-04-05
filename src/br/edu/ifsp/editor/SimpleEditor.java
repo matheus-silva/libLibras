@@ -160,6 +160,7 @@ public class SimpleEditor extends JFrame implements ActionListener, ChangeListen
 				time.add(l);
 			}
 			data.setTimestamp(time);
+			slider.setMaximum(time.size());
 
 		} else if (e.getSource() == mDepth) {
 			view.setCamera(ShowObject.DEPTH);
@@ -169,6 +170,7 @@ public class SimpleEditor extends JFrame implements ActionListener, ChangeListen
 				time.add(l);
 			}
 			data.setTimestamp(time);
+			slider.setMaximum(time.size());
 		} else if (e.getSource() == mSkeleton) {
 
 			Set<Long> time = new TreeSet<>();
@@ -176,6 +178,7 @@ public class SimpleEditor extends JFrame implements ActionListener, ChangeListen
 				time.add(l);
 			}
 			data.setTimestamp(time);
+			slider.setMaximum(time.size());
 		} else if (e.getSource() == mSegmentation) {
 			view.setCamera(ShowObject.DEPTH);
 
@@ -184,6 +187,7 @@ public class SimpleEditor extends JFrame implements ActionListener, ChangeListen
 				time.add(l);
 			}
 			data.setTimestamp(time);
+			slider.setMaximum(time.size());
 		} else if (e.getSource() == mOpen) {
 			File file = load.open(this);
 
