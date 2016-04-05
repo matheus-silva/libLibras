@@ -202,6 +202,8 @@ public class NewControl extends JFrame implements ItemListener, ActionListener, 
 		pnSave.add(btSave);
 		pnSave.add(btClear);
 		pnSetup.add(BorderLayout.SOUTH, pnSave);
+		
+		statusBar();
 	}
 
 	@Override
