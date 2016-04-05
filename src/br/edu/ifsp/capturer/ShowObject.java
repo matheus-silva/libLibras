@@ -8,6 +8,7 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.nio.ByteBuffer;
 import java.nio.ShortBuffer;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -186,17 +187,10 @@ public class ShowObject extends Component {
 	}
 
 	private int[] getPixelDepthSegmentation(ShortBuffer data, float mHistogram[], int pixels[]) {
-		// ByteBufefer back = buffBackground.duplicate();
-		// ByteBuffer user = buffUser.duplicate();
-
 		buffBackground.rewind();
 		buffUser.rewind();
-
-		short[] b = new short[buffUser.limit()];
-
+		
 		int pos = 0;
-		// System.out.println("Background: " + buffBackground.limit() + " |
-		// Segmentation: " + buffUser.limit());
 		try {
 			while (buffBackground.remaining() > 0) {
 				short depth = buffBackground.getShort();
@@ -212,7 +206,7 @@ public class ShowObject extends Component {
 				pos++;
 			}
 		} catch (ArrayIndexOutOfBoundsException e) {
-
+			e.printStackTrace();
 		}
 		return pixels;
 	}

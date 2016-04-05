@@ -3,6 +3,7 @@ package br.edu.ifsp.capturer;
 import java.awt.EventQueue;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.ShortBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -31,11 +32,11 @@ public class Segmentation implements UserTracker.NewFrameListener {
 		this.segmentation = createMapStructure();
 		this.view = view;
 	}
-	
-	public static Map<Long, ByteBuffer> createMapStructure(){
+
+	public static Map<Long, ByteBuffer> createMapStructure() {
 		return new HashMap<>();
 	}
-	
+
 	public void captureData() {
 		NiTE.initialize();
 		user = UserTracker.create();
@@ -46,52 +47,69 @@ public class Segmentation implements UserTracker.NewFrameListener {
 	public void onNewFrame(UserTracker user) {
 		this.user = user;
 		this.frame = user.readFrame();
-		
-		
+
 		if (frame != null && frame.getUserMap() != null) {
 			setUserMap(frame.getUserMap(), frame.getTimestamp());
 		}
-		
+
 		this.frame.release();
 	}
 
 	public synchronized void setUserMap(UserMap user, long timestamp) {
 		ByteBuffer buff = user.getPixels().order(ByteOrder.LITTLE_ENDIAN);
-		
-		if(startRecording){
-			//byte b[] = new byte[buff.limit()];
-			//buff.get(b);
-			//buff.rewind();
-			//ByteBuffer newBuffer = ByteBuffer.wrap(b).order(ByteOrder.LITTLE_ENDIAN);
+
+		if (startRecording) {
+			// byte b[] = new byte[buff.limit()];
+			// buff.get(b);
+			// buff.rewind();
+			// ByteBuffer newBuffer =
+			// ByteBuffer.wrap(b).order(ByteOrder.LITTLE_ENDIAN);
+
+			// ByteBuffer newBuffer = ByteBuffer.allocate(buff.capacity());
+			// buff.rewind();
+			// newBuffer.put(buff);
+			// buff.rewind();
+			// newBuffer.flip();
+
+			short b[] = new short[buff.limit()];
+			buff.rewind();
+			int pos = 0;
+			while (buff.remaining() > 0) {
+				short userId = buff.getShort();
+				byte value = 0;
+				if (userId > 0) {
+					value = 1;
+				}
+				b[pos] = value;
+				pos++;
+			}
 			
-			//ByteBuffer newBuffer = ByteBuffer.allocate(buff.capacity());
-			//buff.rewind();
-			//newBuffer.put(buff);
-			//buff.rewind();
-			//newBuffer.flip();
-			
-			//byte b[] = new byte[buff.limit()];
-			//buff.rewind();
-			//while(buff.remaining() > 0){
-				//int pos = buff.position();
-				//b[pos] = buff.get();
-			//}
-			//ByteBuffer newBuffer = ByteBuffer.wrap(b).order(ByteOrder.LITTLE_ENDIAN);
-			
-			//buff.rewind();
-			//ByteBuffer newBuffer = buff.duplicate();
-			//buff.rewind();
-			
-			//segmentation.put(timestamp, newBuffer);
+			// ByteBuffer newBuffer =
+			// ByteBuffer.wrap(b).order(ByteOrder.LITTLE_ENDIAN);
+
+			// System.out.println("Create Short Buffer");
+			// ShortBuffer shortBuffer = buff.asShortBuffer();
+			// System.out.println("Rewind Short Buffer");
+			// shortBuffer.rewind();
+			// System.out.println("Create array");
+			// short s[] = new short[shortBuffer.limit()];
+			// System.out.println("Create pos");
+			// int pos = 0;
+			// while(shortBuffer.remaining() > 0){
+			// System.out.println("Get short value " + pos);
+			// s[pos] = shortBuffer.get();
+			// pos++;
+			// }
+
+			// segmentation.put(timestamp, newBuffer);
 			System.out.println("Segmentation Received");
 		}
-		
+
 		if (view != null) {
 			view.setUserMap(buff);
-			
-			
+
 		}
-		
+
 	}
 
 	public void startRecording() {
@@ -101,12 +119,12 @@ public class Segmentation implements UserTracker.NewFrameListener {
 	public void stopRecording() {
 		this.startRecording = false;
 	}
-	
-	public void clearRecordedData(){
+
+	public void clearRecordedData() {
 		segmentation = createMapStructure();
 	}
-	
-	public Map<Long, ByteBuffer> getRecordedData(){
+
+	public Map<Long, ByteBuffer> getRecordedData() {
 		return segmentation;
 	}
 
@@ -118,7 +136,7 @@ public class Segmentation implements UserTracker.NewFrameListener {
 				ShowObject view = new ShowObject();
 				Segmentation seg = new Segmentation(view);
 				seg.captureData();
-				
+
 				ImageCapture img = new ImageCapture(view, ImageCapture.DEPTH);
 				img.captureData();
 

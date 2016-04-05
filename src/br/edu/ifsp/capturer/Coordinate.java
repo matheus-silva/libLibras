@@ -190,7 +190,7 @@ public class Coordinate implements UserTracker.NewFrameListener {
 		System.out.println();*/
 
 		if(startRecordingUsers){
-			System.out.println("Skeleton Received");
+			//System.out.println("Skeleton Received");
 			
 			Map<Long, Float[][]> userDepth = coordinatesDepth.get(user.getId());
 			if (userDepth == null) {
