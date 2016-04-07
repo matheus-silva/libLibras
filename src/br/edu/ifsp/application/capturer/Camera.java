@@ -7,7 +7,7 @@ import javax.swing.JFrame;
 
 import br.edu.ifsp.capturer.ShowObject;
 
-public class NewCamera extends JFrame implements Runnable {
+public class Camera extends JFrame implements Runnable {
 
 	public static final String COLOR_STREAM = "Color", DEPTH_STREAM = "Depth", IR_STREAM = "Ir";
 	private ShowObject view = null;
@@ -15,7 +15,7 @@ public class NewCamera extends JFrame implements Runnable {
 	public void run() {
 	}
 
-	public NewCamera(ShowObject componentViewer) {
+	public Camera(ShowObject componentViewer) {
 		super("Camera");
 
 		this.view = componentViewer;

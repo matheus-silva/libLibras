@@ -35,9 +35,9 @@ import com.primesense.nite.PoseType;
 import br.edu.ifsp.capturer.ShowObject;
 import br.edu.ifsp.util.Save;
 
-public class NewControl extends JFrame implements ItemListener, ActionListener, ChangeListener {
+public class Control extends JFrame implements ItemListener, ActionListener, ChangeListener {
 
-	private NewCamera camera;
+	private Camera camera;
 	private ShowObject view;
 	private Capture capture;
 	private Capture.StateChangedListener stateChanged;
@@ -52,7 +52,7 @@ public class NewControl extends JFrame implements ItemListener, ActionListener, 
 	private JButton btStart, btStop, btSave, btClear;
 	private JLabel lblSeconds, lblCount;
 
-	public NewControl() {
+	public Control() {
 		super("New Control");
 
 		initialize();
@@ -69,7 +69,7 @@ public class NewControl extends JFrame implements ItemListener, ActionListener, 
 
 		capture = new Capture(view);
 
-		camera = new NewCamera(view);
+		camera = new Camera(view);
 		stateChanged = new Capture.StateChangedListener() {
 
 			@Override
@@ -212,13 +212,13 @@ public class NewControl extends JFrame implements ItemListener, ActionListener, 
 			return;
 		}
 		if (ie.getSource() == rbColor) {
-			camera.setComponentView(NewCamera.COLOR_STREAM);
+			camera.setComponentView(Camera.COLOR_STREAM);
 
 		} else if (ie.getSource() == rbDepth) {
-			camera.setComponentView(NewCamera.DEPTH_STREAM);
+			camera.setComponentView(Camera.DEPTH_STREAM);
 
 		} else if (ie.getSource() == rbIr) {
-			camera.setComponentView(NewCamera.IR_STREAM);
+			camera.setComponentView(Camera.IR_STREAM);
 
 		} else if (ie.getSource() == cbStartingPose) {
 			// btStart.setEnabled(cbStartingPose.getSelectedItem().equals("Manual"));
@@ -287,13 +287,13 @@ public class NewControl extends JFrame implements ItemListener, ActionListener, 
 					javax.swing.UIManager.setLookAndFeel(info.getClassName());
 				} catch (ClassNotFoundException | InstantiationException | IllegalAccessException
 						| UnsupportedLookAndFeelException ex) {
-					Logger.getLogger(NewControl.class.getName()).log(Level.SEVERE, null, ex);
+					Logger.getLogger(Control.class.getName()).log(Level.SEVERE, null, ex);
 				}
 				break;
 			}
 		}
 
-		new NewControl();
+		new Control();
 	}
 
 }
