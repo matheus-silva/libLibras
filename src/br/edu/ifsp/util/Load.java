@@ -15,9 +15,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -301,41 +303,41 @@ public class Load {
 	}
 
 	public float[][][] loadFile(File arquivo) {
-		Charset c = StandardCharsets.UTF_8;
-		Path get = Paths.get(arquivo.toURI());
-		List<String> readAllLines = new ArrayList<>();
+		List<String> lines = null;;
 		try {
-			readAllLines = Files.readAllLines(get, c);
-		} catch (IOException ex) {
-			Logger.getLogger(Editor.class.getName()).log(Level.SEVERE, null, ex);
+			lines = Files.readAllLines(Paths.get(arquivo.toURI()));
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
 		}
+		
+		lines.sort(new Comparator<String>() {
 
-		float[][][] moves = new float[readAllLines.size()][15][3];
-		for (int i = 0; i < readAllLines.size(); i++) {
-
-			String linha = readAllLines.get(i);
-			if (linha == null || linha.equals("")) {
-				continue;
+			@Override
+			public int compare(String o1, String o2) {
+				return o1.compareTo(o2);
 			}
-
-			linha = linha.replaceAll("^\\d*", "");
-			linha = linha.replaceAll("^\\[", "");
-			linha = linha.replaceAll("]$", "");
-
-			String[] jointsTemp = linha.split("]\\[");
-			for (int j = 0; j < jointsTemp.length; j++) {
-				String coordTemp[] = jointsTemp[j].split(", ");
+		});
+		
+		float[][][] moves = new float[lines.size()][15][3];
+		Map<Long, float[][]> map = new TreeMap<>(); 
+		for (int i = 0; i < lines.size(); i++) {
+			
+			String temp[] = lines.get(i).split("[0-9] ");
+			String temp2[] = temp[1].split("]\\[");
+			for (int j = 0; j < temp2.length; j++) {
+				temp2[j] = temp2[j].replaceAll("]", "").replaceAll("\\[", "");
+				String temp3[] = temp2[j].split(", ");
 				try {
-					moves[i][j][0] = Float.parseFloat(coordTemp[0]);
-					moves[i][j][1] = Float.parseFloat(coordTemp[1]);
-					moves[i][j][2] = Float.parseFloat(coordTemp[2]);
+					moves[i][j][0] = Float.parseFloat(temp3[0]);
+					moves[i][j][1] = Float.parseFloat(temp3[1]);
+					moves[i][j][2] = Float.parseFloat(temp3[2]);
 				} catch (Exception e) {
-					continue;
+					e.printStackTrace();
 				}
 			}
 
 		}
-
 		return moves;
 	}
 

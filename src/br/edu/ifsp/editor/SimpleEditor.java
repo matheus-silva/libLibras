@@ -178,7 +178,7 @@ public class SimpleEditor extends JFrame implements ActionListener, ChangeListen
 				time.add(l);
 			}
 			data.setTimestamp(time);
-			slider.setMaximum(time.size());
+			slider.setMaximum(time.size() - 1);
 		} else if (e.getSource() == mSegmentation) {
 			view.setCamera(ShowObject.DEPTH);
 
