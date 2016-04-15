@@ -41,7 +41,7 @@ public class Load {
 	private File file;
 	private CaptureData data;
 	private boolean loaded;
-	
+
 	private static String directory = "/home/matheus/Música";
 
 	public static void main(String args[]) {
@@ -173,23 +173,41 @@ public class Load {
 
 			Float[][] coords = new Float[15][3];
 			String temp2[] = temp[1].split("]\\[");
-			
-			for(int j = 0; j < temp2.length; j++){
+
+			for (int j = 0; j < temp2.length; j++) {
 				temp2[j] = temp2[j].replaceAll("]", "").replaceAll("\\[", "");
 				String temp3[] = temp2[j].split(", ");
-				try{
+				try {
 					coords[j][0] = Float.parseFloat(temp3[0]);
 					coords[j][1] = Float.parseFloat(temp3[1]);
 					coords[j][2] = Float.parseFloat(temp3[2]);
-				} catch (Exception e){
+				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
-			
+
 			map.put(timestamp, coords);
 		}
 		return map;
 
+	}
+	
+	private void formatSegmentation(Map<Long, ByteBuffer> segmentation) {
+		for (Long v : segmentation.keySet()) {
+			ByteBuffer buff = segmentation.get(v).order(ByteOrder.LITTLE_ENDIAN);
+			byte b[] = new byte[buff.limit()];
+			buff.rewind();
+			buff.get(b);
+			buff.rewind();
+			byte bNew[] = new byte[buff.limit()];
+			for (int i = 1, j = 0; i < bNew.length; i += 2, j++) {
+				byte value = b[j];
+				bNew[i - 1] = 0;
+				bNew[i] = value;
+			}
+			ByteBuffer buffNew = ByteBuffer.wrap(bNew).order(ByteOrder.LITTLE_ENDIAN);
+			segmentation.put(v, buffNew);
+		}
 	}
 
 	public synchronized CaptureData loadFile(Component father, File file) {
@@ -227,7 +245,7 @@ public class Load {
 					System.out.println("Coordinate Real");
 					data.setCoordinateReal(loadCoords(new File(coor.getAbsolutePath() + File.separator + "Real.txt"),
 							Coordinate.createMapStructure()));
-					
+
 					System.out.println("Depth");
 					data.setImageDepth(loadBuffers(depth, ImageCapture.createMapStructure()));
 					System.out.println("Color");
@@ -235,23 +253,23 @@ public class Load {
 					System.out.println("Segmentation");
 					data.setSegmentation(loadBuffers(segmentation, Segmentation.createMapStructure()));
 
-					
+					formatSegmentation(data.getSegmentation());
 
 					Set<Long> time = new TreeSet<>();
 					for (Long l : data.getImageDepth().keySet()) {
 						time.add(l);
 					}
 					for (Long l : data.getImageColor().keySet()) {
-						//time.add(l);
+						// time.add(l);
 					}
 					for (Long l : data.getCoordinateDepth().keySet()) {
-						//time.add(l);
+						// time.add(l);
 					}
 					for (Long l : data.getCoordinateReal().keySet()) {
-						//time.add(l);
+						// time.add(l);
 					}
 					for (Long l : data.getSegmentation().keySet()) {
-						//time.add(l);
+						// time.add(l);
 					}
 
 					data.setTimestamp(time);

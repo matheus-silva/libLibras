@@ -71,21 +71,20 @@ public class Segmentation implements UserTracker.NewFrameListener {
 			// buff.rewind();
 			// newBuffer.flip();
 
-			short b[] = new short[buff.limit()];
-			buff.rewind();
-			int pos = 0;
-			while (buff.remaining() > 0) {
-				short userId = buff.getShort();
-				byte value = 0;
-				if (userId > 0) {
-					value = 1;
-				}
-				b[pos] = value;
-				pos++;
-			}
-			
-			// ByteBuffer newBuffer =
-			// ByteBuffer.wrap(b).order(ByteOrder.LITTLE_ENDIAN);
+			//int[] mColors = new int[] { 0xFFFF0000, 0xFF00FF00, 0xFF0000FF, 0xFFFFFF00, 0xFFFF00FF, 0xFF00FFFF };
+			//int b[] = new int[buff.limit()];
+			//buff.rewind();
+			//int pos = 0;
+			//while (buff.remaining() > 0) {
+				//short userId = buff.getShort();
+				//int color = 0xFFFFFFFF;
+				//if (userId > 0) {
+					//color = mColors[userId % mColors.length];
+				//}
+				//b[pos] = color;
+				//pos++;
+			//}
+			//ByteBuffer newBuffer = ByteBuffer.wrap(b).order(ByteOrder.LITTLE_ENDIAN);
 
 			// System.out.println("Create Short Buffer");
 			// ShortBuffer shortBuffer = buff.asShortBuffer();
@@ -95,9 +94,10 @@ public class Segmentation implements UserTracker.NewFrameListener {
 			// short s[] = new short[shortBuffer.limit()];
 			// System.out.println("Create pos");
 			// int pos = 0;
-			// while(shortBuffer.remaining() > 0){
-			// System.out.println("Get short value " + pos);
+			// while (shortBuffer.remaining() > 2) {
 			// s[pos] = shortBuffer.get();
+			// System.out.println("Get short value " + pos + " | " +
+			// shortBuffer.remaining() + " | " + s[pos]);
 			// pos++;
 			// }
 
@@ -106,10 +106,17 @@ public class Segmentation implements UserTracker.NewFrameListener {
 		}
 
 		if (view != null) {
-			view.setUserMap(buff);
+			view.setUserMap(this, buff, timestamp);
 
 		}
 
+	}
+	
+	public void store(byte values[], long timestamp){
+		if (startRecording) {
+			ByteBuffer buff = ByteBuffer.wrap(values).order(ByteOrder.LITTLE_ENDIAN);
+			segmentation.put(timestamp, buff);
+		}
 	}
 
 	public void startRecording() {

@@ -295,5 +295,14 @@ public class NewControl extends JFrame implements ItemListener, ActionListener, 
 
 		new NewControl();
 	}
-
+	
+	static {
+		String dir = System.getProperty("user.dir");
+		System.load(dir + "\\path\\OpenNI\\OpenNI2\\Drivers\\OniFile.dll");
+		/* C:\Users\Matheus da Silva\git\libLibras\OpenNI2\Drivers\PS1080.dll
+		 * C:\Users\Matheus da Silva\git\libLibras\OpenNI2\Drivers\PSLink.dll
+		 * C:\Users\Matheus da Silva\git\libLibras\NiTE2.jni.dll
+		 * C:\Users\Matheus da Silva\git\libLibras\NiTE2.dll
+		 * */
+	}
 }

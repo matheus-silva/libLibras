@@ -22,6 +22,8 @@ public class ShowObject extends Component {
 	private ByteBuffer buffBackground;
 	private ByteBuffer buffUser;
 	private ByteBuffer buffNewUser;
+	private Segmentation seg;
+	private long timestamp;
 	private int[] pixels;
 	private List<Float[][]> coordinate;
 	private int[] mColors = new int[] { 0xFFFF0000, 0xFF00FF00, 0xFF0000FF, 0xFFFFFF00, 0xFFFF00FF, 0xFF00FFFF };
@@ -47,8 +49,10 @@ public class ShowObject extends Component {
 		return camera;
 	}
 
-	public void setUserMap(ByteBuffer buff) {
+	public void setUserMap(Segmentation seg, ByteBuffer buff, long timestamp) {
+		this.seg = seg;
 		this.buffUser = buff;
+		this.timestamp = timestamp;
 	}
 
 	public void setBackground(ByteBuffer buff, int width, int height) {
@@ -187,9 +191,11 @@ public class ShowObject extends Component {
 	}
 
 	private int[] getPixelDepthSegmentation(ShortBuffer data, float mHistogram[], int pixels[]) {
+		// System.out.println("Seg");
 		buffBackground.rewind();
 		buffUser.rewind();
-		
+		byte values[] = new byte[buffBackground.limit()];
+
 		int pos = 0;
 		try {
 			while (buffBackground.remaining() > 0) {
@@ -198,15 +204,21 @@ public class ShowObject extends Component {
 				short pixel = (short) mHistogram[depth];
 				// short pixel = (short) mHistogram[depth<0?0:depth];
 				int color = 0xFFFFFFFF;
+				int index = 0;
 				if (userId > 0) {
-					color = mColors[userId % mColors.length];
+					index = userId % mColors.length;
+					color = mColors[index];
 				}
 
 				pixels[pos] = color & (0xFF000000 | (pixel << 16) | (pixel << 8) | pixel);
+				values[pos] = (byte) index;
 				pos++;
 			}
 		} catch (ArrayIndexOutOfBoundsException e) {
 			e.printStackTrace();
+		}
+		if (seg != null) {
+			seg.store(values, timestamp);
 		}
 		return pixels;
 	}
