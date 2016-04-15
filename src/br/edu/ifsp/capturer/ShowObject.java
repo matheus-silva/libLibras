@@ -191,7 +191,6 @@ public class ShowObject extends Component {
 	}
 
 	private int[] getPixelDepthSegmentation(ShortBuffer data, float mHistogram[], int pixels[]) {
-		// System.out.println("Seg");
 		buffBackground.rewind();
 		buffUser.rewind();
 		byte values[] = new byte[buffBackground.limit()];
