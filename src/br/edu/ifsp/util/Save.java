@@ -29,7 +29,7 @@ public class Save extends Thread {
 
 	private static String directory = "/home/matheus/Música";
 	
-	public File getFile(Component father) {
+	public File openFile(Component father) {
 		JFileChooser chooser = new JFileChooser(Save.directory);
 		// chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 		if (chooser.showSaveDialog(father) == JFileChooser.APPROVE_OPTION) {

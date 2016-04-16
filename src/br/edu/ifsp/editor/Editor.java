@@ -531,7 +531,7 @@ public class Editor extends JFrame implements ChangeListener, ActionListener {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == mOpen) {
-			File f = new Load().open(this);
+			File f = new Load().openFile(this);
 			if (f != null) {
 				openFile(f);
 			}
@@ -541,7 +541,7 @@ public class Editor extends JFrame implements ChangeListener, ActionListener {
 
 		} else if (e.getSource() == mSaveAs) {
 			Save s = new Save();
-			File f = s.getFile(this);
+			File f = s.openFile(this);
 			if (f != null) {
 				s.saveFile(this, f, history.getCurrentState());
 				// currentFile = f;

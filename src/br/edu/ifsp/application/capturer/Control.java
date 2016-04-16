@@ -262,7 +262,7 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 			capture.stopRecordingUsers();
 		} else if (ae.getSource() == btSave) {
 			Save save = new Save();
-			File f = save.getFile(this);
+			File f = save.openFile(this);
 			if (f != null) {
 				save.saveFile(this, f, capture.getRecordedData());
 				save.clearData();

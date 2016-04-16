@@ -189,7 +189,7 @@ public class SimpleEditor extends JFrame implements ActionListener, ChangeListen
 			data.setTimestamp(time);
 			slider.setMaximum(time.size() - 1);
 		} else if (e.getSource() == mOpen) {
-			File file = load.open(this);
+			File file = load.openDirectory(this);
 
 			initialize(file);
 			
