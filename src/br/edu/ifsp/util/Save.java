@@ -62,7 +62,7 @@ public class Save extends Thread {
 		// getCoords(moviments).getBytes());
 	}
 
-	private void saveBuffer(File file, ByteBuffer buff) {
+	public void saveBuffer(File file, ByteBuffer buff) {
 		BufferedOutputStream out;
 		byte b[] = new byte[buff.limit()];
 

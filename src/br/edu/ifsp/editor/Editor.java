@@ -100,7 +100,7 @@ public class Editor extends JFrame implements ChangeListener, ActionListener {
 
 		setJMenuBar(getMenu());
 
-		if (!(arquivo == null || arquivo.equals(""))) {
+		if (arquivo != null) {
 			openFile(arquivo);
 		}
 
@@ -644,7 +644,7 @@ public class Editor extends JFrame implements ChangeListener, ActionListener {
 			}
 		}
 		// Editor e = new Editor();
-		Editor e = new Editor(new File("data/Dados - Juntas 12.txt"));
+		Editor e = new Editor(new File("C:\\\\Users\\Matheus da Silva\\Documents\\B\\Coordinates\\Real.txt"));
 		// Editor e = new Editor("data/Dados - Real World.txt");
 		e.setVisible(true);
 	}

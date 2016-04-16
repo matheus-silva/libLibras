@@ -38,7 +38,6 @@ public class Coordinate implements UserTracker.NewFrameListener {
 	private UserTrackerFrameRef frame;
 	private Map<Short, Map<Long, Float[][]>> coordinatesDepth = null;
 	private Map<Short, Map<Long, Float[][]>> coordinatesReal = null;
-	private boolean realWorld = true;
 	private boolean startRecordingUsers = false;
 	private ShowObject view = null;
 

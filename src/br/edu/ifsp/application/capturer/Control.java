@@ -109,7 +109,6 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 			}
 		};
 		capture.setStateChanged(stateChanged);
-		// new Thread(camera).start();
 	}
 
 	private void statusBar() {

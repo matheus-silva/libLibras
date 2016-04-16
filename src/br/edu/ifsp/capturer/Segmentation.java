@@ -58,58 +58,19 @@ public class Segmentation implements UserTracker.NewFrameListener {
 	public synchronized void setUserMap(UserMap user, long timestamp) {
 		ByteBuffer buff = user.getPixels().order(ByteOrder.LITTLE_ENDIAN);
 
-		if (startRecording) {
-			// byte b[] = new byte[buff.limit()];
-			// buff.get(b);
-			// buff.rewind();
-			// ByteBuffer newBuffer =
-			// ByteBuffer.wrap(b).order(ByteOrder.LITTLE_ENDIAN);
-
-			// ByteBuffer newBuffer = ByteBuffer.allocate(buff.capacity());
-			// buff.rewind();
-			// newBuffer.put(buff);
-			// buff.rewind();
-			// newBuffer.flip();
-
-			short b[] = new short[buff.limit()];
-			buff.rewind();
-			int pos = 0;
-			while (buff.remaining() > 0) {
-				short userId = buff.getShort();
-				byte value = 0;
-				if (userId > 0) {
-					value = 1;
-				}
-				b[pos] = value;
-				pos++;
-			}
-			
-			// ByteBuffer newBuffer =
-			// ByteBuffer.wrap(b).order(ByteOrder.LITTLE_ENDIAN);
-
-			// System.out.println("Create Short Buffer");
-			// ShortBuffer shortBuffer = buff.asShortBuffer();
-			// System.out.println("Rewind Short Buffer");
-			// shortBuffer.rewind();
-			// System.out.println("Create array");
-			// short s[] = new short[shortBuffer.limit()];
-			// System.out.println("Create pos");
-			// int pos = 0;
-			// while(shortBuffer.remaining() > 0){
-			// System.out.println("Get short value " + pos);
-			// s[pos] = shortBuffer.get();
-			// pos++;
-			// }
-
-			// segmentation.put(timestamp, newBuffer);
-			System.out.println("Segmentation Received");
-		}
-
 		if (view != null) {
-			view.setUserMap(buff);
+			view.setUserMap(this, buff, timestamp);
 
 		}
 
+	}
+	
+	public void store(byte values[], long timestamp){
+		if (startRecording) {
+			// System.out.println("Segmentation Received");
+			ByteBuffer buff = ByteBuffer.wrap(values).order(ByteOrder.LITTLE_ENDIAN);
+			segmentation.put(timestamp, buff);
+		}
 	}
 
 	public void startRecording() {
