@@ -13,6 +13,8 @@ import java.awt.event.FocusListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -296,6 +298,7 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 			if(!isDestinationValid()){
 				return;
 			}
+			File file = getDestinationDirectory();
 			capture.startRecordingUsers();
 		} else if (ae.getSource() == btStop) {
 			capture.stopRecordingUsers();
@@ -353,6 +356,38 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 			return false;
 		}
 		return true;
+	}
+	
+	private File getDestinationDirectory(){
+		String directory = txtDirectory.getText().trim();
+		String person = txtPerson.getText().trim();
+		String sign = txtSign.getText().trim();
+		String s = File.separator;
+		
+		File tempFile = new File(directory + s + person);
+		
+		if(!tempFile.exists()){
+			try {
+				Files.createDirectory(tempFile.toPath());
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
+		File file = new File(directory + s + person + s + sign);
+		
+		if(!file.exists()){
+			try {
+				Files.createDirectory(file.toPath());
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
+		System.out.println(file.getAbsolutePath());
+		return file;
 	}
 
 	public static void main(String args[]) {
