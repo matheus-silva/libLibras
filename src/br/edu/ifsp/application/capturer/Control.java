@@ -36,6 +36,7 @@ import javax.swing.event.ChangeListener;
 import com.primesense.nite.PoseType;
 
 import br.edu.ifsp.capturer.ShowObject;
+import br.edu.ifsp.util.Load;
 import br.edu.ifsp.util.Save;
 import javafx.scene.web.PromptData;
 
@@ -51,6 +52,7 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 	private JComboBox<String> cbStoppingPose = new JComboBox<String>(poseOptions);
 	private JPanel pnTimer, pnCameras, pnSetup, pnRecord, pnSave;
 	private JRadioButton rbColor, rbDepth, rbIr;
+	private JTextField txtDirectory;
 	private ButtonGroup btCamerasGroup;
 	private JSpinner sSeconds;
 	private JButton btStart, btStop, btSave, btClear, btDirectory;
@@ -143,8 +145,10 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 		btStop = new JButton("Stop Recording");
 		btSave = new JButton("Save");
 		btClear = new JButton("Clear");
+		btDirectory = new JButton("Select");
 		lblSeconds = new JLabel();
 		lblCount = new JLabel("Frames: 0");
+		txtDirectory = new JTextField();
 
 		// Creating listeners
 		rbDepth.addItemListener(this);
@@ -156,6 +160,7 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 		btStop.addActionListener(this);
 		btSave.addActionListener(this);
 		btClear.addActionListener(this);
+		btDirectory.addActionListener(this);
 		sSeconds.addChangeListener(this);
 
 		// Basic configurations
@@ -198,11 +203,9 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 
 		lblSeconds.setHorizontalAlignment(SwingConstants.CENTER);
 		
-		btDirectory = new JButton("Select");
-		
 		JPanel pnDirectory = new JPanel(new BorderLayout());
 		pnDirectory.add(BorderLayout.WEST, new JLabel("Path: "));
-		pnDirectory.add(BorderLayout.CENTER, new JTextField());
+		pnDirectory.add(BorderLayout.CENTER, txtDirectory);
 		pnDirectory.add(BorderLayout.EAST, btDirectory);
 		
 		JPanel pnPerson = new JPanel(new BorderLayout());
@@ -256,8 +259,6 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 		} else if (ie.getSource() == cbStoppingPose) {
 			// btStop.setEnabled(cbStoppingPose.getSelectedItem().equals("Manual"));
 			stoppingPoseDetection();
-		} else if(ie.getSource() == btDirectory){
-			
 		}
 	}
 
@@ -307,6 +308,10 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 			run.gc();
 
 			statusBar();
+		} else if(ae.getSource() == btDirectory){
+			Load load = new Load();
+			File file = load.openDirectory(this);
+			txtDirectory.setText(file.getAbsolutePath());
 		}
 	}
 
