@@ -22,6 +22,7 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JSpinner;
@@ -52,7 +53,7 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 	private JComboBox<String> cbStoppingPose = new JComboBox<String>(poseOptions);
 	private JPanel pnTimer, pnCameras, pnSetup, pnRecord, pnSave;
 	private JRadioButton rbColor, rbDepth, rbIr;
-	private JTextField txtDirectory;
+	private JTextField txtDirectory, txtPerson, txtSign;
 	private ButtonGroup btCamerasGroup;
 	private JSpinner sSeconds;
 	private JButton btStart, btStop, btSave, btClear, btDirectory;
@@ -149,6 +150,8 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 		lblSeconds = new JLabel();
 		lblCount = new JLabel("Frames: 0");
 		txtDirectory = new JTextField();
+		txtPerson = new JTextField();
+		txtSign = new JTextField();
 
 		// Creating listeners
 		rbDepth.addItemListener(this);
@@ -210,11 +213,11 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 		
 		JPanel pnPerson = new JPanel(new BorderLayout());
 		pnPerson.add(BorderLayout.WEST, new JLabel("User: "));
-		pnPerson.add(BorderLayout.CENTER, new JTextField());
+		pnPerson.add(BorderLayout.CENTER, txtPerson);
 		
 		JPanel pnSign = new JPanel(new BorderLayout());
 		pnSign.add(BorderLayout.WEST, new JLabel("Sign: "));
-		pnSign.add(BorderLayout.CENTER, new JTextField());
+		pnSign.add(BorderLayout.CENTER, txtSign);
 		
 		JPanel pnPersonSign = new JPanel(new GridLayout(1, 4));
 		pnPersonSign.add(pnPerson);
@@ -290,6 +293,9 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 	@Override
 	public void actionPerformed(ActionEvent ae) {
 		if (ae.getSource() == btStart) {
+			if(!isDestinationValid()){
+				return;
+			}
 			capture.startRecordingUsers();
 		} else if (ae.getSource() == btStop) {
 			capture.stopRecordingUsers();
@@ -313,6 +319,40 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 			File file = load.openDirectory(this);
 			txtDirectory.setText(file.getAbsolutePath());
 		}
+	}
+	
+	private boolean isDestinationValid(){
+		String directory = txtDirectory.getText().trim();
+		String person = txtPerson.getText().trim();
+		String sign = txtSign.getText().trim();
+		
+		if(directory == null || directory.isEmpty()){
+			JOptionPane.showMessageDialog(this, "Please, inform the destination directory", "Error", JOptionPane.ERROR_MESSAGE);
+			txtDirectory.requestFocus();
+			return false;
+		}
+		File dir = new File(directory);
+		if(!dir.exists()){
+			JOptionPane.showMessageDialog(this, "Please, inform an existing directory", "Error", JOptionPane.ERROR_MESSAGE);
+			txtDirectory.requestFocus();
+			return false;
+		}
+		if(dir.isFile()){
+			JOptionPane.showMessageDialog(this, "Please, inform a directory instead of a file", "Error", JOptionPane.ERROR_MESSAGE);
+			txtDirectory.requestFocus();
+			return false;
+		}
+		if(person == null || person.isEmpty()){
+			JOptionPane.showMessageDialog(this, "Please, inform the person's name", "Error", JOptionPane.ERROR_MESSAGE);
+			txtPerson.requestFocus();
+			return false;
+		}
+		if(sign == null || sign.isEmpty()){
+			JOptionPane.showMessageDialog(this, "Please, inform the name of the sign", "Error", JOptionPane.ERROR_MESSAGE);
+			txtSign.requestFocus();
+			return false;
+		}
+		return true;
 	}
 
 	public static void main(String args[]) {
