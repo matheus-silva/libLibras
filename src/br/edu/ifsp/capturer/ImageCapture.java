@@ -1,6 +1,7 @@
 package br.edu.ifsp.capturer;
 
 import java.awt.EventQueue;
+import java.io.File;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.HashMap;
@@ -14,6 +15,8 @@ import org.openni.SensorType;
 import org.openni.VideoFrameRef;
 import org.openni.VideoStream;
 
+import br.edu.ifsp.util.SaveOnline;
+
 public class ImageCapture implements VideoStream.NewFrameListener {
 
 	public static final int COLOR = 0, DEPTH = 1;
@@ -24,6 +27,7 @@ public class ImageCapture implements VideoStream.NewFrameListener {
 	private int camera;
 	private ShowObject view;
 	private Map<Long, ByteBuffer> imageCapture;
+	private File directory;
 
 	public ImageCapture(int camera) {
 		this(null, camera);
@@ -73,21 +77,25 @@ public class ImageCapture implements VideoStream.NewFrameListener {
 	public synchronized void setImageData(VideoFrameRef frame) {
 		this.frame = frame;
 		ByteBuffer buff = frame.getData().order(ByteOrder.LITTLE_ENDIAN);
-		
+
 		if (startRecording) {
 			byte b[] = new byte[buff.limit()];
 			buff.rewind();
-			while(buff.remaining() > 0){
+			while (buff.remaining() > 0) {
 				int pos = buff.position();
 				b[pos] = buff.get();
 			}
 			ByteBuffer newBuffer = ByteBuffer.wrap(b).order(ByteOrder.LITTLE_ENDIAN);
-			
-			imageCapture.put(frame.getTimestamp(), newBuffer);
-			//System.out.println("Image " + (camera == COLOR ? "Color" :
+
+			File file = new File(directory.getAbsolutePath() + File.separator + frame.getTimestamp() + ".bin");
+			SaveOnline save = new SaveOnline(file, newBuffer);
+			new Thread(save).start();
+
+			// imageCapture.put(frame.getTimestamp(), newBuffer);
+			// System.out.println("Image " + (camera == COLOR ? "Color" :
 			// "Depth") + " Received");
 		}
-		
+
 		if (view != null) {
 			// view.setCamera(camera);
 			if (view.getCamera() == camera) {
@@ -102,8 +110,12 @@ public class ImageCapture implements VideoStream.NewFrameListener {
 					}
 				}).start();
 			}
-		}		
-		
+		}
+
+	}
+
+	public void setDirectory(File directory) {
+		this.directory = directory;
 	}
 
 	public void startRecording() {

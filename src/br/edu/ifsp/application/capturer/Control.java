@@ -8,6 +8,8 @@ import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.File;
@@ -23,6 +25,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JSpinner;
+import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingConstants;
 import javax.swing.UnsupportedLookAndFeelException;
@@ -34,6 +37,7 @@ import com.primesense.nite.PoseType;
 
 import br.edu.ifsp.capturer.ShowObject;
 import br.edu.ifsp.util.Save;
+import javafx.scene.web.PromptData;
 
 public class Control extends JFrame implements ItemListener, ActionListener, ChangeListener {
 
@@ -49,7 +53,7 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 	private JRadioButton rbColor, rbDepth, rbIr;
 	private ButtonGroup btCamerasGroup;
 	private JSpinner sSeconds;
-	private JButton btStart, btStop, btSave, btClear;
+	private JButton btStart, btStop, btSave, btClear, btDirectory;
 	private JLabel lblSeconds, lblCount;
 
 	public Control() {
@@ -60,7 +64,7 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setLocation(camera.getLocation().x + camera.getWidth(), camera.getLocation().y);
-		setSize(500, 375);
+		setSize(500, 500);
 		setVisible(true);
 	}
 
@@ -193,6 +197,32 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 		pnStatus.add(BorderLayout.CENTER, lblCount);
 
 		lblSeconds.setHorizontalAlignment(SwingConstants.CENTER);
+		
+		btDirectory = new JButton("Select");
+		
+		JPanel pnDirectory = new JPanel(new BorderLayout());
+		pnDirectory.add(BorderLayout.WEST, new JLabel("Path: "));
+		pnDirectory.add(BorderLayout.CENTER, new JTextField());
+		pnDirectory.add(BorderLayout.EAST, btDirectory);
+		
+		JPanel pnPerson = new JPanel(new BorderLayout());
+		pnPerson.add(BorderLayout.WEST, new JLabel("User: "));
+		pnPerson.add(BorderLayout.CENTER, new JTextField());
+		
+		JPanel pnSign = new JPanel(new BorderLayout());
+		pnSign.add(BorderLayout.WEST, new JLabel("Sign: "));
+		pnSign.add(BorderLayout.CENTER, new JTextField());
+		
+		JPanel pnPersonSign = new JPanel(new GridLayout(1, 4));
+		pnPersonSign.add(pnPerson);
+		pnPersonSign.add(pnSign);
+		
+		JPanel pnFile = new JPanel(new BorderLayout());
+		pnFile.setBorder(new TitledBorder("File"));
+		pnFile.add(BorderLayout.NORTH, pnDirectory);
+		pnFile.add(BorderLayout.CENTER, pnPersonSign);
+		
+		c.add(BorderLayout.NORTH, pnFile);
 		c.add(BorderLayout.CENTER, pnTimer);
 		c.add(BorderLayout.EAST, pnSetup);
 		c.add(BorderLayout.SOUTH, pnStatus);
@@ -201,7 +231,7 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 		pnSave.add(btSave);
 		pnSave.add(btClear);
 		pnSetup.add(BorderLayout.SOUTH, pnSave);
-		
+
 		statusBar();
 	}
 
@@ -226,6 +256,8 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 		} else if (ie.getSource() == cbStoppingPose) {
 			// btStop.setEnabled(cbStoppingPose.getSelectedItem().equals("Manual"));
 			stoppingPoseDetection();
+		} else if(ie.getSource() == btDirectory){
+			
 		}
 	}
 
@@ -294,5 +326,4 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 
 		new Control();
 	}
-
 }

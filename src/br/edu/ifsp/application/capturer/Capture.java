@@ -1,5 +1,6 @@
 package br.edu.ifsp.application.capturer;
 
+import java.io.File;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -10,7 +11,6 @@ import org.openni.ImageRegistrationMode;
 import org.openni.OpenNI;
 import org.openni.SensorType;
 import org.openni.VideoFrameRef;
-import org.openni.VideoMode;
 import org.openni.VideoStream;
 
 import com.primesense.nite.NiTE;
@@ -46,7 +46,7 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 	private Coordinate coor = null;
 	private Segmentation seg = null;
 	private ImageCapture imgColor = null, imgDepth = null;
-	private Set<Long> timestamp = new TreeSet<>();
+	//private Set<Long> timestamp = new TreeSet<>();
 	private Integer seconds, secondsRemaining = 0;
 	private int delay;
 
@@ -73,7 +73,7 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 			OpenNI.initialize();
 			NiTE.initialize();
 		} catch (Exception e) {
-			System.out.println("Error during the loading of the dependents libraries.");			
+			System.out.println("Error during the loading of the dependents libraries.");
 			e.printStackTrace();
 		}
 		coor = new Coordinate(view);
@@ -81,6 +81,9 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 		imgColor = new ImageCapture(view, ShowObject.COLOR);
 		imgDepth = new ImageCapture(view, ShowObject.DEPTH);
 		this.view = view;
+
+		imgColor.setDirectory(new File("C:\\teste\\Color"));
+		imgDepth.setDirectory(new File("C:\\teste\\Depth"));
 
 		System.out.println("Creating streams");
 		Device d = null;
@@ -132,7 +135,7 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 		// }).start();
 
 		if (startRecordingUsers) {
-			timestamp.add(frameColor.getTimestamp());
+			//timestamp.add(frameColor.getTimestamp());
 
 			/* Call the client's listener that are waiting for some events. */
 			if (stateChanged != null) {
@@ -213,7 +216,7 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 		// }).start();
 
 		if (startRecordingUsers) {
-			timestamp.add(frameDepth.getTimestamp());
+			//timestamp.add(frameDepth.getTimestamp());
 
 			/* Call the client's listener that are waiting for some events. */
 			if (stateChanged != null) {
@@ -457,7 +460,7 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 		data.setHeight(videoColor.getVideoMode().getResolutionY());
 		data.setFps(videoColor.getVideoMode().getFps());
 
-		data.setTimestamp(timestamp);
+		//data.setTimestamp(timestamp);
 
 		data.setSegmentation(seg.getRecordedData());
 
@@ -485,7 +488,8 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 	 * @return The amount of frames stored to the user who has more frames
 	 */
 	public int getFramesCount() {
-		return timestamp.size();
+		return 0;
+		//return timestamp.size();
 	}
 
 	/**
@@ -493,7 +497,7 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 	 * stored.
 	 */
 	public void clearMoviments() {
-		timestamp = new TreeSet<>();
+		//timestamp = new TreeSet<>();
 		coor.clearRecordedData();
 		seg.clearRecordedData();
 		imgColor.clearRecordedData();
