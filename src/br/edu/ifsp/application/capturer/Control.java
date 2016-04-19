@@ -53,6 +53,7 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 	private String poseOptions[] = new String[] { "Manual", "Crossed Hands", "PSI" };
 	private JComboBox<String> cbStartingPose = new JComboBox<String>(poseOptions);
 	private JComboBox<String> cbStoppingPose = new JComboBox<String>(poseOptions);
+	private String lastSelectedStartPose = "Manual";
 	private JPanel pnTimer, pnCameras, pnSetup, pnRecord, pnSave;
 	private JRadioButton rbColor, rbDepth, rbIr;
 	private JTextField txtDirectory, txtPerson, txtSign;
@@ -268,6 +269,17 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 	}
 
 	private void startingPoseDetection() {
+		if(cbStartingPose.getSelectedItem().equals(lastSelectedStartPose)){
+			return;
+		}
+		if(!isDestinationValid()){
+			cbStartingPose.setSelectedItem(lastSelectedStartPose);
+			return;
+		}
+		lastSelectedStartPose = (String) cbStartingPose.getSelectedItem();
+		File file = getDestinationDirectory();
+		capture.setFile(file);
+		
 		if (cbStartingPose.getSelectedItem().equals("Crossed Hands")) {
 			capture.startRecordingUsers(PoseType.CROSSED_HANDS, (int) sSeconds.getValue());
 		} else if (cbStartingPose.getSelectedItem().equals("PSI")) {
