@@ -299,6 +299,7 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 				return;
 			}
 			File file = getDestinationDirectory();
+			capture.setFile(file);
 			capture.startRecordingUsers();
 		} else if (ae.getSource() == btStop) {
 			capture.stopRecordingUsers();

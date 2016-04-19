@@ -1,6 +1,8 @@
 package br.edu.ifsp.application.capturer;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -46,6 +48,7 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 	private Coordinate coor = null;
 	private Segmentation seg = null;
 	private ImageCapture imgColor = null, imgDepth = null;
+	private File file;
 	//private Set<Long> timestamp = new TreeSet<>();
 	private int frames;
 	private Integer seconds, secondsRemaining = 0;
@@ -82,9 +85,6 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 		imgColor = new ImageCapture(view, ShowObject.COLOR);
 		imgDepth = new ImageCapture(view, ShowObject.DEPTH);
 		this.view = view;
-
-		imgColor.setDirectory(new File("C:\\teste\\Color"));
-		imgDepth.setDirectory(new File("C:\\teste\\Depth"));
 
 		System.out.println("Creating streams");
 		Device d = null;
@@ -482,6 +482,34 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 		data.setCoordinateDepth(coor.getRecordedDepthData().get(idShort));
 		data.setCoordinateReal(coor.getRecordedRealData().get(idShort));
 		return data;
+	}
+	
+	public void setFile(File file){
+		this.file = file;
+		
+		File depth = new File(file.getAbsolutePath() + File.separator + "Depth");
+		File color = new File(file.getAbsolutePath() + File.separator + "Color");
+		
+		if(!depth.exists()){
+			try {
+				Files.createDirectories(depth.toPath());
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
+		if(!color.exists()){
+			try {
+				Files.createDirectory(color.toPath());
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
+		imgDepth.setDirectory(depth);
+		imgColor.setDirectory(color);
 	}
 
 	/**
