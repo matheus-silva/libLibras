@@ -47,6 +47,7 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 	private Segmentation seg = null;
 	private ImageCapture imgColor = null, imgDepth = null;
 	//private Set<Long> timestamp = new TreeSet<>();
+	private int frames;
 	private Integer seconds, secondsRemaining = 0;
 	private int delay;
 
@@ -136,7 +137,8 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 
 		if (startRecordingUsers) {
 			//timestamp.add(frameColor.getTimestamp());
-
+			frames++;
+			
 			/* Call the client's listener that are waiting for some events. */
 			if (stateChanged != null) {
 				stateChanged.stateChanged(Capture.StateChangedListener.NEW_DATA_ARRIVED);
@@ -217,7 +219,8 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 
 		if (startRecordingUsers) {
 			//timestamp.add(frameDepth.getTimestamp());
-
+			frames++;
+			
 			/* Call the client's listener that are waiting for some events. */
 			if (stateChanged != null) {
 				stateChanged.stateChanged(Capture.StateChangedListener.NEW_DATA_ARRIVED);
@@ -488,7 +491,7 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 	 * @return The amount of frames stored to the user who has more frames
 	 */
 	public int getFramesCount() {
-		return 0;
+		return frames;
 		//return timestamp.size();
 	}
 
@@ -498,6 +501,7 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 	 */
 	public void clearMoviments() {
 		//timestamp = new TreeSet<>();
+		frames = 0;
 		coor.clearRecordedData();
 		seg.clearRecordedData();
 		imgColor.clearRecordedData();
