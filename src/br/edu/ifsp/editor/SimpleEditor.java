@@ -81,7 +81,7 @@ public class SimpleEditor extends JFrame implements ActionListener, ChangeListen
 	private void initializeComponents() {
 		Container c = getContentPane();
 		c.setLayout(new BorderLayout());
-		
+
 		c.removeAll();
 		c.revalidate();
 
@@ -192,7 +192,7 @@ public class SimpleEditor extends JFrame implements ActionListener, ChangeListen
 			File file = load.openDirectory(this);
 
 			initialize(file);
-			
+
 			initializeComponents();
 		}
 		stateChanged(new ChangeEvent(slider));
@@ -205,16 +205,33 @@ public class SimpleEditor extends JFrame implements ActionListener, ChangeListen
 
 			Long timestamp = data.getTimestampByIndex(index);
 
-			view.setStatus("Time: " + timestamp);
-			view.setUserCoordinate(data.getCoordinateDepth().get(timestamp), 0, 0);
+			if (timestamp != null) {
+				view.setStatus(timestamp.toString());
+			}
+			
+			if (data.hasCoordinatesDepth()) {
+				view.setUserCoordinate(data.getCoordinateDepth().get(timestamp), 0, 0);
+			}
 
-			ByteBuffer buffSegmentation = data.getSegmentation().get(timestamp);
+			if (data.hasSegmentation()) {
+				ByteBuffer buffSegmentation = data.getSegmentation().get(timestamp);
 
-			ByteBuffer buffBackground;
+				if (buffSegmentation != null) {
+					buffSegmentation.rewind();
+				}
+
+				view.setUserMap(seg, buffSegmentation, timestamp);
+			}
+
+			ByteBuffer buffBackground = null;
 			if (view.getCamera() == ShowObject.COLOR) {
-				buffBackground = data.getImageColor().get(timestamp);
+				if (data.hasImageColor()) {
+					buffBackground = data.getImageColor().get(timestamp);
+				}
 			} else if (view.getCamera() == ShowObject.DEPTH) {
-				buffBackground = data.getImageDepth().get(timestamp);
+				if (data.hasImageDepth()) {
+					buffBackground = data.getImageDepth().get(timestamp);
+				}
 			} else {
 				return;
 			}
@@ -223,14 +240,9 @@ public class SimpleEditor extends JFrame implements ActionListener, ChangeListen
 				buffBackground.rewind();
 			}
 
-			if (buffSegmentation != null) {
-				buffSegmentation.rewind();
-			}
-
-			view.setUserMap(seg, buffSegmentation, timestamp);
 			view.setBackground(buffBackground, 640, 480);
-			view.repaint();
 
+			view.repaint();
 		}
 	}
 

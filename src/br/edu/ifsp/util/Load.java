@@ -31,7 +31,7 @@ import br.edu.ifsp.capturer.ImageCapture;
 import br.edu.ifsp.capturer.Segmentation;
 import br.edu.ifsp.capturer.ShowObject;
 
-public class Load extends Thread{
+public class Load extends Thread {
 
 	private JDialog d;
 	private File file;
@@ -62,12 +62,12 @@ public class Load extends Thread{
 	public File openFile(Component father) {
 		return open(father, JFileChooser.FILES_ONLY);
 	}
-	
-	public File openDirectory(Component father){
+
+	public File openDirectory(Component father) {
 		return open(father, JFileChooser.DIRECTORIES_ONLY);
 	}
 
-	private File open(Component father, int mode){
+	private File open(Component father, int mode) {
 		JFileChooser chooser = new JFileChooser(Load.directory);
 		chooser.setFileSelectionMode(mode);
 		if (chooser.showOpenDialog(father) == JFileChooser.APPROVE_OPTION) {
@@ -76,7 +76,7 @@ public class Load extends Thread{
 		}
 		return null;
 	}
-	
+
 	public ByteBuffer loadBuffer(File file) {
 		BufferedInputStream in;
 		List<Byte> bytes = new ArrayList<>();
@@ -178,7 +178,7 @@ public class Load extends Thread{
 		return map;
 
 	}
-	
+
 	private void formatSegmentation(Map<Long, ByteBuffer> segmentation) {
 		for (Long v : segmentation.keySet()) {
 			ByteBuffer buff = segmentation.get(v).order(ByteOrder.LITTLE_ENDIAN);
@@ -207,7 +207,7 @@ public class Load extends Thread{
 		d = new JDialog((JFrame) father, "Loading...", true);
 		d.setSize(300, 75);
 		d.setLocationRelativeTo(father);
-		d.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+		// d.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		d.setResizable(false);
 
 		JProgressBar pb = new JProgressBar();
@@ -229,7 +229,7 @@ public class Load extends Thread{
 
 		return data;
 	}
-	
+
 	@Override
 	public void run() {
 		System.out.println("Loading " + file.getAbsolutePath());
@@ -239,25 +239,42 @@ public class Load extends Thread{
 			File segmentation = new File(file.getAbsoluteFile() + File.separator + "Segmentation");
 			File coor = new File(file.getAbsoluteFile() + File.separator + "Coordinates");
 
-			System.out.println("Coordinate Depth");
-			data.setCoordinateDepth(loadCoords(new File(coor.getAbsolutePath() + File.separator + "Depth.txt"),
-					Coordinate.createMapStructure()));
-			System.out.println("Coordinate Real");
-			data.setCoordinateReal(loadCoords(new File(coor.getAbsolutePath() + File.separator + "Real.txt"),
-					Coordinate.createMapStructure()));
+			File coorDepth = new File(coor.getAbsolutePath() + File.separator + "Depth.txt");
+			if (coorDepth.exists()) {
+				System.out.println("Coordinate Depth");
+				data.setCoordinateDepth(loadCoords(coorDepth, Coordinate.createMapStructure()));
+			}
 
-			System.out.println("Depth");
-			data.setImageDepth(loadBuffers(depth, ImageCapture.createMapStructure()));
-			System.out.println("Color");
-			data.setImageColor(loadBuffers(color, ImageCapture.createMapStructure()));
-			System.out.println("Segmentation");
-			data.setSegmentation(loadBuffers(segmentation, Segmentation.createMapStructure()));
+			File coorReal = new File(coor.getAbsolutePath() + File.separator + "Real.txt");
+			if (coorReal.exists()) {
+				System.out.println("Coordinate Real");
+				data.setCoordinateReal(loadCoords(coorReal, Coordinate.createMapStructure()));
+			}
 
-			formatSegmentation(data.getSegmentation());
+			if (depth.exists()) {
+				System.out.println("Depth");
+				data.setImageDepth(loadBuffers(depth, ImageCapture.createMapStructure()));
+			}
+
+			if (color.exists()) {
+				System.out.println("Color");
+				data.setImageColor(loadBuffers(color, ImageCapture.createMapStructure()));
+			}
+
+			if (segmentation.exists()) {
+				System.out.println("Segmentation");
+				data.setSegmentation(loadBuffers(segmentation, Segmentation.createMapStructure()));
+			}
+
+			if (data.hasSegmentation()) {
+				formatSegmentation(data.getSegmentation());
+			}
 
 			Set<Long> time = new TreeSet<>();
-			for (Long l : data.getImageDepth().keySet()) {
-				time.add(l);
+			if (data.hasImageDepth()) {
+				for (Long l : data.getImageDepth().keySet()) {
+					time.add(l);
+				}
 			}
 			data.setTimestamp(time);
 
@@ -272,15 +289,15 @@ public class Load extends Thread{
 		d.dispose();
 	}
 
-
 	public float[][][] loadFile(File arquivo) {
-		List<String> lines = null;;
+		List<String> lines = null;
+		;
 		try {
 			lines = Files.readAllLines(Paths.get(arquivo.toURI()));
 		} catch (IOException ex) {
 			Logger.getLogger(Load.class.getName()).log(Level.SEVERE, null, ex);
 		}
-		
+
 		lines.sort(new Comparator<String>() {
 
 			@Override
@@ -288,11 +305,11 @@ public class Load extends Thread{
 				return o1.compareTo(o2);
 			}
 		});
-		
+
 		float[][][] moves = new float[lines.size()][15][3];
-		Map<Long, float[][]> map = new TreeMap<>(); 
+		Map<Long, float[][]> map = new TreeMap<>();
 		for (int i = 0; i < lines.size(); i++) {
-			
+
 			String temp[] = lines.get(i).split("[0-9] ");
 			String temp2[] = temp[1].split("]\\[");
 			for (int j = 0; j < temp2.length; j++) {
