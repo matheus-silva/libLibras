@@ -39,6 +39,7 @@ import javax.swing.event.ChangeListener;
 import com.primesense.nite.PoseType;
 
 import br.edu.ifsp.capturer.ShowObject;
+import br.edu.ifsp.util.Delete;
 import br.edu.ifsp.util.Load;
 import br.edu.ifsp.util.Save;
 import javafx.scene.web.PromptData;
@@ -59,7 +60,7 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 	private JTextField txtDirectory, txtPerson, txtSign;
 	private ButtonGroup btCamerasGroup;
 	private JSpinner sSeconds;
-	private JButton btStart, btStop, btSave, btClear, btDirectory;
+	private JButton btStart, btStop, btSave, btDelete, btDirectory;
 	private JLabel lblSeconds, lblCount;
 
 	public Control() {
@@ -148,7 +149,7 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 		btStart = new JButton("Start Recording");
 		btStop = new JButton("Stop Recording");
 		btSave = new JButton("Save");
-		btClear = new JButton("Clear");
+		btDelete = new JButton("Delete");
 		btDirectory = new JButton("Select");
 		lblSeconds = new JLabel();
 		lblCount = new JLabel("Frames: 0");
@@ -165,7 +166,7 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 		btStart.addActionListener(this);
 		btStop.addActionListener(this);
 		btSave.addActionListener(this);
-		btClear.addActionListener(this);
+		btDelete.addActionListener(this);
 		btDirectory.addActionListener(this);
 		sSeconds.addChangeListener(this);
 
@@ -208,29 +209,29 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 		pnStatus.add(BorderLayout.CENTER, lblCount);
 
 		lblSeconds.setHorizontalAlignment(SwingConstants.CENTER);
-		
+
 		JPanel pnDirectory = new JPanel(new BorderLayout());
 		pnDirectory.add(BorderLayout.WEST, new JLabel("Path: "));
 		pnDirectory.add(BorderLayout.CENTER, txtDirectory);
 		pnDirectory.add(BorderLayout.EAST, btDirectory);
-		
+
 		JPanel pnPerson = new JPanel(new BorderLayout());
 		pnPerson.add(BorderLayout.WEST, new JLabel("User: "));
 		pnPerson.add(BorderLayout.CENTER, txtPerson);
-		
+
 		JPanel pnSign = new JPanel(new BorderLayout());
 		pnSign.add(BorderLayout.WEST, new JLabel("Sign: "));
 		pnSign.add(BorderLayout.CENTER, txtSign);
-		
+
 		JPanel pnPersonSign = new JPanel(new GridLayout(1, 4));
 		pnPersonSign.add(pnPerson);
 		pnPersonSign.add(pnSign);
-		
+
 		JPanel pnFile = new JPanel(new BorderLayout());
 		pnFile.setBorder(new TitledBorder("File"));
 		pnFile.add(BorderLayout.NORTH, pnDirectory);
 		pnFile.add(BorderLayout.CENTER, pnPersonSign);
-		
+
 		c.add(BorderLayout.NORTH, pnFile);
 		c.add(BorderLayout.CENTER, pnTimer);
 		c.add(BorderLayout.EAST, pnSetup);
@@ -238,7 +239,7 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 
 		pnSave.setBorder(new TitledBorder("Save"));
 		pnSave.add(btSave);
-		pnSave.add(btClear);
+		pnSave.add(btDelete);
 		pnSetup.add(BorderLayout.SOUTH, pnSave);
 
 		statusBar();
@@ -269,17 +270,17 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 	}
 
 	private void startingPoseDetection() {
-		if(cbStartingPose.getSelectedItem().equals(lastSelectedStartPose)){
+		if (cbStartingPose.getSelectedItem().equals(lastSelectedStartPose)) {
 			return;
 		}
-		if(!isDestinationValid()){
+		if (!isDestinationValidMessage()) {
 			cbStartingPose.setSelectedItem(lastSelectedStartPose);
 			return;
 		}
 		lastSelectedStartPose = (String) cbStartingPose.getSelectedItem();
 		File file = getDestinationDirectory();
 		capture.setFile(file);
-		
+
 		if (cbStartingPose.getSelectedItem().equals("Crossed Hands")) {
 			capture.startRecordingUsers(PoseType.CROSSED_HANDS, (int) sSeconds.getValue());
 		} else if (cbStartingPose.getSelectedItem().equals("PSI")) {
@@ -307,7 +308,7 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 	@Override
 	public void actionPerformed(ActionEvent ae) {
 		if (ae.getSource() == btStart) {
-			if(!isDestinationValid()){
+			if (!isDestinationValidMessage()) {
 				return;
 			}
 			File file = getDestinationDirectory();
@@ -322,64 +323,95 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 				save.saveFile(this, f, capture.getRecordedData());
 				save.clearData();
 			}
-		} else if (ae.getSource() == btClear) {
-			capture.clearMoviments();
+		} else if (ae.getSource() == btDelete) {
+			if (!isDestinationValidMessage()) {
+				return;
+			}
+			File file = getDestinationDirectory();
 
-			Runtime run = Runtime.getRuntime();
-			run.runFinalization();
-			run.gc();
+			if (file.exists()) {
+				int option = JOptionPane.showConfirmDialog(this,
+						"Are you sure you want to delete the directory:\n" + "<html><pre>" + file.getAbsolutePath()
+								+ "</pre></html>\n" + "All the recorded data will be deleted",
+						"Warning", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
+				
+				if (option == JOptionPane.YES_OPTION) {
+					try {
+						Delete delete = new Delete();
+						delete.deleteFile(file);
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						JOptionPane.showMessageDialog(this,
+								"An error happened when trying to delete the directory:\n" + "<html><pre>"
+										+ file.getAbsolutePath() + "</pre></html>\n",
+								"Error", JOptionPane.ERROR_MESSAGE);
+						e.printStackTrace();
+					}
+				}
+			}
 
-			statusBar();
-		} else if(ae.getSource() == btDirectory){
+			/*
+			 * capture.clearMoviments();
+			 * 
+			 * Runtime run = Runtime.getRuntime(); run.runFinalization();
+			 * run.gc();
+			 * 
+			 * statusBar();
+			 */
+		} else if (ae.getSource() == btDirectory) {
 			Load load = new Load();
 			File file = load.openDirectory(this);
 			txtDirectory.setText(file.getAbsolutePath());
 		}
 	}
-	
-	private boolean isDestinationValid(){
+
+	private boolean isDestinationValidMessage() {
 		String directory = txtDirectory.getText().trim();
 		String person = txtPerson.getText().trim();
 		String sign = txtSign.getText().trim();
-		
-		if(directory == null || directory.isEmpty()){
-			JOptionPane.showMessageDialog(this, "Please, inform the destination directory", "Error", JOptionPane.ERROR_MESSAGE);
+
+		if (directory == null || directory.isEmpty()) {
+			JOptionPane.showMessageDialog(this, "Please, inform the destination directory", "Error",
+					JOptionPane.ERROR_MESSAGE);
 			txtDirectory.requestFocus();
 			return false;
 		}
 		File dir = new File(directory);
-		if(!dir.exists()){
-			JOptionPane.showMessageDialog(this, "Please, inform an existing directory", "Error", JOptionPane.ERROR_MESSAGE);
+		if (!dir.exists()) {
+			JOptionPane.showMessageDialog(this, "Please, inform an existing directory", "Error",
+					JOptionPane.ERROR_MESSAGE);
 			txtDirectory.requestFocus();
 			return false;
 		}
-		if(dir.isFile()){
-			JOptionPane.showMessageDialog(this, "Please, inform a directory instead of a file", "Error", JOptionPane.ERROR_MESSAGE);
+		if (dir.isFile()) {
+			JOptionPane.showMessageDialog(this, "Please, inform a directory instead of a file", "Error",
+					JOptionPane.ERROR_MESSAGE);
 			txtDirectory.requestFocus();
 			return false;
 		}
-		if(person == null || person.isEmpty()){
+		if (person == null || person.isEmpty()) {
 			JOptionPane.showMessageDialog(this, "Please, inform the person's name", "Error", JOptionPane.ERROR_MESSAGE);
 			txtPerson.requestFocus();
 			return false;
 		}
-		if(sign == null || sign.isEmpty()){
-			JOptionPane.showMessageDialog(this, "Please, inform the name of the sign", "Error", JOptionPane.ERROR_MESSAGE);
+		if (sign == null || sign.isEmpty()) {
+			JOptionPane.showMessageDialog(this, "Please, inform the name of the sign", "Error",
+					JOptionPane.ERROR_MESSAGE);
 			txtSign.requestFocus();
 			return false;
 		}
 		return true;
 	}
-	
-	private File getDestinationDirectory(){
+
+	private File getDestinationDirectory() {
 		String directory = txtDirectory.getText().trim();
 		String person = txtPerson.getText().trim();
 		String sign = txtSign.getText().trim();
 		String s = File.separator;
-		
+
 		File tempFile = new File(directory + s + person);
-		
-		if(!tempFile.exists()){
+
+		if (!tempFile.exists()) {
 			try {
 				Files.createDirectory(tempFile.toPath());
 			} catch (IOException e) {
@@ -387,10 +419,10 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 				e.printStackTrace();
 			}
 		}
-		
+
 		File file = new File(directory + s + person + s + sign);
-		
-		if(!file.exists()){
+
+		if (!file.exists()) {
 			try {
 				Files.createDirectory(file.toPath());
 			} catch (IOException e) {
@@ -398,7 +430,7 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 				e.printStackTrace();
 			}
 		}
-		
+
 		System.out.println(file.getAbsolutePath());
 		return file;
 	}

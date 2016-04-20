@@ -485,6 +485,9 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 	}
 	
 	public void setFile(File file){
+		if(!file.equals(this.file)){
+			this.frames = 0;
+		}
 		this.file = file;
 		
 		File depth = new File(file.getAbsolutePath() + File.separator + "Depth");
@@ -540,7 +543,6 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 	 */
 	public void clearMoviments() {
 		//timestamp = new TreeSet<>();
-		frames = 0;
 		coor.clearRecordedData();
 		seg.clearRecordedData();
 		imgColor.clearRecordedData();
