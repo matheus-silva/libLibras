@@ -489,6 +489,7 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 		
 		File depth = new File(file.getAbsolutePath() + File.separator + "Depth");
 		File color = new File(file.getAbsolutePath() + File.separator + "Color");
+		File coord = new File(file.getAbsolutePath() + File.separator + "Coordinates");
 		
 		if(!depth.exists()){
 			try {
@@ -508,8 +509,18 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 			}
 		}
 		
+		if(!coord.exists()){
+			try {
+				Files.createDirectory(coord.toPath());
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
 		imgDepth.setDirectory(depth);
 		imgColor.setDirectory(color);
+		coor.setDirectory(coord);
 	}
 
 	/**

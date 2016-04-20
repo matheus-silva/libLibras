@@ -1,6 +1,9 @@
 package br.edu.ifsp.capturer;
 
 import java.awt.EventQueue;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,7 +19,9 @@ import com.primesense.nite.SkeletonJoint;
 import com.primesense.nite.SkeletonState;
 import com.primesense.nite.UserData;
 import com.primesense.nite.UserTracker;
-import com.primesense.nite.UserTrackerFrameRef;;
+import com.primesense.nite.UserTrackerFrameRef;
+
+import br.edu.ifsp.util.SaveOnlineCoordinate;;
 
 /**
  * This is the class responsible for recording the movements of the users. It
@@ -40,6 +45,7 @@ public class Coordinate implements UserTracker.NewFrameListener {
 	private Map<Short, Map<Long, Float[][]>> coordinatesReal = null;
 	private boolean startRecordingUsers = false;
 	private ShowObject view = null;
+	private File directory;
 
 	/**
 	 * Default Constructor
@@ -191,7 +197,17 @@ public class Coordinate implements UserTracker.NewFrameListener {
 		if(startRecordingUsers){
 			//System.out.println("Skeleton Received");
 			
-			Map<Long, Float[][]> userDepth = coordinatesDepth.get(user.getId());
+			File fileDepth = new File(directory.getAbsolutePath() + File.separator + "Depth.txt");
+			File fileReal = new File(directory.getAbsolutePath() + File.separator + "Real.txt");
+			
+			
+			SaveOnlineCoordinate saveDepth = new SaveOnlineCoordinate(fileDepth, timestamp, depth);
+			SaveOnlineCoordinate saveReal = new SaveOnlineCoordinate(fileReal, timestamp, realWorld);
+			
+			new Thread(saveDepth).start();
+			new Thread(saveReal).start();
+			
+			/*Map<Long, Float[][]> userDepth = coordinatesDepth.get(user.getId());
 			if (userDepth == null) {
 				userDepth = createMapStructure();
 				coordinatesDepth.put(user.getId(), userDepth);
@@ -205,7 +221,7 @@ public class Coordinate implements UserTracker.NewFrameListener {
 				coordinatesReal.put(user.getId(), userReal);
 			}
 			
-			userReal.put(timestamp, realWorld);
+			userReal.put(timestamp, realWorld);*/
 		}
 		
 		if (view != null) {
@@ -246,6 +262,10 @@ public class Coordinate implements UserTracker.NewFrameListener {
 		return 0;
 	}
 
+	public void setDirectory(File coord) {
+		this.directory = coord;
+	}
+	
 	/**
 	 * Delete all the movements stored. This method clean the movements that was
 	 * stored.
@@ -350,4 +370,5 @@ public class Coordinate implements UserTracker.NewFrameListener {
 			}
 		});
 	}
+
 }
