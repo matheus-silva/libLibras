@@ -31,7 +31,7 @@ import br.edu.ifsp.capturer.ImageCapture;
 import br.edu.ifsp.capturer.Segmentation;
 import br.edu.ifsp.capturer.ShowObject;
 
-public class Load extends Thread {
+public class Load implements Runnable {
 
 	private JDialog d;
 	private File file;
@@ -214,8 +214,8 @@ public class Load extends Thread {
 		pb.setIndeterminate(true);
 		d.getContentPane().add(BorderLayout.CENTER, pb);
 
-		this.start();
-
+		new Thread(this).start();
+		
 		d.setVisible(true);
 
 		while (!loaded) {

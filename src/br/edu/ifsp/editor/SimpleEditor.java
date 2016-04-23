@@ -37,7 +37,7 @@ public class SimpleEditor extends JFrame implements ActionListener, ChangeListen
 	private Segmentation seg;
 	private ImageCapture imgDepth;
 	private ImageCapture imgColor;
-
+	
 	private JSlider slider;
 	private JMenuBar menu;
 	private JMenu mFile, mView;
@@ -56,10 +56,11 @@ public class SimpleEditor extends JFrame implements ActionListener, ChangeListen
 		setVisible(true);
 		load = new Load();
 
+		initializeComponents();
+		
 		if (file != null) {
 			initialize(file);
-
-			initializeComponents();
+			loadData();
 		}
 	}
 
@@ -118,17 +119,38 @@ public class SimpleEditor extends JFrame implements ActionListener, ChangeListen
 		mView.add(mDepth);
 		mView.add(mSkeleton);
 		mView.add(mSegmentation);
+		
+		mView.setEnabled(false);
 
 		menu.add(mFile);
 		menu.add(mView);
 
 		return menu;
 	}
+	
+	private void loadData(){
+		getContentPane().add(BorderLayout.CENTER, getComponent());
+		
+		mView.setEnabled(true);
+		mColor.setEnabled(data.hasImageColor());
+		mDepth.setEnabled(data.hasImageDepth());
+		mSkeleton.setEnabled(data.hasCoordinatesDepth());
+		mSegmentation.setEnabled(data.hasSegmentation());
+		
+		slider.setMinimum(0);
+		slider.setMaximum(data.getTimestamp().size());
+		slider.setValue(0);
+		
+		revalidate();
+		repaint();
+	}
 
 	private JPanel getComponent() {
 		JPanel c = new JPanel(new GridLayout(1, 0));
 		c.setBorder(new TitledBorder("View"));
-		c.add(view);
+		if(view != null){
+			c.add(view);
+		}
 		c.setSize(640, 480);
 		return c;
 	}
@@ -138,7 +160,7 @@ public class SimpleEditor extends JFrame implements ActionListener, ChangeListen
 		c.setBorder(new TitledBorder("Control"));
 		c.setSize(640, 100);
 
-		slider = new JSlider(0, data.getTimestamp().size());
+		slider = new JSlider();
 		slider.setValue(0);
 		slider.setPaintTicks(true);
 		slider.setMinorTickSpacing(1);
@@ -192,8 +214,8 @@ public class SimpleEditor extends JFrame implements ActionListener, ChangeListen
 			File file = load.openDirectory(this);
 
 			initialize(file);
-
-			initializeComponents();
+			loadData();
+			
 		}
 		stateChanged(new ChangeEvent(slider));
 	}
