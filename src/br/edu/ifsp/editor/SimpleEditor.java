@@ -37,12 +37,13 @@ public class SimpleEditor extends JFrame implements ActionListener, ChangeListen
 	private Segmentation seg;
 	private ImageCapture imgDepth;
 	private ImageCapture imgColor;
-	
+
 	private JSlider slider;
 	private JMenuBar menu;
 	private JMenu mFile, mView;
 	private JMenuItem mOpen;
 	private JMenuItem mColor, mDepth, mSkeleton, mSegmentation;
+	private JMenuItem mSave;
 
 	public SimpleEditor() {
 		this(null);
@@ -57,7 +58,7 @@ public class SimpleEditor extends JFrame implements ActionListener, ChangeListen
 		load = new Load();
 
 		initializeComponents();
-		
+
 		if (file != null) {
 			initialize(file);
 			loadData();
@@ -105,42 +106,46 @@ public class SimpleEditor extends JFrame implements ActionListener, ChangeListen
 		mDepth = new JMenuItem("Depth");
 		mSkeleton = new JMenuItem("Skeleton");
 		mSegmentation = new JMenuItem("Segmentation");
-
+		mSave = new JMenuItem("Save as Image");
 		mOpen.addActionListener(this);
 
 		mColor.addActionListener(this);
 		mDepth.addActionListener(this);
 		mSkeleton.addActionListener(this);
 		mSegmentation.addActionListener(this);
+		mSave.addActionListener(this);
 
 		mFile.add(mOpen);
+		mFile.add(mSave);
 
 		mView.add(mColor);
 		mView.add(mDepth);
 		mView.add(mSkeleton);
 		mView.add(mSegmentation);
-		
+
 		mView.setEnabled(false);
+		mSave.setEnabled(false);
 
 		menu.add(mFile);
 		menu.add(mView);
 
 		return menu;
 	}
-	
-	private void loadData(){
+
+	private void loadData() {
 		getContentPane().add(BorderLayout.CENTER, getComponent());
-		
+
 		mView.setEnabled(true);
 		mColor.setEnabled(data.hasImageColor());
 		mDepth.setEnabled(data.hasImageDepth());
 		mSkeleton.setEnabled(data.hasCoordinatesDepth());
 		mSegmentation.setEnabled(data.hasSegmentation());
+		mSave.setEnabled(true);
 		
 		slider.setMinimum(0);
 		slider.setMaximum(data.getTimestamp().size());
 		slider.setValue(0);
-		
+
 		revalidate();
 		repaint();
 	}
@@ -148,7 +153,7 @@ public class SimpleEditor extends JFrame implements ActionListener, ChangeListen
 	private JPanel getComponent() {
 		JPanel c = new JPanel(new GridLayout(1, 0));
 		c.setBorder(new TitledBorder("View"));
-		if(view != null){
+		if (view != null) {
 			c.add(view);
 		}
 		c.setSize(640, 480);
@@ -215,7 +220,18 @@ public class SimpleEditor extends JFrame implements ActionListener, ChangeListen
 
 			initialize(file);
 			loadData();
+
+		} else if (e.getSource() == mSave) {
+			File file = load.openDirectory(this);
 			
+			if(file == null || !file.exists()){
+				return;
+			}
+			
+			long timestamp = data.getTimestampByIndex(slider.getValue());
+			String name = File.separator + timestamp + ".png";
+			
+			view.saveFrame(new File(file.getAbsoluteFile() + name));
 		}
 		stateChanged(new ChangeEvent(slider));
 	}
@@ -227,10 +243,6 @@ public class SimpleEditor extends JFrame implements ActionListener, ChangeListen
 
 			Long timestamp = data.getTimestampByIndex(index);
 
-			if (timestamp != null) {
-				view.setStatus(timestamp.toString());
-			}
-			
 			if (data.hasCoordinatesDepth()) {
 				view.setUserCoordinate(data.getCoordinateDepth().get(timestamp), 0, 0);
 			}
@@ -264,7 +276,10 @@ public class SimpleEditor extends JFrame implements ActionListener, ChangeListen
 
 			view.setBackground(buffBackground, 640, 480);
 
+			view.revalidate();
 			view.repaint();
+
+			setTitle("Simple Editor - " + data.getTimestampByIndex(slider.getValue()));
 		}
 	}
 

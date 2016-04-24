@@ -6,10 +6,14 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ShortBuffer;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+
+import javax.imageio.ImageIO;
 
 public class ShowObject extends Component {
 
@@ -21,6 +25,7 @@ public class ShowObject extends Component {
 	private ByteBuffer buffBackground;
 	private ByteBuffer buffUser;
 	private Segmentation seg;
+	private BufferedImage img;
 	private long timestamp;
 	private List<Float[][]> coordinate;
 	private int[] mColors = new int[] { 0xFFFF0000, 0xFF00FF00, 0xFF0000FF, 0xFFFFFF00, 0xFFFF00FF, 0xFF00FFFF };
@@ -89,9 +94,21 @@ public class ShowObject extends Component {
 		if (background == null) {
 			return;
 		}
-		BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+		img = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
 		img.setRGB(0, 0, width, height, background, 0, width);
 		g.drawImage(img, 0, 0, getWidth(), getHeight(), null);
+	}
+
+	public void saveFrame(File file) {
+		if (img == null) {
+			return;
+		}
+		try {
+			ImageIO.write(img, "png", file);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	public void drawUserSkeleton(Graphics2D g) {
