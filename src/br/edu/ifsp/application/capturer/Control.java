@@ -279,7 +279,7 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 			return;
 		}
 		lastSelectedStartPose = (String) cbStartingPose.getSelectedItem();
-		File file = getDestinationDirectory();
+		File file = createDestinationDirectory();
 		capture.setFile(file);
 
 		if (cbStartingPose.getSelectedItem().equals("Crossed Hands")) {
@@ -312,7 +312,7 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 			if (!isDestinationValidMessage()) {
 				return;
 			}
-			File file = getDestinationDirectory();
+			File file = createDestinationDirectory();
 			capture.setFile(file);
 			capture.startRecordingUsers();
 		} else if (ae.getSource() == btStop) {
@@ -323,13 +323,13 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 			}
 
 			File file = getDestinationDirectory();
+			if (!file.exists()) {
+				JOptionPane.showMessageDialog(this, "The informed directory doesn't exist.\n" + "<html><pre>"
+						+ file.getAbsolutePath() + "</pre></html>", "Warning", JOptionPane.WARNING_MESSAGE);
+				return;
+			}
+
 			SimpleEditor editor = new SimpleEditor(file, this);
-
-			Runtime run = Runtime.getRuntime();
-			run.runFinalization();
-			run.gc();
-
-			statusBar();
 
 			/*
 			 * Save save = new Save(); File f = save.openFile(this); if (f !=
@@ -340,7 +340,13 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 			if (!isDestinationValidMessage()) {
 				return;
 			}
+
 			File file = getDestinationDirectory();
+			if (!file.exists()) {
+				JOptionPane.showMessageDialog(this, "The informed directory doesn't exist.\n" + "<html><pre>"
+						+ file.getAbsolutePath() + "</pre></html>", "Warning", JOptionPane.WARNING_MESSAGE);
+				return;
+			}
 
 			if (file.exists()) {
 				int option = JOptionPane.showConfirmDialog(this,
@@ -378,6 +384,11 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 				txtDirectory.setText(file.getAbsolutePath());
 			}
 		}
+		Runtime run = Runtime.getRuntime();
+		run.runFinalization();
+		run.gc();
+
+		statusBar();
 	}
 
 	private boolean isDestinationValidMessage() {
@@ -418,7 +429,7 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 		return true;
 	}
 
-	private File getDestinationDirectory() {
+	private File createDestinationDirectory() {
 		String directory = txtDirectory.getText().trim();
 		String person = txtPerson.getText().trim();
 		String sign = txtSign.getText().trim();
@@ -447,6 +458,17 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 		}
 
 		System.out.println(file.getAbsolutePath());
+		return file;
+	}
+
+	private File getDestinationDirectory() {
+		String directory = txtDirectory.getText().trim();
+		String person = txtPerson.getText().trim();
+		String sign = txtSign.getText().trim();
+		String s = File.separator;
+
+		File file = new File(directory + s + person + s + sign);
+
 		return file;
 	}
 
