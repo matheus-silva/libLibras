@@ -11,6 +11,7 @@ import java.nio.ByteBuffer;
 import java.util.Set;
 import java.util.TreeSet;
 
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -28,7 +29,7 @@ import br.edu.ifsp.capturer.ShowObject;
 import br.edu.ifsp.util.CaptureData;
 import br.edu.ifsp.util.Load;
 
-public class SimpleEditor extends JFrame implements ActionListener, ChangeListener {
+public class SimpleEditor extends JDialog implements ActionListener, ChangeListener {
 
 	private CaptureData data;
 	private Load load;
@@ -44,29 +45,35 @@ public class SimpleEditor extends JFrame implements ActionListener, ChangeListen
 	private JMenuItem mOpen;
 	private JMenuItem mColor, mDepth, mSkeleton, mSegmentation;
 	private JMenuItem mSave;
+	
+	private JFrame father;
 
-	public SimpleEditor() {
-		this(null);
+	public SimpleEditor(JFrame father) {
+		this(null, father);
 	}
 
-	public SimpleEditor(File file) {
-		super("Simple Editor");
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setSize(640, 580);
+	public SimpleEditor(File file, JFrame father) {
+		super(new JFrame(), "Simple Editor", true);
+		
+		this.load = new Load();
+		this.father = father;
+
 		setJMenuBar(getMenu());
-		setVisible(true);
-		load = new Load();
-
 		initializeComponents();
-
+		
+		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		setSize(640, 580);
+		
 		if (file != null) {
 			initialize(file);
 			loadData();
 		}
+		
+		setVisible(true);
 	}
 
 	private CaptureData load(File file) {
-		return load.loadFile(this, file);
+		return load.loadFile(father, file);
 	}
 
 	private void initialize(File file) {
@@ -141,7 +148,7 @@ public class SimpleEditor extends JFrame implements ActionListener, ChangeListen
 		mSkeleton.setEnabled(data.hasCoordinatesDepth());
 		mSegmentation.setEnabled(data.hasSegmentation());
 		mSave.setEnabled(true);
-		
+
 		slider.setMinimum(0);
 		slider.setMaximum(data.getTimestamp().size());
 		slider.setValue(0);
@@ -216,21 +223,21 @@ public class SimpleEditor extends JFrame implements ActionListener, ChangeListen
 			data.setTimestamp(time);
 			slider.setMaximum(time.size() - 1);
 		} else if (e.getSource() == mOpen) {
-			File file = load.openDirectory(this);
+			File file = load.openDirectory(father);
 
 			initialize(file);
 			loadData();
 
 		} else if (e.getSource() == mSave) {
-			File file = load.openDirectory(this);
-			
-			if(file == null || !file.exists()){
+			File file = load.openDirectory(father);
+
+			if (file == null || !file.exists()) {
 				return;
 			}
-			
+
 			long timestamp = data.getTimestampByIndex(slider.getValue());
 			String name = File.separator + timestamp + ".png";
-			
+
 			view.saveFrame(new File(file.getAbsoluteFile() + name));
 		}
 		stateChanged(new ChangeEvent(slider));
@@ -288,7 +295,7 @@ public class SimpleEditor extends JFrame implements ActionListener, ChangeListen
 
 			@Override
 			public void run() {
-				new SimpleEditor();
+				new SimpleEditor(new JFrame());
 			}
 		});
 	}

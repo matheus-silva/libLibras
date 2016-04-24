@@ -318,18 +318,24 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 		} else if (ae.getSource() == btStop) {
 			capture.stopRecordingUsers();
 		} else if (ae.getSource() == btOpenData) {
-			if(!isDestinationValidMessage()){
+			if (!isDestinationValidMessage()) {
 				return;
 			}
+
 			File file = getDestinationDirectory();
-			SimpleEditor editor = new SimpleEditor(file);
-			System.out.println("Editor");
-			/*Save save = new Save();
-			File f = save.openFile(this);
-			if (f != null) {
-				save.saveFile(this, f, capture.getRecordedData());
-				save.clearData();
-			}*/
+			SimpleEditor editor = new SimpleEditor(file, this);
+
+			Runtime run = Runtime.getRuntime();
+			run.runFinalization();
+			run.gc();
+
+			statusBar();
+
+			/*
+			 * Save save = new Save(); File f = save.openFile(this); if (f !=
+			 * null) { save.saveFile(this, f, capture.getRecordedData());
+			 * save.clearData(); }
+			 */
 		} else if (ae.getSource() == btDelete) {
 			if (!isDestinationValidMessage()) {
 				return;
@@ -341,7 +347,7 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 						"Are you sure you want to delete the directory:\n" + "<html><pre>" + file.getAbsolutePath()
 								+ "</pre></html>\n" + "All the recorded data will be deleted",
 						"Warning", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
-				
+
 				if (option == JOptionPane.YES_OPTION) {
 					try {
 						Delete delete = new Delete();
@@ -368,7 +374,9 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 		} else if (ae.getSource() == btDirectory) {
 			Load load = new Load();
 			File file = load.openDirectory(this);
-			txtDirectory.setText(file.getAbsolutePath());
+			if (file != null) {
+				txtDirectory.setText(file.getAbsolutePath());
+			}
 		}
 	}
 
