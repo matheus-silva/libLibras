@@ -61,7 +61,7 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 	private JTextField txtDirectory, txtPerson, txtSign;
 	private ButtonGroup btCamerasGroup;
 	private JSpinner sSeconds;
-	private JButton btStart, btStop, btOpenData, btDelete, btDirectory;
+	private JButton btStart, btStop, btOpenData, btDelete, btDirectory, btGarbage;
 	private JLabel lblSeconds, lblCount;
 
 	public Control() {
@@ -152,6 +152,7 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 		btOpenData = new JButton("View Data");
 		btDelete = new JButton("Delete");
 		btDirectory = new JButton("Select");
+		btGarbage = new JButton("Garbage Collector");
 		lblSeconds = new JLabel();
 		lblCount = new JLabel("Frames: 0");
 		txtDirectory = new JTextField();
@@ -169,6 +170,7 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 		btOpenData.addActionListener(this);
 		btDelete.addActionListener(this);
 		btDirectory.addActionListener(this);
+		btGarbage.addActionListener(this);
 		sSeconds.addChangeListener(this);
 
 		// Basic configurations
@@ -208,6 +210,7 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 		pnTimer.add(lblSeconds);
 
 		pnStatus.add(BorderLayout.CENTER, lblCount);
+		pnStatus.add(BorderLayout.EAST, btGarbage);
 
 		lblSeconds.setHorizontalAlignment(SwingConstants.CENTER);
 
@@ -368,27 +371,19 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 					}
 				}
 			}
-
-			/*
-			 * capture.clearMoviments();
-			 * 
-			 * Runtime run = Runtime.getRuntime(); run.runFinalization();
-			 * run.gc();
-			 * 
-			 * statusBar();
-			 */
 		} else if (ae.getSource() == btDirectory) {
 			Load load = new Load();
 			File file = load.openDirectory(this);
 			if (file != null) {
 				txtDirectory.setText(file.getAbsolutePath());
 			}
-		}
-		Runtime run = Runtime.getRuntime();
-		run.runFinalization();
-		run.gc();
+		} else if (ae.getSource() == btGarbage) {
+			Runtime run = Runtime.getRuntime();
+			run.runFinalization();
+			run.gc();
 
-		statusBar();
+			statusBar();
+		}
 	}
 
 	private boolean isDestinationValidMessage() {
