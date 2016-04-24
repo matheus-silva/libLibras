@@ -39,6 +39,7 @@ import javax.swing.event.ChangeListener;
 import com.primesense.nite.PoseType;
 
 import br.edu.ifsp.capturer.ShowObject;
+import br.edu.ifsp.editor.SimpleEditor;
 import br.edu.ifsp.util.Delete;
 import br.edu.ifsp.util.Load;
 import br.edu.ifsp.util.Save;
@@ -55,12 +56,12 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 	private JComboBox<String> cbStartingPose = new JComboBox<String>(poseOptions);
 	private JComboBox<String> cbStoppingPose = new JComboBox<String>(poseOptions);
 	private String lastSelectedStartPose = "Manual";
-	private JPanel pnTimer, pnCameras, pnSetup, pnRecord, pnSave;
+	private JPanel pnTimer, pnCameras, pnSetup, pnRecord, pnOption;
 	private JRadioButton rbColor, rbDepth, rbIr;
 	private JTextField txtDirectory, txtPerson, txtSign;
 	private ButtonGroup btCamerasGroup;
 	private JSpinner sSeconds;
-	private JButton btStart, btStop, btSave, btDelete, btDirectory;
+	private JButton btStart, btStop, btOpenData, btDelete, btDirectory;
 	private JLabel lblSeconds, lblCount;
 
 	public Control() {
@@ -140,7 +141,7 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 		pnCameras = new JPanel(new FlowLayout(FlowLayout.LEADING, 0, 0));
 		pnRecord = new JPanel(new GridLayout(8, 1, 0, 1));
 		JPanel pnStatus = new JPanel(new BorderLayout());
-		pnSave = new JPanel(new GridLayout(0, 1));
+		pnOption = new JPanel(new GridLayout(0, 1));
 		rbColor = new JRadioButton("Color");
 		rbDepth = new JRadioButton("Depth");
 		rbIr = new JRadioButton("IR");
@@ -148,7 +149,7 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 		sSeconds = new JSpinner(new SpinnerNumberModel(5, 0, null, 1));
 		btStart = new JButton("Start Recording");
 		btStop = new JButton("Stop Recording");
-		btSave = new JButton("Save");
+		btOpenData = new JButton("View Data");
 		btDelete = new JButton("Delete");
 		btDirectory = new JButton("Select");
 		lblSeconds = new JLabel();
@@ -165,7 +166,7 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 		cbStoppingPose.addItemListener(this);
 		btStart.addActionListener(this);
 		btStop.addActionListener(this);
-		btSave.addActionListener(this);
+		btOpenData.addActionListener(this);
 		btDelete.addActionListener(this);
 		btDirectory.addActionListener(this);
 		sSeconds.addChangeListener(this);
@@ -237,10 +238,10 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 		c.add(BorderLayout.EAST, pnSetup);
 		c.add(BorderLayout.SOUTH, pnStatus);
 
-		pnSave.setBorder(new TitledBorder("Save"));
-		pnSave.add(btSave);
-		pnSave.add(btDelete);
-		pnSetup.add(BorderLayout.SOUTH, pnSave);
+		pnOption.setBorder(new TitledBorder("Options"));
+		pnOption.add(btOpenData);
+		pnOption.add(btDelete);
+		pnSetup.add(BorderLayout.SOUTH, pnOption);
 
 		statusBar();
 	}
@@ -316,13 +317,19 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 			capture.startRecordingUsers();
 		} else if (ae.getSource() == btStop) {
 			capture.stopRecordingUsers();
-		} else if (ae.getSource() == btSave) {
-			Save save = new Save();
+		} else if (ae.getSource() == btOpenData) {
+			if(!isDestinationValidMessage()){
+				return;
+			}
+			File file = getDestinationDirectory();
+			SimpleEditor editor = new SimpleEditor(file);
+			System.out.println("Editor");
+			/*Save save = new Save();
 			File f = save.openFile(this);
 			if (f != null) {
 				save.saveFile(this, f, capture.getRecordedData());
 				save.clearData();
-			}
+			}*/
 		} else if (ae.getSource() == btDelete) {
 			if (!isDestinationValidMessage()) {
 				return;
