@@ -242,28 +242,28 @@ public class Load implements Runnable {
 			File coorDepth = new File(coor.getAbsolutePath() + File.separator + "Depth.txt");
 			if (coorDepth.exists()) {
 				System.out.println("Coordinate Depth");
-				data.setCoordinateDepth(loadCoords(coorDepth, Coordinate.createMapStructure()));
+				data.setCoordinateDepth(loadCoords(coorDepth, new TreeMap<Long, Float[][]>()));
 			}
 
 			File coorReal = new File(coor.getAbsolutePath() + File.separator + "Real.txt");
 			if (coorReal.exists()) {
 				System.out.println("Coordinate Real");
-				data.setCoordinateReal(loadCoords(coorReal, Coordinate.createMapStructure()));
+				data.setCoordinateReal(loadCoords(coorReal, new TreeMap<Long, Float[][]>()));
 			}
 
 			if (depth.exists()) {
 				System.out.println("Depth");
-				data.setImageDepth(loadBuffers(depth, ImageCapture.createMapStructure()));
+				data.setImageDepth(loadBuffers(depth, new TreeMap<Long, ByteBuffer>()));
 			}
 
 			if (color.exists()) {
 				System.out.println("Color");
-				data.setImageColor(loadBuffers(color, ImageCapture.createMapStructure()));
+				data.setImageColor(loadBuffers(color, new TreeMap<Long, ByteBuffer>()));
 			}
 
 			if (segmentation.exists()) {
 				System.out.println("Segmentation");
-				data.setSegmentation(loadBuffers(segmentation, Segmentation.createMapStructure()));
+				data.setSegmentation(loadBuffers(segmentation, new TreeMap<Long, ByteBuffer>()));
 			}
 
 			if (data.hasSegmentation()) {

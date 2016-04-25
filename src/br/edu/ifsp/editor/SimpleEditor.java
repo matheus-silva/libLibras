@@ -189,37 +189,25 @@ public class SimpleEditor extends JDialog implements ActionListener, ChangeListe
 		if (e.getSource() == mColor) {
 			view.setCamera(ShowObject.COLOR);
 
-			Set<Long> time = new TreeSet<>();
-			for (Long l : data.getImageColor().keySet()) {
-				time.add(l);
-			}
+			Set<Long> time = data.getImageColor().keySet();
 			data.setTimestamp(time);
 			slider.setMaximum(time.size() - 1);
 
 		} else if (e.getSource() == mDepth) {
 			view.setCamera(ShowObject.DEPTH);
 
-			Set<Long> time = new TreeSet<>();
-			for (Long l : data.getImageDepth().keySet()) {
-				time.add(l);
-			}
+			Set<Long> time = data.getImageDepth().keySet();
 			data.setTimestamp(time);
 			slider.setMaximum(time.size() - 1);
 		} else if (e.getSource() == mSkeleton) {
 
-			Set<Long> time = new TreeSet<>();
-			for (Long l : data.getCoordinateDepth().keySet()) {
-				time.add(l);
-			}
+			Set<Long> time = data.getCoordinateDepth().keySet();
 			data.setTimestamp(time);
 			slider.setMaximum(time.size() - 1);
 		} else if (e.getSource() == mSegmentation) {
 			view.setCamera(ShowObject.DEPTH);
 
-			Set<Long> time = new TreeSet<>();
-			for (Long l : data.getSegmentation().keySet()) {
-				time.add(l);
-			}
+			Set<Long> time = data.getSegmentation().keySet();
 			data.setTimestamp(time);
 			slider.setMaximum(time.size() - 1);
 		} else if (e.getSource() == mOpen) {
