@@ -124,6 +124,7 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 		if (!startRecordingUsers) {
 			imgColor.stopRecording();
 		} else {
+			checkFile(file);
 			imgColor.startRecording();
 		}
 
@@ -181,6 +182,7 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 			if (!startRecordingUsers) {
 				coor.stopRecording();
 			} else {
+				checkFile(file);
 				coor.startRecording();
 			}
 
@@ -196,17 +198,18 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 
 		/* If the recording is not allowed. */
 		if (!startRecordingUsers) {
-			seg.stopRecording();
+			//seg.stopRecording();
 			imgDepth.stopRecording();
 		} else {
-			seg.startRecording();
+			checkFile(file);
+			//seg.startRecording();
 			imgDepth.startRecording();
 		}
 
 		// new Thread(new Runnable() {
 		// @Override
 		// public void run() {
-		seg.setUserMap(frame.getUserMap(), frame.getTimestamp());
+		//seg.setUserMap(frame.getUserMap(), frame.getTimestamp());
 		// }
 		// }).start();
 
@@ -482,6 +485,18 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 		data.setCoordinateDepth(coor.getRecordedDepthData().get(idShort));
 		data.setCoordinateReal(coor.getRecordedRealData().get(idShort));
 		return data;
+	}
+	
+	private void checkFile(File file){
+		if(file.exists()){
+			return;
+		}
+		
+		if(!file.mkdirs()){
+			System.err.println("The creation of the directories failed.");
+		} else {
+			setFile(file);
+		}
 	}
 	
 	public void setFile(File file){

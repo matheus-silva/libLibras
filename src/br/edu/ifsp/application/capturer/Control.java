@@ -95,6 +95,12 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 					btStart.setEnabled(false);
 					cbStoppingPose.setEnabled(true);
 					btStop.setEnabled(true);
+					
+					txtDirectory.setEnabled(false);
+					btDirectory.setEnabled(false);
+					txtPerson.setEnabled(false);
+					txtSign.setEnabled(false);
+					btDelete.setEnabled(false);
 					break;
 				case Capture.StateChangedListener.RECORDING_STOPPED:
 					lblSeconds.setText("\u25A0");
@@ -104,6 +110,12 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 					btStart.setEnabled(true);
 					cbStoppingPose.setEnabled(false);
 					btStop.setEnabled(false);
+					
+					txtDirectory.setEnabled(true);
+					btDirectory.setEnabled(true);
+					txtPerson.setEnabled(true);
+					txtSign.setEnabled(true);
+					btDelete.setEnabled(true);
 					break;
 				case Capture.StateChangedListener.TIMER_CHANGED:
 					lblSeconds.setText(String.valueOf(capture.getSeconds()));

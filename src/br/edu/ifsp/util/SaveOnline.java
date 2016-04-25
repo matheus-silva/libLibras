@@ -24,7 +24,7 @@ public class SaveOnline implements Runnable {
 		save.saveBuffer(file, frame);
 
 		COUNT++;
-		if (COUNT % 500 == 0) {
+		if (COUNT % 250 == 0) {
 			callGC();
 		}
 	}
