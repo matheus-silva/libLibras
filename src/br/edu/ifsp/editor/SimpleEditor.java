@@ -167,7 +167,6 @@ public class SimpleEditor extends JDialog implements ActionListener, ChangeListe
 		if (view != null) {
 			c.add(view);
 		}
-		c.setSize(640, 480);
 		return c;
 	}
 
@@ -218,8 +217,11 @@ public class SimpleEditor extends JDialog implements ActionListener, ChangeListe
 			File file = load.openDirectory(father);
 
 			initialize(file);
+			initializeComponents();
 			loadData();
-
+			revalidate();
+			repaint();
+			
 		} else if (e.getSource() == mSaveImage) {
 			File file = load.openDirectory(father);
 
@@ -227,7 +229,7 @@ public class SimpleEditor extends JDialog implements ActionListener, ChangeListe
 				return;
 			}
 
-			long timestamp = data.getTimestampByIndex(slider.getValue());
+			Long timestamp = data.getTimestampByIndex(slider.getValue());
 			String name = File.separator + timestamp + ".png";
 
 			view.saveFrame(new File(file.getAbsoluteFile() + name));
