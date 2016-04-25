@@ -18,4 +18,26 @@ public class Delete {
 		Files.delete(file.toPath());
 	}
 
+	public void deleteUsedFile(File file) throws IOException {
+		File depth = new File(file.getAbsolutePath() + File.separator + "Depth");
+		File color = new File(file.getAbsolutePath() + File.separator + "Color");
+		File coord = new File(file.getAbsolutePath() + File.separator + "Coordinates");
+		File seg = new File(file.getAbsolutePath() + File.separator + "Segmentation");
+		
+		if(depth.exists()){
+			deleteFile(depth);
+		}
+		
+		if(color.exists()){
+			deleteFile(color);
+		}
+		
+		if(coord.exists()){
+			deleteFile(coord);
+		}
+		
+		if(seg.exists()){
+			deleteFile(seg);
+		}
+	}
 }

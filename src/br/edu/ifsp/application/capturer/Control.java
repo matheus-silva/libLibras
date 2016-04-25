@@ -372,7 +372,7 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 				if (option == JOptionPane.YES_OPTION) {
 					try {
 						Delete delete = new Delete();
-						delete.deleteFile(file);
+						delete.deleteUsedFile(file);
 					} catch (IOException e) {
 						// TODO Auto-generated catch block
 						JOptionPane.showMessageDialog(this,
