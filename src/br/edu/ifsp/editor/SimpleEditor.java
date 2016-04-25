@@ -6,6 +6,10 @@ import java.awt.EventQueue;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowStateListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.nio.ByteBuffer;
 import java.util.Set;
@@ -39,12 +43,13 @@ public class SimpleEditor extends JDialog implements ActionListener, ChangeListe
 	private ImageCapture imgDepth;
 	private ImageCapture imgColor;
 
+	private JPanel pnView;
 	private JSlider slider;
 	private JMenuBar menu;
 	private JMenu mFile, mView;
 	private JMenuItem mOpen;
 	private JMenuItem mColor, mDepth, mSkeleton, mSegmentation;
-	private JMenuItem mSave;
+	private JMenuItem mSaveImage;
 	
 	private JFrame father;
 
@@ -61,7 +66,7 @@ public class SimpleEditor extends JDialog implements ActionListener, ChangeListe
 		setJMenuBar(getMenu());
 		initializeComponents();
 		
-		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		setSize(640, 580);
 		
 		if (file != null) {
@@ -70,6 +75,7 @@ public class SimpleEditor extends JDialog implements ActionListener, ChangeListe
 		}
 		
 		setVisible(true);
+		
 	}
 
 	private CaptureData load(File file) {
@@ -94,7 +100,8 @@ public class SimpleEditor extends JDialog implements ActionListener, ChangeListe
 		c.removeAll();
 		c.revalidate();
 
-		c.add(BorderLayout.CENTER, getComponent());
+		pnView = getComponent();
+		c.add(BorderLayout.CENTER, pnView);
 		c.add(BorderLayout.SOUTH, getControl());
 
 		c.revalidate();
@@ -113,17 +120,17 @@ public class SimpleEditor extends JDialog implements ActionListener, ChangeListe
 		mDepth = new JMenuItem("Depth");
 		mSkeleton = new JMenuItem("Skeleton");
 		mSegmentation = new JMenuItem("Segmentation");
-		mSave = new JMenuItem("Save as Image");
+		mSaveImage = new JMenuItem("Save as Image");
 		mOpen.addActionListener(this);
 
 		mColor.addActionListener(this);
 		mDepth.addActionListener(this);
 		mSkeleton.addActionListener(this);
 		mSegmentation.addActionListener(this);
-		mSave.addActionListener(this);
+		mSaveImage.addActionListener(this);
 
 		mFile.add(mOpen);
-		mFile.add(mSave);
+		mFile.add(mSaveImage);
 
 		mView.add(mColor);
 		mView.add(mDepth);
@@ -131,7 +138,7 @@ public class SimpleEditor extends JDialog implements ActionListener, ChangeListe
 		mView.add(mSegmentation);
 
 		mView.setEnabled(false);
-		mSave.setEnabled(false);
+		mSaveImage.setEnabled(false);
 
 		menu.add(mFile);
 		menu.add(mView);
@@ -147,14 +154,11 @@ public class SimpleEditor extends JDialog implements ActionListener, ChangeListe
 		mDepth.setEnabled(data.hasImageDepth());
 		mSkeleton.setEnabled(data.hasCoordinatesDepth());
 		mSegmentation.setEnabled(data.hasSegmentation());
-		mSave.setEnabled(true);
+		mSaveImage.setEnabled(true);
 
 		slider.setMinimum(0);
 		slider.setMaximum(data.getTimestamp().size());
 		slider.setValue(0);
-
-		revalidate();
-		repaint();
 	}
 
 	private JPanel getComponent() {
@@ -216,7 +220,7 @@ public class SimpleEditor extends JDialog implements ActionListener, ChangeListe
 			initialize(file);
 			loadData();
 
-		} else if (e.getSource() == mSave) {
+		} else if (e.getSource() == mSaveImage) {
 			File file = load.openDirectory(father);
 
 			if (file == null || !file.exists()) {
@@ -273,7 +277,7 @@ public class SimpleEditor extends JDialog implements ActionListener, ChangeListe
 
 			view.revalidate();
 			view.repaint();
-
+			
 			setTitle("Simple Editor - " + data.getTimestampByIndex(slider.getValue()));
 		}
 	}

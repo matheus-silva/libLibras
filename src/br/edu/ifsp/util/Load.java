@@ -207,7 +207,7 @@ public class Load implements Runnable {
 		d = new JDialog((JFrame) father, "Loading...", true);
 		d.setSize(300, 75);
 		d.setLocationRelativeTo(father);
-		// d.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+		d.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
 		d.setResizable(false);
 
 		JProgressBar pb = new JProgressBar();
