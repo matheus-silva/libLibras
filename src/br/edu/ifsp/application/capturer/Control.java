@@ -74,6 +74,7 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 		setLocation(camera.getLocation().x + camera.getWidth(), camera.getLocation().y);
 		setSize(500, 500);
 		setVisible(true);
+		callGCAlways(1_000);
 	}
 
 	private void initialize() {
@@ -390,11 +391,7 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 				txtDirectory.setText(file.getAbsolutePath());
 			}
 		} else if (ae.getSource() == btGarbage) {
-			Runtime run = Runtime.getRuntime();
-			run.runFinalization();
-			run.gc();
-
-			statusBar();
+			callGC();
 		}
 	}
 
@@ -477,6 +474,32 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 		File file = new File(directory + s + person + s + sign);
 
 		return file;
+	}
+	
+	public void callGC(){
+		Runtime run = Runtime.getRuntime();
+		run.runFinalization();
+		run.gc();
+
+		statusBar();
+	}
+	
+	public void callGCAlways(int millis){
+		new Thread(new Runnable() {
+			
+			@Override
+			public void run() {
+				while(true){
+					try {
+						Thread.sleep(millis);
+						callGC();
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			}
+		}).start();
 	}
 
 	public static void main(String args[]) {

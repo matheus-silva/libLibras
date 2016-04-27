@@ -25,8 +25,10 @@ public class SaveOnline implements Runnable {
 
 		COUNT++;
 		if (COUNT % 250 == 0) {
-			callGC();
+			//callGC();
 		}
+		
+		frame = null;
 	}
 
 	private synchronized void callGC() {
