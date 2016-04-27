@@ -133,7 +133,7 @@ public class Coordinate implements UserTracker.NewFrameListener {
 				continue;
 			}
 
-			getUserJoints(userTracker, user, this.frame.getTimestamp(), frame.getDepthFrame().getWidth(), frame.getDepthFrame().getHeight());
+			setUserJoints(userTracker, user, this.frame.getTimestamp(), frame.getDepthFrame().getWidth(), frame.getDepthFrame().getHeight());
 
 			if (view != null) {
 				view.repaint();
@@ -144,7 +144,7 @@ public class Coordinate implements UserTracker.NewFrameListener {
 		this.frame.release();
 	}
 
-	public synchronized void getUserJoints(UserTracker userTracker, UserData user, long timestamp, int width, int height) {
+	public synchronized void setUserJoints(UserTracker userTracker, UserData user, long timestamp, int width, int height) {
 		/* Get the joints of the current user */
 
 		/* Get the skeleton of the current user */

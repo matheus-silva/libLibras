@@ -49,7 +49,7 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 	private Segmentation seg = null;
 	private ImageCapture imgColor = null, imgDepth = null;
 	private File file;
-	//private Set<Long> timestamp = new TreeSet<>();
+	// private Set<Long> timestamp = new TreeSet<>();
 	private int frames;
 	private Integer seconds, secondsRemaining = 0;
 	private int delay;
@@ -137,9 +137,9 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 		// }).start();
 
 		if (startRecordingUsers) {
-			//timestamp.add(frameColor.getTimestamp());
+			// timestamp.add(frameColor.getTimestamp());
 			frames++;
-			
+
 			/* Call the client's listener that are waiting for some events. */
 			if (stateChanged != null) {
 				stateChanged.stateChanged(Capture.StateChangedListener.NEW_DATA_ARRIVED);
@@ -189,7 +189,7 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 			// new Thread(new Runnable() {
 			// @Override
 			// public void run() {
-			coor.getUserJoints(userTracker, user, frameDepth.getTimestamp(), frameDepth.getWidth(),
+			coor.setUserJoints(userTracker, user, frameDepth.getTimestamp(), frameDepth.getWidth(),
 					frameDepth.getHeight());
 			// }
 			// }).start();
@@ -198,18 +198,18 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 
 		/* If the recording is not allowed. */
 		if (!startRecordingUsers) {
-			//seg.stopRecording();
+			// seg.stopRecording();
 			imgDepth.stopRecording();
 		} else {
 			checkFile(file);
-			//seg.startRecording();
+			// seg.startRecording();
 			imgDepth.startRecording();
 		}
 
 		// new Thread(new Runnable() {
 		// @Override
 		// public void run() {
-		//seg.setUserMap(frame.getUserMap(), frame.getTimestamp());
+		// seg.setUserMap(frame.getUserMap(), frame.getTimestamp());
 		// }
 		// }).start();
 
@@ -221,9 +221,9 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 		// }).start();
 
 		if (startRecordingUsers) {
-			//timestamp.add(frameDepth.getTimestamp());
+			// timestamp.add(frameDepth.getTimestamp());
 			frames++;
-			
+
 			/* Call the client's listener that are waiting for some events. */
 			if (stateChanged != null) {
 				stateChanged.stateChanged(Capture.StateChangedListener.NEW_DATA_ARRIVED);
@@ -466,7 +466,7 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 		data.setHeight(videoColor.getVideoMode().getResolutionY());
 		data.setFps(videoColor.getVideoMode().getFps());
 
-		//data.setTimestamp(timestamp);
+		// data.setTimestamp(timestamp);
 
 		data.setSegmentation(seg.getRecordedData());
 
@@ -486,30 +486,28 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 		data.setCoordinateReal(coor.getRecordedRealData().get(idShort));
 		return data;
 	}
-	
-	private void checkFile(File file){
-		if(file.exists()){
-			return;
+
+	private void checkFile(File file) {
+		if (!file.exists()) {
+
+			if (!file.mkdirs()) {
+				System.err.println("The creation of the directories failed.");
+			}
 		}
-		
-		if(!file.mkdirs()){
-			System.err.println("The creation of the directories failed.");
-		} else {
-			setFile(file);
-		}
+		setFile(file);
 	}
-	
-	public void setFile(File file){
-		if(!file.equals(this.file)){
+
+	public void setFile(File file) {
+		if (!file.equals(this.file)) {
 			this.frames = 0;
 		}
 		this.file = file;
-		
+
 		File depth = new File(file.getAbsolutePath() + File.separator + "Depth");
 		File color = new File(file.getAbsolutePath() + File.separator + "Color");
 		File coord = new File(file.getAbsolutePath() + File.separator + "Coordinates");
-		
-		if(!depth.exists()){
+
+		if (!depth.exists()) {
 			try {
 				Files.createDirectories(depth.toPath());
 			} catch (IOException e) {
@@ -517,8 +515,8 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 				e.printStackTrace();
 			}
 		}
-		
-		if(!color.exists()){
+
+		if (!color.exists()) {
 			try {
 				Files.createDirectory(color.toPath());
 			} catch (IOException e) {
@@ -526,8 +524,8 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 				e.printStackTrace();
 			}
 		}
-		
-		if(!coord.exists()){
+
+		if (!coord.exists()) {
 			try {
 				Files.createDirectory(coord.toPath());
 			} catch (IOException e) {
@@ -535,7 +533,7 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 				e.printStackTrace();
 			}
 		}
-		
+
 		imgDepth.setDirectory(depth);
 		imgColor.setDirectory(color);
 		coor.setDirectory(coord);
@@ -549,7 +547,7 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 	 */
 	public int getFramesCount() {
 		return frames;
-		//return timestamp.size();
+		// return timestamp.size();
 	}
 
 	/**
@@ -557,7 +555,7 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 	 * stored.
 	 */
 	public void clearMoviments() {
-		//timestamp = new TreeSet<>();
+		// timestamp = new TreeSet<>();
 		coor.clearRecordedData();
 		seg.clearRecordedData();
 		imgColor.clearRecordedData();
