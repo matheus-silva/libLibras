@@ -74,7 +74,7 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 		setLocation(camera.getLocation().x + camera.getWidth(), camera.getLocation().y);
 		setSize(500, 500);
 		setVisible(true);
-		callGCAlways(1_000);
+		callGCAlways(5_000);
 	}
 
 	private void initialize() {

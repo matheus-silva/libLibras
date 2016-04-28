@@ -38,10 +38,7 @@ public class SimpleEditor extends JDialog implements ActionListener, ChangeListe
 	private CaptureData data;
 	private Load load;
 	private ShowObject view;
-	private Coordinate coor;
 	private Segmentation seg;
-	private ImageCapture imgDepth;
-	private ImageCapture imgColor;
 
 	private JPanel pnView;
 	private JSlider slider;
@@ -87,10 +84,7 @@ public class SimpleEditor extends JDialog implements ActionListener, ChangeListe
 			data = load(file);
 		}
 		view = new ShowObject();
-		coor = new Coordinate(view);
 		seg = new Segmentation(view);
-		imgDepth = new ImageCapture(view, ImageCapture.DEPTH);
-		imgColor = new ImageCapture(view, ImageCapture.COLOR);
 	}
 
 	private void initializeComponents() {
@@ -234,54 +228,58 @@ public class SimpleEditor extends JDialog implements ActionListener, ChangeListe
 
 			view.saveFrame(new File(file.getAbsoluteFile() + name));
 		}
-		stateChanged(new ChangeEvent(slider));
+		updateSlider();
 	}
 
 	@Override
 	public void stateChanged(ChangeEvent e) {
 		if (e.getSource() == slider) {
-			int index = slider.getValue();
-
-			Long timestamp = data.getTimestampByIndex(index);
-
-			if (data.hasCoordinatesDepth()) {
-				view.setUserCoordinate(data.getCoordinateDepth().get(timestamp), 0, 0);
-			}
-
-			if (data.hasSegmentation()) {
-				ByteBuffer buffSegmentation = data.getSegmentation().get(timestamp);
-
-				if (buffSegmentation != null) {
-					buffSegmentation.rewind();
-				}
-
-				view.setUserMap(seg, buffSegmentation, timestamp);
-			}
-
-			ByteBuffer buffBackground = null;
-			if (view.getCamera() == ShowObject.COLOR) {
-				if (data.hasImageColor()) {
-					buffBackground = data.getImageColor().get(timestamp);
-				}
-			} else if (view.getCamera() == ShowObject.DEPTH) {
-				if (data.hasImageDepth()) {
-					buffBackground = data.getImageDepth().get(timestamp);
-				}
-			} else {
-				return;
-			}
-
-			if (buffBackground != null) {
-				buffBackground.rewind();
-			}
-
-			view.setBackground(buffBackground, 640, 480);
-
-			view.revalidate();
-			view.repaint();
-			
-			setTitle("Simple Editor - " + data.getTimestampByIndex(slider.getValue()));
+			updateSlider();
 		}
+	}
+	
+	private void updateSlider(){
+		int index = slider.getValue();
+
+		Long timestamp = data.getTimestampByIndex(index);
+
+		if (data.hasCoordinatesDepth()) {
+			view.setUserCoordinate(data.getCoordinateDepth().get(timestamp), 0, 0);
+		}
+
+		if (data.hasSegmentation()) {
+			ByteBuffer buffSegmentation = data.getSegmentation().get(timestamp);
+
+			if (buffSegmentation != null) {
+				buffSegmentation.rewind();
+			}
+
+			view.setUserMap(seg, buffSegmentation, timestamp);
+		}
+
+		ByteBuffer buffBackground = null;
+		if (view.getCamera() == ShowObject.COLOR) {
+			if (data.hasImageColor()) {
+				buffBackground = data.getImageColor().get(timestamp);
+			}
+		} else if (view.getCamera() == ShowObject.DEPTH) {
+			if (data.hasImageDepth()) {
+				buffBackground = data.getImageDepth().get(timestamp);
+			}
+		} else {
+			return;
+		}
+
+		if (buffBackground != null) {
+			buffBackground.rewind();
+		}
+
+		view.setBackground(buffBackground, 640, 480);
+
+		view.revalidate();
+		view.repaint();
+		
+		setTitle("Simple Editor - " + data.getTimestampByIndex(slider.getValue()));
 	}
 
 	public static void main(String args[]) {

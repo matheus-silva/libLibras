@@ -11,8 +11,12 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.Map;
+import java.util.Set;
+
+
 
 /**
  *
@@ -31,7 +35,50 @@ public class Comp extends Component {
 	private Modification modification;
 	private boolean isCenterVisible = false;
 	public static final String SKELETON = "Skeleton", NUMBER = "Number", CIRCLE = "Circle";
-
+	
+	public static Comp getInstanceByMap(Map<Long, Float[][]> map){
+		float[][][] data = new float[map.size()][][];
+		Set keys = map.entrySet();
+		
+		Iterator it = keys.iterator();
+		for(int i = 0; i < data.length; i++){
+			Float[][] temp = map.get(it.next());
+			data[i] = new float[temp.length][];
+			for(int j = 0; j < temp.length; j++){
+				
+				Float[] temp1 = temp[j];
+				data[i][j] = new float[temp1.length];
+				
+				for(int k = 0; k < temp1.length; k++){
+					data[i][j][k] = temp[j][k];
+				}
+			}
+		}
+		
+		return new Comp(data);
+	}
+	
+	public static Comp getInstanceByList(List<Float[][]> list){
+		float[][][] data = new float[list.size()][][];
+		
+		for(int i = 0; i < list.size(); i++){
+			
+			Float[][] temp = list.get(i);
+			data[i] = new float[temp.length][];
+			
+			for(int j = 0; j < temp.length; j++){
+				
+				Float[] temp1 = temp[j];
+				data[i][j] = new float[temp1.length];
+				
+				for(int k = 0; k < temp1.length; k++){
+					data[i][j][k] = temp[j][k];
+				}
+			}
+		}
+		return new Comp(data);
+	}
+	
 	public Comp(float[][][] data) {
 		this.data = new float[data.length][][];
 		for (int i = 0; i < data.length; i++) {
