@@ -96,7 +96,7 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 					btStart.setEnabled(false);
 					cbStoppingPose.setEnabled(true);
 					btStop.setEnabled(true);
-					
+
 					txtDirectory.setEnabled(false);
 					btDirectory.setEnabled(false);
 					txtPerson.setEnabled(false);
@@ -111,7 +111,7 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 					btStart.setEnabled(true);
 					cbStoppingPose.setEnabled(false);
 					btStop.setEnabled(false);
-					
+
 					txtDirectory.setEnabled(true);
 					btDirectory.setEnabled(true);
 					txtPerson.setEnabled(true);
@@ -475,21 +475,21 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 
 		return file;
 	}
-	
-	public void callGC(){
+
+	public void callGC() {
 		Runtime run = Runtime.getRuntime();
 		run.runFinalization();
 		run.gc();
 
 		statusBar();
 	}
-	
-	public void callGCAlways(int millis){
+
+	public void callGCAlways(int millis) {
 		new Thread(new Runnable() {
-			
+
 			@Override
 			public void run() {
-				while(true){
+				while (true) {
 					try {
 						Thread.sleep(millis);
 						callGC();
