@@ -37,7 +37,7 @@ public class SimpleEditor extends JDialog implements ActionListener, ChangeListe
 
 	private CaptureData data;
 	private Load load;
-	private ShowObject view;
+	private ShowObject viewDepth;
 	private Segmentation seg;
 
 	private JPanel pnView;
@@ -83,8 +83,8 @@ public class SimpleEditor extends JDialog implements ActionListener, ChangeListe
 		if (file != null) {
 			data = load(file);
 		}
-		view = new ShowObject();
-		seg = new Segmentation(view);
+		viewDepth = new ShowObject();
+		seg = new Segmentation(viewDepth);
 	}
 
 	private void initializeComponents() {
@@ -158,8 +158,8 @@ public class SimpleEditor extends JDialog implements ActionListener, ChangeListe
 	private JPanel getComponent() {
 		JPanel c = new JPanel(new GridLayout(1, 0));
 		c.setBorder(new TitledBorder("View"));
-		if (view != null) {
-			c.add(view);
+		if (viewDepth != null) {
+			c.add(viewDepth);
 		}
 		return c;
 	}
@@ -184,14 +184,14 @@ public class SimpleEditor extends JDialog implements ActionListener, ChangeListe
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == mColor) {
-			view.setCamera(ShowObject.COLOR);
+			viewDepth.setCamera(ShowObject.COLOR);
 
 			Set<Long> time = data.getImageColor().keySet();
 			data.setTimestamp(time);
 			slider.setMaximum(time.size() - 1);
 
 		} else if (e.getSource() == mDepth) {
-			view.setCamera(ShowObject.DEPTH);
+			viewDepth.setCamera(ShowObject.DEPTH);
 
 			Set<Long> time = data.getImageDepth().keySet();
 			data.setTimestamp(time);
@@ -202,7 +202,7 @@ public class SimpleEditor extends JDialog implements ActionListener, ChangeListe
 			data.setTimestamp(time);
 			slider.setMaximum(time.size() - 1);
 		} else if (e.getSource() == mSegmentation) {
-			view.setCamera(ShowObject.DEPTH);
+			viewDepth.setCamera(ShowObject.DEPTH);
 
 			Set<Long> time = data.getSegmentation().keySet();
 			data.setTimestamp(time);
@@ -226,7 +226,7 @@ public class SimpleEditor extends JDialog implements ActionListener, ChangeListe
 			Long timestamp = data.getTimestampByIndex(slider.getValue());
 			String name = File.separator + timestamp + ".png";
 
-			view.saveFrame(new File(file.getAbsoluteFile() + name));
+			viewDepth.saveFrame(new File(file.getAbsoluteFile() + name));
 		}
 		updateSlider();
 	}
@@ -244,7 +244,7 @@ public class SimpleEditor extends JDialog implements ActionListener, ChangeListe
 		Long timestamp = data.getTimestampByIndex(index);
 
 		if (data.hasCoordinatesDepth()) {
-			view.setUserCoordinate(data.getCoordinateDepth().get(timestamp), 0, 0);
+			viewDepth.setUserCoordinate(data.getCoordinateDepth().get(timestamp), 0, 0);
 		}
 
 		if (data.hasSegmentation()) {
@@ -254,15 +254,15 @@ public class SimpleEditor extends JDialog implements ActionListener, ChangeListe
 				buffSegmentation.rewind();
 			}
 
-			view.setUserMap(seg, buffSegmentation, timestamp);
+			viewDepth.setUserMap(seg, buffSegmentation, timestamp);
 		}
 
 		ByteBuffer buffBackground = null;
-		if (view.getCamera() == ShowObject.COLOR) {
+		if (viewDepth.getCamera() == ShowObject.COLOR) {
 			if (data.hasImageColor()) {
 				buffBackground = data.getImageColor().get(timestamp);
 			}
-		} else if (view.getCamera() == ShowObject.DEPTH) {
+		} else if (viewDepth.getCamera() == ShowObject.DEPTH) {
 			if (data.hasImageDepth()) {
 				buffBackground = data.getImageDepth().get(timestamp);
 			}
@@ -274,10 +274,10 @@ public class SimpleEditor extends JDialog implements ActionListener, ChangeListe
 			buffBackground.rewind();
 		}
 
-		view.setBackground(buffBackground, 640, 480);
+		viewDepth.setBackground(buffBackground, 640, 480);
 
-		view.revalidate();
-		view.repaint();
+		viewDepth.revalidate();
+		viewDepth.repaint();
 		
 		setTitle("Simple Editor - " + data.getTimestampByIndex(slider.getValue()));
 	}

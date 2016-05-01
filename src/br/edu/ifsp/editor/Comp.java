@@ -16,8 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-
-
 /**
  *
  * @author a1402153
@@ -38,9 +36,9 @@ public class Comp extends Component {
 	
 	public static Comp getInstanceByMap(Map<Long, Float[][]> map){
 		float[][][] data = new float[map.size()][][];
-		Set keys = map.entrySet();
+		Set<Long> keys = map.keySet();
 		
-		Iterator it = keys.iterator();
+		Iterator<Long> it = keys.iterator();
 		for(int i = 0; i < data.length; i++){
 			Float[][] temp = map.get(it.next());
 			data[i] = new float[temp.length][];

@@ -1,8 +1,13 @@
 package br.edu.ifsp.util;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 public class CaptureData {
 
@@ -14,7 +19,7 @@ public class CaptureData {
 	private Map<Long, ByteBuffer> imageDepth;
 	private Map<Long, ByteBuffer> imageColor;
 
-	public boolean hasCoordinateReal() {
+	public boolean hasCoordinatesReal() {
 		return !(coordinateReal == null || coordinateReal.isEmpty());
 	}
 
@@ -116,5 +121,231 @@ public class CaptureData {
 	public void setImageColor(Map<Long, ByteBuffer> imageColor) {
 		this.imageColor = imageColor;
 	}
+	
+	private void printTimeline(){
+		List<String> times = new ArrayList<>();
+		for(Long l: getImageColor().keySet()){
+			times.add(l + " - Color");
+		}
+		for(Long l: getImageDepth().keySet()){
+			times.add(l + " - Depth");
+		}
+		times.sort(new Comparator<String>() {
+			@Override
+			public int compare(String s1, String s2) {
+				return s1.compareTo(s2);
+			}
+		});
+		for(String s: times){
+			System.out.println(s);
+		}
+	}
 
+	private Long getTimestampClosest(Long timestamp, Set<Long> timestamps) {
+		long temp = Long.MAX_VALUE;
+		Long t = null;
+		for (Long time : timestamps) {
+			long dif;
+			if (time == timestamp) {
+				return timestamp;
+			} else if (time > timestamp) {
+				dif = time - timestamp;
+			} else {
+				dif = timestamp - time;
+			}
+			if (dif < temp) {
+				temp = dif;
+				t = time;
+			}
+		}
+		return t;
+	}
+
+	private CaptureData synchronizeValues(Long timestamp) {
+		CaptureData data = new CaptureData();
+		String msg = "Line: ";
+		if (hasSegmentation()) {
+			Long segTime = getTimestampClosest(timestamp, getSegmentation().keySet());
+			if (segTime != null) {
+				data.setSegmentation(new TreeMap<>());
+				data.getSegmentation().put(segTime, getSegmentation().get(segTime));
+			}
+			msg += "S: " + segTime + " | ";
+		}
+
+		if (hasImageColor()) {
+			Long colorTime = getTimestampClosest(timestamp, getImageColor().keySet());
+			if (colorTime != null) {
+				data.setImageColor(new TreeMap<>());
+				data.getImageColor().put(colorTime, getImageColor().get(colorTime));
+			}
+			msg += "C: " + colorTime + " | ";
+		}
+
+		if (hasImageDepth()) {
+			Long depthTime = getTimestampClosest(timestamp, getImageDepth().keySet());
+			if (depthTime != null) {
+				data.setImageDepth(new TreeMap<>());
+				data.getImageDepth().put(depthTime, getImageDepth().get(depthTime));
+			}
+			msg += "D: " + depthTime + " | ";
+		}
+
+		if (hasCoordinatesDepth()) {
+			Set<Long> original = getCoordinateDepth().keySet();
+			Set<Long> timeChanged = new TreeSet<>();
+
+			for (Long t : original) {
+				String v = t.toString();
+				v = v + "0";
+				timeChanged.add(Long.parseLong(v));
+			}
+
+			Long depthTime = getTimestampClosest(timestamp, timeChanged);
+			if (depthTime != null) {
+				depthTime = Long.parseLong(depthTime.toString().substring(0, depthTime.toString().length() - 1));
+				data.setCoordinateDepth(new TreeMap<>());
+				data.getCoordinateDepth().put(depthTime, getCoordinateDepth().get(depthTime));
+			}
+			msg += "CD: " + depthTime + " | ";
+		}
+
+		if (hasCoordinatesReal()) {
+			Set<Long> original = getCoordinateReal().keySet();
+			Set<Long> timeChanged = new TreeSet<>();
+
+			for (Long t : original) {
+				String v = t.toString();
+				v = v + "0";
+				timeChanged.add(Long.parseLong(v));
+			}
+
+			Long realTime = getTimestampClosest(timestamp, timeChanged);
+			if (realTime != null) {
+				realTime = Long.parseLong(realTime.toString().substring(0, realTime.toString().length() - 1));
+				data.setCoordinateReal(new TreeMap<>());
+				data.getCoordinateReal().put(realTime, getCoordinateReal().get(realTime));
+			}
+			msg += "CR: " + realTime + " | ";
+		}
+		System.out.println(msg);
+		return data;
+	}
+
+	public List<SyncData> synchronize() {
+		CaptureData data = new CaptureData();
+		List<SyncData> sd = new ArrayList<>();
+		Map<Long, ByteBuffer> base;
+		
+		if (hasImageColor() && hasImageDepth()) {
+			if (getImageColor().size() <= getImageDepth().size()) {
+				base = getImageColor();
+			} else {
+				base = getImageDepth();
+			}
+
+		} else if (hasImageColor()) {
+			base = getImageColor();
+		} else if (hasImageDepth()) {
+			base = getImageDepth();
+		} else {
+			return null;
+		}
+		
+		//printTimeline();
+		
+		data.setSegmentation(new TreeMap<>());
+		data.setImageColor(new TreeMap<>());
+		data.setImageDepth(new TreeMap<>());
+		data.setCoordinateDepth(new TreeMap<>());
+		data.setCoordinateReal(new TreeMap<>());
+
+		for (Long timestamp : base.keySet()) {
+			CaptureData d = synchronizeValues(timestamp);
+			SyncData sync = new SyncData();
+			if (d.hasSegmentation()) {
+				for (Long t : d.getSegmentation().keySet()) {
+					//data.getSegmentation().put(t, d.getSegmentation().get(t));
+					sync.setTimestampSegmentation(t);
+				}
+			}
+
+			if (d.hasImageColor()) {
+				for (Long t : d.getImageColor().keySet()) {
+					//data.getImageColor().put(t, d.getImageColor().get(t));
+					sync.setTimestampColor(t);
+				}
+			}
+
+			if (d.hasImageDepth()) {
+				for (Long t : d.getImageDepth().keySet()) {
+					//data.getImageDepth().put(t, d.getImageDepth().get(t));
+					sync.setTimestampDepth(t);
+				}
+			}
+
+			if (d.hasCoordinatesReal()) {
+				for (Long t : d.getCoordinateReal().keySet()) {
+					//data.getCoordinateReal().put(t, d.getCoordinateReal().get(t));
+					sync.setTimestampCoordinateReal(t);
+				}
+			}
+
+			if (d.hasCoordinatesDepth()) {
+				for (Long t : d.getCoordinateDepth().keySet()) {
+					//data.getCoordinateDepth().put(t, d.getCoordinateDepth().get(t));
+					sync.setTimestampCoordinateDepth(t);
+				}
+			}
+			sd.add(sync);
+		}
+
+		return sd;
+	}
+
+	public class SyncData {
+		
+		private Long timestampSegmentation, timestampDepth, timestampColor, timestampCoordinateDepth, timestampCoordinateReal;
+
+		public Long getTimestampSegmentation() {
+			return timestampSegmentation;
+		}
+
+		public void setTimestampSegmentation(Long timestampSegmentation) {
+			this.timestampSegmentation = timestampSegmentation;
+		}
+
+		public Long getTimestampDepth() {
+			return timestampDepth;
+		}
+
+		public void setTimestampDepth(Long timestampDepth) {
+			this.timestampDepth = timestampDepth;
+		}
+
+		public Long getTimestampColor() {
+			return timestampColor;
+		}
+
+		public void setTimestampColor(Long timestampColor) {
+			this.timestampColor = timestampColor;
+		}
+
+		public Long getTimestampCoordinateDepth() {
+			return timestampCoordinateDepth;
+		}
+
+		public void setTimestampCoordinateDepth(Long timestampCoordinateDepth) {
+			this.timestampCoordinateDepth = timestampCoordinateDepth;
+		}
+
+		public Long getTimestampCoordinateReal() {
+			return timestampCoordinateReal;
+		}
+
+		public void setTimestampCoordinateReal(Long timestampCoordinateReal) {
+			this.timestampCoordinateReal = timestampCoordinateReal;
+		}
+		
+	}
 }
