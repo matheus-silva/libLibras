@@ -5,21 +5,20 @@ import java.awt.Color;
 import java.awt.Container;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.ButtonGroup;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
@@ -40,10 +39,9 @@ import com.primesense.nite.PoseType;
 
 import br.edu.ifsp.capturer.ShowObject;
 import br.edu.ifsp.editor.SimpleEditor;
+import br.edu.ifsp.util.Config;
 import br.edu.ifsp.util.Delete;
 import br.edu.ifsp.util.Load;
-import br.edu.ifsp.util.Save;
-import javafx.scene.web.PromptData;
 
 public class Control extends JFrame implements ItemListener, ActionListener, ChangeListener {
 
@@ -55,10 +53,14 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 	private String poseOptions[] = new String[] { "Manual", "Crossed Hands", "PSI" };
 	private JComboBox<String> cbStartingPose = new JComboBox<String>(poseOptions);
 	private JComboBox<String> cbStoppingPose = new JComboBox<String>(poseOptions);
+	private JComboBox<Object> cbPerson;
+	private JComboBox<Object> cbSign;
+	private JComboBox<Object> cbRecord;
 	private String lastSelectedStartPose = "Manual";
 	private JPanel pnTimer, pnCameras, pnSetup, pnRecord, pnOption;
 	private JRadioButton rbColor, rbDepth, rbIr;
-	private JTextField txtDirectory, txtPerson, txtSign;
+	private JTextField txtDirectory;
+	//private JTextField txtPerson, txtSign;
 	private ButtonGroup btCamerasGroup;
 	private JSpinner sSeconds;
 	private JButton btStart, btStop, btOpenData, btDelete, btDirectory, btGarbage;
@@ -97,10 +99,7 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 					cbStoppingPose.setEnabled(true);
 					btStop.setEnabled(true);
 
-					txtDirectory.setEnabled(false);
 					btDirectory.setEnabled(false);
-					txtPerson.setEnabled(false);
-					txtSign.setEnabled(false);
 					btDelete.setEnabled(false);
 					break;
 				case Capture.StateChangedListener.RECORDING_STOPPED:
@@ -112,10 +111,7 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 					cbStoppingPose.setEnabled(false);
 					btStop.setEnabled(false);
 
-					txtDirectory.setEnabled(true);
 					btDirectory.setEnabled(true);
-					txtPerson.setEnabled(true);
-					txtSign.setEnabled(true);
 					btDelete.setEnabled(true);
 					break;
 				case Capture.StateChangedListener.TIMER_CHANGED:
@@ -169,8 +165,9 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 		lblSeconds = new JLabel();
 		lblCount = new JLabel("Frames: 0");
 		txtDirectory = new JTextField();
-		txtPerson = new JTextField();
-		txtSign = new JTextField();
+		cbPerson = new JComboBox<>();
+		cbSign = new JComboBox<>();
+		cbRecord = new JComboBox<>();
 
 		// Creating listeners
 		rbDepth.addItemListener(this);
@@ -191,6 +188,11 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 		rbDepth.setVisible(true);
 		rbColor.setVisible(true);
 		rbIr.setVisible(false);
+
+		txtDirectory.setEditable(false);
+		if (Config.getInstance() != null) {
+			txtDirectory.setText(Config.getInstance().getDirectory());
+		}
 
 		lblSeconds.setFont(new Font("Serif", Font.BOLD, 100));
 		lblSeconds.setForeground(Color.red);
@@ -232,22 +234,21 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 		pnDirectory.add(BorderLayout.CENTER, txtDirectory);
 		pnDirectory.add(BorderLayout.EAST, btDirectory);
 
-		JPanel pnPerson = new JPanel(new BorderLayout());
-		pnPerson.add(BorderLayout.WEST, new JLabel("User: "));
-		pnPerson.add(BorderLayout.CENTER, txtPerson);
-
-		JPanel pnSign = new JPanel(new BorderLayout());
-		pnSign.add(BorderLayout.WEST, new JLabel("Sign: "));
-		pnSign.add(BorderLayout.CENTER, txtSign);
-
-		JPanel pnPersonSign = new JPanel(new GridLayout(1, 4));
-		pnPersonSign.add(pnPerson);
-		pnPersonSign.add(pnSign);
-
+		if(Config.getInstance() != null){
+			cbPerson.setModel(new DefaultComboBoxModel<>(Config.getInstance().getPeople().toArray()));
+			cbSign.setModel(new DefaultComboBoxModel<>(Config.getInstance().getSign().toArray()));
+			cbRecord.setModel(new DefaultComboBoxModel<>(Config.getInstance().getRecord().toArray()));			
+		}
+		
+		JPanel pnFolder = new JPanel(new BorderLayout());
+		pnFolder.add(BorderLayout.WEST, cbPerson);
+		pnFolder.add(BorderLayout.CENTER, cbSign);
+		pnFolder.add(BorderLayout.EAST, cbRecord);
+		
 		JPanel pnFile = new JPanel(new BorderLayout());
 		pnFile.setBorder(new TitledBorder("File"));
 		pnFile.add(BorderLayout.NORTH, pnDirectory);
-		pnFile.add(BorderLayout.CENTER, pnPersonSign);
+		pnFile.add(BorderLayout.CENTER, pnFolder);
 
 		c.add(BorderLayout.NORTH, pnFile);
 		c.add(BorderLayout.CENTER, pnTimer);
@@ -397,8 +398,9 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 
 	private boolean isDestinationValidMessage() {
 		String directory = txtDirectory.getText().trim();
-		String person = txtPerson.getText().trim();
-		String sign = txtSign.getText().trim();
+		String person = (String) cbPerson.getSelectedItem();
+		String sign = (String) cbSign.getSelectedItem();
+		String record = (String) cbRecord.getSelectedItem();
 
 		if (directory == null || directory.isEmpty()) {
 			JOptionPane.showMessageDialog(this, "Please, inform the destination directory", "Error",
@@ -419,15 +421,21 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 			txtDirectory.requestFocus();
 			return false;
 		}
-		if (person == null || person.isEmpty()) {
+		if (person == null || person.equals("Select")) {
 			JOptionPane.showMessageDialog(this, "Please, inform the person's name", "Error", JOptionPane.ERROR_MESSAGE);
-			txtPerson.requestFocus();
+			cbPerson.requestFocus();
 			return false;
 		}
-		if (sign == null || sign.isEmpty()) {
+		if (sign == null || sign.equals("Select")) {
 			JOptionPane.showMessageDialog(this, "Please, inform the name of the sign", "Error",
 					JOptionPane.ERROR_MESSAGE);
-			txtSign.requestFocus();
+			cbSign.requestFocus();
+			return false;
+		}
+		if (record == null || record.equals("Select")) {
+			JOptionPane.showMessageDialog(this, "Please, inform the record", "Error",
+					JOptionPane.ERROR_MESSAGE);
+			cbRecord.requestFocus();
 			return false;
 		}
 		return true;
@@ -435,8 +443,9 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 
 	private File createDestinationDirectory() {
 		String directory = txtDirectory.getText().trim();
-		String person = txtPerson.getText().trim();
-		String sign = txtSign.getText().trim();
+		String person = (String) cbPerson.getSelectedItem();
+		String sign = (String) cbSign.getSelectedItem();
+		String record = (String) cbRecord.getSelectedItem();
 		String s = File.separator;
 
 		File tempFile = new File(directory + s + person);
@@ -450,8 +459,19 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 			}
 		}
 
-		File file = new File(directory + s + person + s + sign);
+		File tempFile2 = new File(directory + s + person + s + sign);
 
+		if (!tempFile2.exists()) {
+			try {
+				Files.createDirectory(tempFile2.toPath());
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+
+		File file = new File(directory + s + person + s + sign + s + record);
+		
 		if (!file.exists()) {
 			try {
 				Files.createDirectory(file.toPath());
@@ -460,18 +480,19 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 				e.printStackTrace();
 			}
 		}
-
+		
 		System.out.println(file.getAbsolutePath());
 		return file;
 	}
 
 	private File getDestinationDirectory() {
-		String directory = txtDirectory.getText().trim();
-		String person = txtPerson.getText().trim();
-		String sign = txtSign.getText().trim();
+		String directory = txtDirectory.getText().trim();;
+		String person = (String) cbPerson.getSelectedItem();
+		String sign = (String) cbSign.getSelectedItem();
+		String record = (String) cbRecord.getSelectedItem();
 		String s = File.separator;
 
-		File file = new File(directory + s + person + s + sign);
+		File file = new File(directory + s + person + s + sign + s + record);
 
 		return file;
 	}
