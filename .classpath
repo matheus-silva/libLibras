@@ -6,6 +6,6 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="lib" path="lib/com.primesense.nite.jar"/>
 	<classpathentry kind="lib" path="lib/org.openni.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Matheus da Silva/git/libLibras/path/OpenNI"/>
+	<classpathentry kind="lib" path="lib/gson-2.6.2.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

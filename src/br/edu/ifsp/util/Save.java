@@ -26,11 +26,14 @@ public class Save extends Thread {
 	private JDialog d;
 	private CaptureData data;
 	private float[][][] moviments;
-
-	private static String directory = "/home/matheus/Música";
 	
 	public File openFile(Component father) {
-		JFileChooser chooser = new JFileChooser(Save.directory);
+		JFileChooser chooser = new JFileChooser();
+		
+		if(Config.getInstance() != null){
+			chooser.setCurrentDirectory(new File(Config.getInstance().getDirectory()));
+		}
+		
 		// chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 		if (chooser.showSaveDialog(father) == JFileChooser.APPROVE_OPTION) {
 			return chooser.getSelectedFile();
