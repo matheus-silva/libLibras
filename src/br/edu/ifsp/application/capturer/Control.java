@@ -100,6 +100,7 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 					cbStoppingPose.setEnabled(true);
 					btStop.setEnabled(true);
 
+					btOpenData.setEnabled(false);
 					btDirectory.setEnabled(false);
 					btDelete.setEnabled(false);
 					break;
@@ -112,6 +113,7 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 					cbStoppingPose.setEnabled(false);
 					btStop.setEnabled(false);
 
+					btOpenData.setEnabled(true);
 					btDirectory.setEnabled(true);
 					btDelete.setEnabled(true);
 					break;
@@ -372,7 +374,7 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 
 			if (file.exists()) {
 				int option = JOptionPane.showConfirmDialog(this,
-						"Are you sure you want to delete the directory:\n" + "<html><pre>" + file.getAbsolutePath()
+						"Are you sure you want to delete the directory?\n" + "<html><pre>" + file.getAbsolutePath()
 								+ "</pre></html>\n" + "All the recorded data will be deleted",
 						"Warning", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
 
@@ -380,6 +382,11 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 					try {
 						Delete delete = new Delete();
 						delete.deleteUsedFile(file);
+						JOptionPane
+								.showMessageDialog(
+										this, "The following directory was deleted:\n" + "<html><pre>"
+												+ file.getAbsolutePath() + "</pre></html>\n",
+										"Information", JOptionPane.INFORMATION_MESSAGE);
 					} catch (IOException e) {
 						// TODO Auto-generated catch block
 						JOptionPane.showMessageDialog(this,
