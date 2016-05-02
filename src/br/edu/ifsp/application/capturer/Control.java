@@ -61,7 +61,7 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 	private JPanel pnTimer, pnCameras, pnSetup, pnRecord, pnOption;
 	private JRadioButton rbColor, rbDepth, rbIr;
 	private JTextField txtDirectory;
-	//private JTextField txtPerson, txtSign;
+	// private JTextField txtPerson, txtSign;
 	private ButtonGroup btCamerasGroup;
 	private JSpinner sSeconds;
 	private JButton btStart, btStop, btOpenData, btDelete, btDirectory, btGarbage;
@@ -191,9 +191,6 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 		rbIr.setVisible(false);
 
 		txtDirectory.setEditable(false);
-		if (Config.getInstance() != null) {
-			txtDirectory.setText(Config.getInstance().getDirectory());
-		}
 
 		lblSeconds.setFont(new Font("Serif", Font.BOLD, 100));
 		lblSeconds.setForeground(Color.red);
@@ -235,17 +232,24 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 		pnDirectory.add(BorderLayout.CENTER, txtDirectory);
 		pnDirectory.add(BorderLayout.EAST, btDirectory);
 
-		if(Config.getInstance() != null){
-			cbPerson.setModel(new DefaultComboBoxModel<>(Config.getInstance().getPeople().toArray()));
-			cbSign.setModel(new DefaultComboBoxModel<>(Config.getInstance().getSign().toArray()));
-			cbRecord.setModel(new DefaultComboBoxModel<>(Config.getInstance().getRecord().toArray()));			
+		if (Config.getInstance() != null) {
+			txtDirectory.setText(Config.getInstance().getDirectory());
+			if (Config.getInstance().getPeople() != null) {
+				cbPerson.setModel(new DefaultComboBoxModel<>(Config.getInstance().getPeople().toArray()));
+			}
+			if (Config.getInstance().getSign() != null) {
+				cbSign.setModel(new DefaultComboBoxModel<>(Config.getInstance().getSign().toArray()));
+			}
+			if (Config.getInstance().getRecord() != null) {
+				cbRecord.setModel(new DefaultComboBoxModel<>(Config.getInstance().getRecord().toArray()));
+			}
 		}
-		
+
 		JPanel pnFolder = new JPanel(new BorderLayout());
 		pnFolder.add(BorderLayout.WEST, cbPerson);
 		pnFolder.add(BorderLayout.CENTER, cbSign);
 		pnFolder.add(BorderLayout.EAST, cbRecord);
-		
+
 		JPanel pnFile = new JPanel(new BorderLayout());
 		pnFile.setBorder(new TitledBorder("File"));
 		pnFile.add(BorderLayout.NORTH, pnDirectory);
@@ -434,8 +438,7 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 			return false;
 		}
 		if (record == null || record.equals("Select")) {
-			JOptionPane.showMessageDialog(this, "Please, inform the record", "Error",
-					JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(this, "Please, inform the record", "Error", JOptionPane.ERROR_MESSAGE);
 			cbRecord.requestFocus();
 			return false;
 		}
@@ -472,7 +475,7 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 		}
 
 		File file = new File(directory + s + person + s + sign + s + record);
-		
+
 		if (!file.exists()) {
 			try {
 				Files.createDirectory(file.toPath());
@@ -481,13 +484,14 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 				e.printStackTrace();
 			}
 		}
-		
+
 		System.out.println(file.getAbsolutePath());
 		return file;
 	}
 
 	private File getDestinationDirectory() {
-		String directory = txtDirectory.getText().trim();;
+		String directory = txtDirectory.getText().trim();
+		;
 		String person = (String) cbPerson.getSelectedItem();
 		String sign = (String) cbSign.getSelectedItem();
 		String record = (String) cbRecord.getSelectedItem();

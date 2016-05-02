@@ -30,7 +30,7 @@ public class Save extends Thread {
 	public File openFile(Component father) {
 		JFileChooser chooser = new JFileChooser();
 		
-		if(Config.getInstance() != null){
+		if(Config.getInstance() != null && Config.getInstance().getDirectory() != null){
 			chooser.setCurrentDirectory(new File(Config.getInstance().getDirectory()));
 		}
 		

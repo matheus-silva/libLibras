@@ -68,7 +68,7 @@ public class Load implements Runnable {
 	private File open(Component father, int mode) {
 		JFileChooser chooser = new JFileChooser();
 		
-		if(Config.getInstance() != null){
+		if(Config.getInstance() != null && Config.getInstance().getDirectory() != null){
 			chooser.setCurrentDirectory(new File(Config.getInstance().getDirectory()));
 		}
 		
