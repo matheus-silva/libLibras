@@ -43,7 +43,7 @@ public class SimpleViewer extends JDialog implements ChangeListener, ActionListe
 	}
 
 	public SimpleViewer(File file, JFrame father) {
-		super(new JFrame(), "Simple Editor", true);
+		super(new JFrame(), "Simple Viewer", true);
 
 		this.load = new Load();
 		this.father = father;
@@ -51,6 +51,7 @@ public class SimpleViewer extends JDialog implements ChangeListener, ActionListe
 		setJMenuBar(createMenuBar());
 
 		if (file != null) {
+			setTitle("Simple Viewer - " + file.getAbsolutePath());
 			this.data = openData(file);
 			if (this.data != null) {
 				this.syncData = this.data.synchronize();
@@ -277,6 +278,7 @@ public class SimpleViewer extends JDialog implements ChangeListener, ActionListe
 			File file = load.openDirectory(father);
 
 			if (file != null) {
+				setTitle("Simple Viewer - " + file.getAbsolutePath());
 				this.data = openData(file);
 				if (this.data != null) {
 					getContentPane().removeAll();
