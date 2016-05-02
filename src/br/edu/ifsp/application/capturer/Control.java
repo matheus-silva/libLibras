@@ -39,6 +39,7 @@ import com.primesense.nite.PoseType;
 
 import br.edu.ifsp.capturer.ShowObject;
 import br.edu.ifsp.editor.SimpleEditor;
+import br.edu.ifsp.editor.SimpleViewer;
 import br.edu.ifsp.util.Config;
 import br.edu.ifsp.util.Delete;
 import br.edu.ifsp.util.Load;
@@ -346,7 +347,7 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 				return;
 			}
 
-			SimpleEditor editor = new SimpleEditor(file, this);
+			SimpleViewer view = new SimpleViewer(file, this);
 
 			/*
 			 * Save save = new Save(); File f = save.openFile(this); if (f !=
