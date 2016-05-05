@@ -54,13 +54,12 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 	private String poseOptions[] = new String[] { "Manual", "Crossed Hands", "PSI" };
 	private JComboBox<String> cbStartingPose = new JComboBox<String>(poseOptions);
 	private JComboBox<String> cbStoppingPose = new JComboBox<String>(poseOptions);
-	private JComboBox<Object> cbPerson;
 	private JComboBox<Object> cbSign;
 	private JComboBox<Object> cbRecord;
 	private String lastSelectedStartPose = "Manual";
 	private JPanel pnTimer, pnCameras, pnSetup, pnRecord, pnOption;
 	private JRadioButton rbColor, rbDepth, rbIr;
-	private JTextField txtDirectory;
+	private JTextField txtDirectory, txtPerson;
 	// private JTextField txtPerson, txtSign;
 	private ButtonGroup btCamerasGroup;
 	private JSpinner sSeconds;
@@ -99,7 +98,11 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 					btStart.setEnabled(false);
 					cbStoppingPose.setEnabled(true);
 					btStop.setEnabled(true);
-
+					
+					txtPerson.setEnabled(false);
+					cbSign.setEnabled(false);
+					cbRecord.setEnabled(false);
+					
 					btOpenData.setEnabled(false);
 					btDirectory.setEnabled(false);
 					btDelete.setEnabled(false);
@@ -112,6 +115,10 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 					btStart.setEnabled(true);
 					cbStoppingPose.setEnabled(false);
 					btStop.setEnabled(false);
+					
+					txtPerson.setEnabled(true);
+					cbSign.setEnabled(true);
+					cbRecord.setEnabled(true);
 
 					btOpenData.setEnabled(true);
 					btDirectory.setEnabled(true);
@@ -168,7 +175,7 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 		lblSeconds = new JLabel();
 		lblCount = new JLabel("Frames: 0");
 		txtDirectory = new JTextField();
-		cbPerson = new JComboBox<>();
+		txtPerson = new JTextField(10);
 		cbSign = new JComboBox<>();
 		cbRecord = new JComboBox<>();
 
@@ -236,9 +243,6 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 
 		if (Config.getInstance() != null) {
 			txtDirectory.setText(Config.getInstance().getDirectory());
-			if (Config.getInstance().getPeople() != null) {
-				cbPerson.setModel(new DefaultComboBoxModel<>(Config.getInstance().getPeople().toArray()));
-			}
 			if (Config.getInstance().getSign() != null) {
 				cbSign.setModel(new DefaultComboBoxModel<>(Config.getInstance().getSign().toArray()));
 			}
@@ -248,7 +252,7 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 		}
 
 		JPanel pnFolder = new JPanel(new BorderLayout());
-		pnFolder.add(BorderLayout.WEST, cbPerson);
+		pnFolder.add(BorderLayout.WEST, txtPerson);
 		pnFolder.add(BorderLayout.CENTER, cbSign);
 		pnFolder.add(BorderLayout.EAST, cbRecord);
 
@@ -410,7 +414,7 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 
 	private boolean isDestinationValidMessage() {
 		String directory = txtDirectory.getText().trim();
-		String person = (String) cbPerson.getSelectedItem();
+		String person = txtPerson.getText().trim();
 		String sign = (String) cbSign.getSelectedItem();
 		String record = (String) cbRecord.getSelectedItem();
 
@@ -433,9 +437,9 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 			txtDirectory.requestFocus();
 			return false;
 		}
-		if (person == null || person.equals("Select")) {
+		if (person == null || person.isEmpty()) {
 			JOptionPane.showMessageDialog(this, "Please, inform the person's name", "Error", JOptionPane.ERROR_MESSAGE);
-			cbPerson.requestFocus();
+			txtPerson.requestFocus();
 			return false;
 		}
 		if (sign == null || sign.equals("Select")) {
@@ -454,7 +458,7 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 
 	private File createDestinationDirectory() {
 		String directory = txtDirectory.getText().trim();
-		String person = (String) cbPerson.getSelectedItem();
+		String person = txtPerson.getText().trim();
 		String sign = (String) cbSign.getSelectedItem();
 		String record = (String) cbRecord.getSelectedItem();
 		String s = File.separator;
@@ -498,8 +502,7 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 
 	private File getDestinationDirectory() {
 		String directory = txtDirectory.getText().trim();
-		;
-		String person = (String) cbPerson.getSelectedItem();
+		String person = txtPerson.getText().trim();
 		String sign = (String) cbSign.getSelectedItem();
 		String record = (String) cbRecord.getSelectedItem();
 		String s = File.separator;
