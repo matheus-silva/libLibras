@@ -98,11 +98,11 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 					btStart.setEnabled(false);
 					cbStoppingPose.setEnabled(true);
 					btStop.setEnabled(true);
-					
+
 					txtPerson.setEnabled(false);
 					cbSign.setEnabled(false);
 					cbRecord.setEnabled(false);
-					
+
 					btOpenData.setEnabled(false);
 					btDirectory.setEnabled(false);
 					btDelete.setEnabled(false);
@@ -115,7 +115,7 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 					btStart.setEnabled(true);
 					cbStoppingPose.setEnabled(false);
 					btStop.setEnabled(false);
-					
+
 					txtPerson.setEnabled(true);
 					cbSign.setEnabled(true);
 					cbRecord.setEnabled(true);
@@ -387,8 +387,8 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 						Delete delete = new Delete();
 						delete.deleteUsedFile(file);
 						JOptionPane
-								.showMessageDialog(
-										this, "The following directory was deleted:\n" + "<html><pre>"
+								.showMessageDialog(this,
+										"The following directory was deleted:\n" + "<html><pre>"
 												+ file.getAbsolutePath() + "</pre></html>\n",
 										"Information", JOptionPane.INFORMATION_MESSAGE);
 					} catch (IOException e) {
@@ -439,6 +439,12 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 		}
 		if (person == null || person.isEmpty()) {
 			JOptionPane.showMessageDialog(this, "Please, inform the person's name", "Error", JOptionPane.ERROR_MESSAGE);
+			txtPerson.requestFocus();
+			return false;
+		}
+		if (person.matches(".*[\\/:*?\"<>|]")) {
+			JOptionPane.showMessageDialog(this, "Please, don't use the following characters:\n"
+					+ "<html><pre>\\ / : * ? \" &lt; > |</pre></html>", "Error", JOptionPane.ERROR_MESSAGE);
 			txtPerson.requestFocus();
 			return false;
 		}
