@@ -32,4 +32,18 @@ public class Util {
 		return true;
 	}
 	
+	public long getFileSize(File file){
+		if(!file.exists()){
+			return 0;
+		}
+		if(file.isFile()){
+			return file.length();
+		}
+		long size = 0;
+		for(File f : file.listFiles()){
+			size += getFileSize(f);
+		}
+		return size;
+	}
+	
 }
