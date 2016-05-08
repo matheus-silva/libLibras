@@ -5,7 +5,6 @@ import java.awt.Color;
 import java.awt.Container;
 import java.awt.FlowLayout;
 import java.awt.Font;
-import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -38,11 +37,11 @@ import javax.swing.event.ChangeListener;
 import com.primesense.nite.PoseType;
 
 import br.edu.ifsp.capturer.ShowObject;
-import br.edu.ifsp.editor.SimpleEditor;
 import br.edu.ifsp.editor.SimpleViewer;
 import br.edu.ifsp.util.Config;
 import br.edu.ifsp.util.Delete;
 import br.edu.ifsp.util.Load;
+import br.edu.ifsp.util.Util;
 
 public class Control extends JFrame implements ItemListener, ActionListener, ChangeListener {
 
@@ -306,6 +305,9 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 			cbStartingPose.setSelectedItem(lastSelectedStartPose);
 			return;
 		}
+		if(!overwriteFile()){
+			return;
+		}
 		lastSelectedStartPose = (String) cbStartingPose.getSelectedItem();
 		File file = createDestinationDirectory();
 		capture.setFile(file);
@@ -338,6 +340,9 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 	public void actionPerformed(ActionEvent ae) {
 		if (ae.getSource() == btStart) {
 			if (!isDestinationValidMessage()) {
+				return;
+			}
+			if(!overwriteFile()){
 				return;
 			}
 			File file = createDestinationDirectory();
@@ -443,8 +448,9 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 			return false;
 		}
 		if (person.matches(".*[\\/:*?\"<>|]")) {
-			JOptionPane.showMessageDialog(this, "Please, don't use the following characters:\n"
-					+ "<html><pre>\\ / : * ? \" &lt; > |</pre></html>", "Error", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(this,
+					"Please, don't use the following characters:\n" + "<html><pre>\\ / : * ? \" &lt; > |</pre></html>",
+					"Error", JOptionPane.ERROR_MESSAGE);
 			txtPerson.requestFocus();
 			return false;
 		}
@@ -516,6 +522,22 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 		File file = new File(directory + s + person + s + sign + s + record);
 
 		return file;
+	}
+	
+	private boolean overwriteFile(){
+		Util util = new Util();
+		if (!util.isFileEmpty(getDestinationDirectory())) {
+			int option = JOptionPane.showConfirmDialog(this,
+					"There are some data stored in the informed directory:\n" + "<html><pre>"
+							+ getDestinationDirectory().getAbsolutePath() + "</pre></html>"
+							+ "\nDo you want to save in this directory?",
+					"Warning", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
+
+			if (option != JOptionPane.YES_OPTION) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	public void callGC() {
