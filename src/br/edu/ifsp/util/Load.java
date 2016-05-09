@@ -26,10 +26,10 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 
-import br.edu.ifsp.capturer.Coordinate;
-import br.edu.ifsp.capturer.ImageCapture;
-import br.edu.ifsp.capturer.Segmentation;
+import com.google.gson.Gson;
+
 import br.edu.ifsp.capturer.ShowObject;
+import br.edu.ifsp.util.CaptureData.CaptureMetadata;
 
 public class Load implements Runnable {
 
@@ -80,6 +80,28 @@ public class Load implements Runnable {
 		return null;
 	}
 
+	public CaptureMetadata loadMetadata(File file){
+		CaptureMetadata metadata = null;
+		
+		try {
+			List<String> lines = Files.readAllLines(file.toPath());
+			String json = new String();
+			
+			for(String s: lines){
+				json += s + "\n";
+			}
+			
+			Gson g = new Gson();
+			metadata = g.fromJson(json, CaptureMetadata.class);
+			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return metadata;
+	}
+	
 	public ByteBuffer loadBuffer(File file) {
 		BufferedInputStream in;
 		List<Byte> bytes = new ArrayList<>();
@@ -241,7 +263,8 @@ public class Load implements Runnable {
 			File color = new File(file.getAbsoluteFile() + File.separator + "Color");
 			File segmentation = new File(file.getAbsoluteFile() + File.separator + "Segmentation");
 			File coor = new File(file.getAbsoluteFile() + File.separator + "Coordinates");
-
+			File info = new File(file.getAbsolutePath() + File.separator + "info.json");
+			
 			File coorDepth = new File(coor.getAbsolutePath() + File.separator + "Depth.txt");
 			if (coorDepth.exists()) {
 				System.out.println("Coordinate Depth");
@@ -269,6 +292,11 @@ public class Load implements Runnable {
 				data.setSegmentation(loadBuffers(segmentation, new TreeMap<Long, ByteBuffer>()));
 			}
 
+			if(info.exists()){
+				System.out.println("Info");
+				data.setMetadata(loadMetadata(info));
+			}
+			
 			if (data.hasSegmentation()) {
 				formatSegmentation(data.getSegmentation());
 			}

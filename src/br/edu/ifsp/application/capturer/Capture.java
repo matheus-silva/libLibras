@@ -523,7 +523,7 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 			sb.append("\t\"colorWidth\": " + metadata.getColorWidth() + ",\n");
 			sb.append("\t\"colorHeight\": " + metadata.getColorHeight() + ",\n");
 			sb.append("\t\"colorFPS\": " + metadata.getColorFPS() + ",\n");
-			sb.append("\t\"colorPixelFormat\": \"" + metadata.getColorPixelFormat() + "\",\n");
+			sb.append("\t\"colorPixelFormat\": \"" + metadata.getColorPixelFormat() + "\"\n");
 			sb.append("}");
 
 			try {
