@@ -599,6 +599,10 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 		return frames;
 		// return timestamp.size();
 	}
+	
+	public void setFramesCount(int frames){
+		this.frames = frames;
+	}
 
 	/**
 	 * Delete all the movements stored. This method clean the movements that was
@@ -631,6 +635,10 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 	 */
 	public boolean isTimerActivated() {
 		return startTimer;
+	}
+	
+	public boolean isRecording(){
+		return startRecordingUsers;
 	}
 
 	/**

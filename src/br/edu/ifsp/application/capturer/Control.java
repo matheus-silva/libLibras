@@ -10,6 +10,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -192,6 +194,23 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 		btDirectory.addActionListener(this);
 		btGarbage.addActionListener(this);
 		sSeconds.addChangeListener(this);
+
+		MouseAdapter showFileSize = new MouseAdapter() {
+
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				File file = getDestinationDirectory();
+				if (file.exists() && e.getSource() instanceof JButton && !capture.isRecording()) {
+					long size = new Util().getFileSize(file);
+					size = size / 1_024 / 1_024;
+					JButton b = (JButton) e.getSource();
+					b.setToolTipText(b.getText() + " (" + size + " Mb)");
+				}
+			}
+		};
+
+		btOpenData.addMouseListener(showFileSize);
+		btDelete.addMouseListener(showFileSize);
 
 		// Basic configurations
 		rbColor.setSelected(true);
@@ -397,6 +416,7 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 										"The following directory was deleted:\n" + "<html><pre>"
 												+ file.getAbsolutePath() + "</pre></html>\n",
 										"Information", JOptionPane.INFORMATION_MESSAGE);
+						capture.setFramesCount(0);
 					} catch (IOException e) {
 						// TODO Auto-generated catch block
 						JOptionPane.showMessageDialog(this,
