@@ -472,7 +472,7 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 	private File createDestinationDirectory() {
 		String directory = txtDirectory.getText().trim();
 		String person = txtPerson.getText().trim();
-		String sign = (String) cbSign.getSelectedItem();
+		String sign = cbSign.getSelectedItem().toString().hashCode() + "";
 		String record = (String) cbRecord.getSelectedItem();
 		String s = File.separator;
 
@@ -516,7 +516,7 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 	private File getDestinationDirectory() {
 		String directory = txtDirectory.getText().trim();
 		String person = txtPerson.getText().trim();
-		String sign = (String) cbSign.getSelectedItem();
+		String sign = cbSign.getSelectedItem().toString().hashCode() + "";
 		String record = (String) cbRecord.getSelectedItem();
 		String s = File.separator;
 
@@ -532,7 +532,7 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 		metadata.setSign(cbSign.getSelectedItem().toString());
 		metadata.setFolder("" + cbSign.getSelectedItem().toString().hashCode());
 		metadata.setRecord(cbRecord.getSelectedItem().toString());
-		metadata.setCreator("");
+		metadata.setCreator(System.getProperty("user.name"));
 
 		return metadata;
 	}
