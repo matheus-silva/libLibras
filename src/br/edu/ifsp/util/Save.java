@@ -194,9 +194,6 @@ public class Save extends Thread {
 					.createDirectory(new File(directory.toFile().getAbsolutePath() + File.separator + "Coordinates").toPath());
 
 			StringBuilder sb = new StringBuilder();
-			sb.append("Width: " + data.getWidth() + "\n");
-			sb.append("Height: " + data.getHeight() + "\n");
-			sb.append("FPS: " + data.getFps() + "\n");
 
 			System.out.println("Config");
 			saveString(new File(directory.toFile().getAbsolutePath() + File.separator + "Config.txt"), sb.toString());

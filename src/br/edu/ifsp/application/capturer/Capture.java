@@ -3,6 +3,8 @@ package br.edu.ifsp.application.capturer;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
+import java.nio.file.attribute.FileAttribute;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -15,18 +17,22 @@ import org.openni.SensorType;
 import org.openni.VideoFrameRef;
 import org.openni.VideoStream;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.primesense.nite.NiTE;
 import com.primesense.nite.PoseType;
 import com.primesense.nite.SkeletonState;
 import com.primesense.nite.UserData;
 import com.primesense.nite.UserTracker;
 import com.primesense.nite.UserTrackerFrameRef;
+import com.sun.xml.internal.ws.api.addressing.WSEndpointReference.Metadata;
 
 import br.edu.ifsp.capturer.Coordinate;
 import br.edu.ifsp.capturer.ImageCapture;
 import br.edu.ifsp.capturer.Segmentation;
 import br.edu.ifsp.capturer.ShowObject;
-import br.edu.ifsp.util.CaptureData;;
+import br.edu.ifsp.util.CaptureData;
+import br.edu.ifsp.util.CaptureData.CaptureMetadata;;
 
 /**
  * This is the class responsible for recording the movements of the users. It
@@ -48,6 +54,7 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 	private Coordinate coor = null;
 	private Segmentation seg = null;
 	private ImageCapture imgColor = null, imgDepth = null;
+	private CaptureMetadata metadata;
 	private File file;
 	// private Set<Long> timestamp = new TreeSet<>();
 	private int frames;
@@ -125,6 +132,7 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 			imgColor.stopRecording();
 		} else {
 			checkFile(file);
+			createInfoFile();
 			imgColor.startRecording();
 		}
 
@@ -183,6 +191,7 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 				coor.stopRecording();
 			} else {
 				checkFile(file);
+				createInfoFile();
 				coor.startRecording();
 			}
 
@@ -202,6 +211,7 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 			imgDepth.stopRecording();
 		} else {
 			checkFile(file);
+			createInfoFile();
 			// seg.startRecording();
 			imgDepth.startRecording();
 		}
@@ -461,10 +471,8 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 
 	public CaptureData getRecordedData() {
 		CaptureData data = new CaptureData();
-
-		data.setWidth(videoColor.getVideoMode().getResolutionX());
-		data.setHeight(videoColor.getVideoMode().getResolutionY());
-		data.setFps(videoColor.getVideoMode().getFps());
+		
+		data.setMetadata(metadata);
 
 		// data.setTimestamp(timestamp);
 
@@ -494,15 +502,57 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 				System.err.println("The creation of the directories failed.");
 			}
 		}
-		setFile(file);
+		setFile(file, metadata);
 	}
 
-	public void setFile(File file) {
+	private void createInfoFile() {
+		File info = new File(file.getAbsolutePath() + File.separator + "info.json");
+		if (!info.exists()) {
+
+			StringBuilder sb = new StringBuilder();
+			sb.append("{\n");
+			sb.append("\t\"person\": \"" + metadata.getPerson() + "\",\n");
+			sb.append("\t\"sign\": \"" + metadata.getSign() + "\",\n");
+			sb.append("\t\"folder\": \"" + metadata.getFolder() + "\",\n");
+			sb.append("\t\"record\": \"" + metadata.getRecord() + "\",\n");
+			sb.append("\t\"creator\": \"" + metadata.getCreator() + "\",\n");
+			sb.append("\t\"depthWidth\": " + metadata.getDepthWidth() + ",\n");
+			sb.append("\t\"depthHeight\": " + metadata.getDepthHeight() + ",\n");
+			sb.append("\t\"depthFPS\": " + metadata.getDepthFPS() + ",\n");
+			sb.append("\t\"depthPixelFormat\": \"" + metadata.getDepthPixelFormat() + "\",\n");
+			sb.append("\t\"colorWidth\": " + metadata.getColorWidth() + ",\n");
+			sb.append("\t\"colorHeight\": " + metadata.getColorHeight() + ",\n");
+			sb.append("\t\"colorFPS\": " + metadata.getColorFPS() + ",\n");
+			sb.append("\t\"colorPixelFormat\": \"" + metadata.getColorPixelFormat() + "\",\n");
+			sb.append("}");
+
+			try {
+				Files.write(info.toPath(), sb.toString().getBytes(), StandardOpenOption.CREATE);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+		}
+	}
+
+	public void setFile(File file, CaptureMetadata metadata) {
 		if (!file.equals(this.file)) {
 			this.frames = 0;
 		}
 		this.file = file;
+		this.metadata = metadata;
 
+		metadata.setDepthWidth(frameDepth.getVideoMode().getResolutionX());
+		metadata.setDepthHeight(frameDepth.getVideoMode().getResolutionY());
+		metadata.setDepthFPS(frameDepth.getVideoMode().getFps());
+		metadata.setDepthPixelFormat(frameDepth.getVideoMode().getPixelFormat().name());
+		
+		metadata.setColorWidth(frameColor.getVideoMode().getResolutionX());
+		metadata.setColorHeight(frameColor.getVideoMode().getResolutionY());
+		metadata.setColorFPS(frameColor.getVideoMode().getFps());
+		metadata.setColorPixelFormat(frameColor.getVideoMode().getPixelFormat().name());
+		
 		File depth = new File(file.getAbsolutePath() + File.separator + "Depth");
 		File color = new File(file.getAbsolutePath() + File.separator + "Color");
 		File coord = new File(file.getAbsolutePath() + File.separator + "Coordinates");

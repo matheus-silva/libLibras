@@ -10,8 +10,8 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 public class CaptureData {
-
-	private int width, height, fps;
+	
+	private CaptureMetadata metadata;
 	private Set<Long> timestamp;
 	private Map<Long, Float[][]> coordinateReal;
 	private Map<Long, Float[][]> coordinateDepth;
@@ -48,30 +48,6 @@ public class CaptureData {
 			pos++;
 		}
 		return null;
-	}
-
-	public int getWidth() {
-		return width;
-	}
-
-	public void setWidth(int width) {
-		this.width = width;
-	}
-
-	public int getHeight() {
-		return height;
-	}
-
-	public void setHeight(int height) {
-		this.height = height;
-	}
-
-	public int getFps() {
-		return fps;
-	}
-
-	public void setFps(int fps) {
-		this.fps = fps;
 	}
 
 	public Set<Long> getTimestamp() {
@@ -122,12 +98,20 @@ public class CaptureData {
 		this.imageColor = imageColor;
 	}
 	
-	private void printTimeline(){
+	public CaptureMetadata getMetadata(){
+		return metadata;
+	}
+	
+	public void setMetadata(CaptureMetadata metadata){
+		this.metadata = metadata;
+	}
+
+	private void printTimeline() {
 		List<String> times = new ArrayList<>();
-		for(Long l: getImageColor().keySet()){
+		for (Long l : getImageColor().keySet()) {
 			times.add(l + " - Color");
 		}
-		for(Long l: getImageDepth().keySet()){
+		for (Long l : getImageDepth().keySet()) {
 			times.add(l + " - Depth");
 		}
 		times.sort(new Comparator<String>() {
@@ -136,7 +120,7 @@ public class CaptureData {
 				return s1.compareTo(s2);
 			}
 		});
-		for(String s: times){
+		for (String s : times) {
 			System.out.println(s);
 		}
 	}
@@ -236,7 +220,7 @@ public class CaptureData {
 		CaptureData data = new CaptureData();
 		List<SyncData> sd = new ArrayList<>();
 		Map<Long, ByteBuffer> base;
-		
+
 		if (hasImageColor() && hasImageDepth()) {
 			if (getImageColor().size() <= getImageDepth().size()) {
 				base = getImageColor();
@@ -251,9 +235,9 @@ public class CaptureData {
 		} else {
 			return null;
 		}
-		
-		//printTimeline();
-		
+
+		// printTimeline();
+
 		data.setSegmentation(new TreeMap<>());
 		data.setImageColor(new TreeMap<>());
 		data.setImageDepth(new TreeMap<>());
@@ -265,35 +249,38 @@ public class CaptureData {
 			SyncData sync = new SyncData();
 			if (d.hasSegmentation()) {
 				for (Long t : d.getSegmentation().keySet()) {
-					//data.getSegmentation().put(t, d.getSegmentation().get(t));
+					// data.getSegmentation().put(t,
+					// d.getSegmentation().get(t));
 					sync.setTimestampSegmentation(t);
 				}
 			}
 
 			if (d.hasImageColor()) {
 				for (Long t : d.getImageColor().keySet()) {
-					//data.getImageColor().put(t, d.getImageColor().get(t));
+					// data.getImageColor().put(t, d.getImageColor().get(t));
 					sync.setTimestampColor(t);
 				}
 			}
 
 			if (d.hasImageDepth()) {
 				for (Long t : d.getImageDepth().keySet()) {
-					//data.getImageDepth().put(t, d.getImageDepth().get(t));
+					// data.getImageDepth().put(t, d.getImageDepth().get(t));
 					sync.setTimestampDepth(t);
 				}
 			}
 
 			if (d.hasCoordinatesReal()) {
 				for (Long t : d.getCoordinateReal().keySet()) {
-					//data.getCoordinateReal().put(t, d.getCoordinateReal().get(t));
+					// data.getCoordinateReal().put(t,
+					// d.getCoordinateReal().get(t));
 					sync.setTimestampCoordinateReal(t);
 				}
 			}
 
 			if (d.hasCoordinatesDepth()) {
 				for (Long t : d.getCoordinateDepth().keySet()) {
-					//data.getCoordinateDepth().put(t, d.getCoordinateDepth().get(t));
+					// data.getCoordinateDepth().put(t,
+					// d.getCoordinateDepth().get(t));
 					sync.setTimestampCoordinateDepth(t);
 				}
 			}
@@ -304,8 +291,9 @@ public class CaptureData {
 	}
 
 	public class SyncData {
-		
-		private Long timestampSegmentation, timestampDepth, timestampColor, timestampCoordinateDepth, timestampCoordinateReal;
+
+		private Long timestampSegmentation, timestampDepth, timestampColor, timestampCoordinateDepth,
+				timestampCoordinateReal;
 
 		public Long getTimestampSegmentation() {
 			return timestampSegmentation;
@@ -346,6 +334,102 @@ public class CaptureData {
 		public void setTimestampCoordinateReal(Long timestampCoordinateReal) {
 			this.timestampCoordinateReal = timestampCoordinateReal;
 		}
+
+	}
+
+	public static class CaptureMetadata {
 		
+		private String person;
+		private String sign;
+		private String folder;
+		private String record;
+		private String creator;
+		private int depthWidth;
+		private int depthHeight;
+		private int depthFPS;
+		private String depthPixelFormat;
+		private int colorWidth;
+		private int colorHeight;
+		private int colorFPS;
+		private String colorPixelFormat;
+		
+		public String getPerson() {
+			return person;
+		}
+		public void setPerson(String person) {
+			this.person = person;
+		}
+		public String getSign() {
+			return sign;
+		}
+		public void setSign(String sign) {
+			this.sign = sign;
+		}
+		public String getFolder() {
+			return folder;
+		}
+		public void setFolder(String folder) {
+			this.folder = folder;
+		}
+		public String getRecord() {
+			return record;
+		}
+		public void setRecord(String record) {
+			this.record = record;
+		}
+		public String getCreator() {
+			return creator;
+		}
+		public void setCreator(String creator) {
+			this.creator = creator;
+		}
+		public int getDepthWidth() {
+			return depthWidth;
+		}
+		public void setDepthWidth(int depthWidth) {
+			this.depthWidth = depthWidth;
+		}
+		public int getDepthHeight() {
+			return depthHeight;
+		}
+		public void setDepthHeight(int depthHeight) {
+			this.depthHeight = depthHeight;
+		}
+		public int getDepthFPS() {
+			return depthFPS;
+		}
+		public void setDepthFPS(int depthFPS) {
+			this.depthFPS = depthFPS;
+		}
+		public String getDepthPixelFormat() {
+			return depthPixelFormat;
+		}
+		public void setDepthPixelFormat(String depthPixelFormat) {
+			this.depthPixelFormat = depthPixelFormat;
+		}
+		public int getColorWidth() {
+			return colorWidth;
+		}
+		public void setColorWidth(int colorWidth) {
+			this.colorWidth = colorWidth;
+		}
+		public int getColorHeight() {
+			return colorHeight;
+		}
+		public void setColorHeight(int colorHeight) {
+			this.colorHeight = colorHeight;
+		}
+		public int getColorFPS() {
+			return colorFPS;
+		}
+		public void setColorFPS(int colorFPS) {
+			this.colorFPS = colorFPS;
+		}
+		public String getColorPixelFormat() {
+			return colorPixelFormat;
+		}
+		public void setColorPixelFormat(String colorPixelFormat) {
+			this.colorPixelFormat = colorPixelFormat;
+		}
 	}
 }

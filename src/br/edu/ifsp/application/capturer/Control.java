@@ -38,6 +38,7 @@ import com.primesense.nite.PoseType;
 
 import br.edu.ifsp.capturer.ShowObject;
 import br.edu.ifsp.editor.SimpleViewer;
+import br.edu.ifsp.util.CaptureData.CaptureMetadata;
 import br.edu.ifsp.util.Config;
 import br.edu.ifsp.util.Delete;
 import br.edu.ifsp.util.Load;
@@ -305,12 +306,12 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 			cbStartingPose.setSelectedItem(lastSelectedStartPose);
 			return;
 		}
-		if(!overwriteFile()){
+		if (!overwriteFile()) {
 			return;
 		}
 		lastSelectedStartPose = (String) cbStartingPose.getSelectedItem();
 		File file = createDestinationDirectory();
-		capture.setFile(file);
+		capture.setFile(file, getMetadata());
 
 		if (cbStartingPose.getSelectedItem().equals("Crossed Hands")) {
 			capture.startRecordingUsers(PoseType.CROSSED_HANDS, (int) sSeconds.getValue());
@@ -342,11 +343,11 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 			if (!isDestinationValidMessage()) {
 				return;
 			}
-			if(!overwriteFile()){
+			if (!overwriteFile()) {
 				return;
 			}
 			File file = createDestinationDirectory();
-			capture.setFile(file);
+			capture.setFile(file, getMetadata());
 			capture.startRecordingUsers();
 		} else if (ae.getSource() == btStop) {
 			capture.stopRecordingUsers();
@@ -523,8 +524,20 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 
 		return file;
 	}
-	
-	private boolean overwriteFile(){
+
+	private CaptureMetadata getMetadata() {
+		CaptureMetadata metadata = new CaptureMetadata();
+
+		metadata.setPerson(txtPerson.getText().trim());
+		metadata.setSign(cbSign.getSelectedItem().toString());
+		metadata.setFolder("" + cbSign.getSelectedItem().toString().hashCode());
+		metadata.setRecord(cbRecord.getSelectedItem().toString());
+		metadata.setCreator("");
+
+		return metadata;
+	}
+
+	private boolean overwriteFile() {
 		Util util = new Util();
 		if (!util.isFileEmpty(getDestinationDirectory())) {
 			int option = JOptionPane.showConfirmDialog(this,
@@ -568,6 +581,7 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 
 	public static void main(String args[]) {
 		System.out.println("Started");
+
 		for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
 			if ("Metal".equals(info.getName())) {
 				try {

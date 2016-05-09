@@ -7,8 +7,6 @@ import br.edu.ifsp.util.Save;
 
 public class SaveOnline implements Runnable {
 
-	public static int COUNT = 0;
-
 	private File file;
 	private ByteBuffer frame;
 
@@ -22,19 +20,7 @@ public class SaveOnline implements Runnable {
 	@Override
 	public void run() {
 		save.saveBuffer(file, frame);
-
-		COUNT++;
-		if (COUNT % 250 == 0) {
-			//callGC();
-		}
 		
 		frame = null;
-	}
-
-	private synchronized void callGC() {
-		Runtime run = Runtime.getRuntime();
-		run.runFinalization();
-		run.gc();
-
 	}
 }
