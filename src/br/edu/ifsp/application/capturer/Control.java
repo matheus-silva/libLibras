@@ -67,7 +67,7 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 	// private JTextField txtPerson, txtSign;
 	private ButtonGroup btCamerasGroup;
 	private JSpinner sSeconds;
-	private JButton btStart, btStop, btOpenData, btDelete, btDirectory, btGarbage;
+	private JButton btStart, btStop, btOpenData, btDelete, btDirectory, btCreate, btGarbage;
 	private JLabel lblSeconds, lblCount;
 
 	public Control() {
@@ -77,7 +77,7 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 		initializeComponentsForm();
 
 		view.setFont(getLibrasFont());
-		
+
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setLocation(camera.getLocation().x + camera.getWidth(), camera.getLocation().y);
 		setSize(500, 500);
@@ -118,7 +118,7 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 					lblSeconds.setText("\u25A0");
 					view.setStatus("\u25A0");
 					view.setStatusCenter(null);
-					
+
 					cbStartingPose.setEnabled(true);
 					btStart.setEnabled(true);
 					cbStoppingPose.setEnabled(false);
@@ -136,7 +136,7 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 					lblSeconds.setText(String.valueOf(capture.getSeconds()));
 					view.setStatus(String.valueOf(capture.getSeconds()));
 					view.setStatusCenter(String.valueOf(capture.getSeconds()));
-					
+
 					cbStartingPose.setEnabled(false);
 					btStart.setEnabled(false);
 					cbStoppingPose.setEnabled(false);
@@ -151,7 +151,7 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 		capture.setStateChanged(stateChanged);
 	}
 
-	private Font getLibrasFont(){
+	private Font getLibrasFont() {
 		Font font = null;
 		GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
 		try {
@@ -165,7 +165,7 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 		}
 		return font;
 	}
-	
+
 	private void statusBar() {
 		Runtime run = Runtime.getRuntime();
 		long used = (run.maxMemory() - run.freeMemory());
@@ -195,6 +195,7 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 		btOpenData = new JButton("View Data");
 		btDelete = new JButton("Delete");
 		btDirectory = new JButton("Select");
+		btCreate = new JButton("Create");
 		btGarbage = new JButton("Garbage Collector");
 		lblSeconds = new JLabel();
 		lblCount = new JLabel("Frames: 0");
@@ -214,6 +215,7 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 		btOpenData.addActionListener(this);
 		btDelete.addActionListener(this);
 		btDirectory.addActionListener(this);
+		btCreate.addActionListener(this);
 		btGarbage.addActionListener(this);
 		sSeconds.addChangeListener(this);
 
@@ -304,7 +306,7 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 		pnFile.setBorder(new TitledBorder("File"));
 		pnFile.add(BorderLayout.NORTH, pnDirectory);
 		pnFile.add(BorderLayout.CENTER, pnFolder);
-		//pnFile.add(BorderLayout.EAST, new JButton("Create"));
+		pnFile.add(BorderLayout.EAST, btCreate);
 
 		c.add(BorderLayout.NORTH, pnFile);
 		c.add(BorderLayout.CENTER, pnTimer);
@@ -459,6 +461,12 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 			if (file != null) {
 				txtDirectory.setText(file.getAbsolutePath());
 			}
+		} else if (ae.getSource() == btCreate) {
+			if (!isDestinationValidMessage()) {
+				return;
+			}
+			File file = createDestinationDirectory();
+			capture.setFile(file, getMetadata());
 		} else if (ae.getSource() == btGarbage) {
 			callGC();
 		}
