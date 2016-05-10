@@ -199,7 +199,7 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 		lblSeconds = new JLabel();
 		lblCount = new JLabel("Frames: 0");
 		txtDirectory = new JTextField();
-		txtPerson = new JTextField(10);
+		txtPerson = new JTextField(8);
 		cbSign = new JComboBox<>();
 		cbRecord = new JComboBox<>();
 
@@ -222,11 +222,14 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 			@Override
 			public void mouseEntered(MouseEvent e) {
 				File file = getDestinationDirectory();
-				if (file.exists() && e.getSource() instanceof JButton && !capture.isRecording()) {
+				if (file.exists() && !capture.isRecording()) {
 					long size = new Util().getFileSize(file);
 					size = size / 1_024 / 1_024;
 					JButton b = (JButton) e.getSource();
 					b.setToolTipText(b.getText() + " (" + size + " Mb)");
+				} else {
+					JButton b = (JButton) e.getSource();
+					b.setToolTipText("");
 				}
 			}
 		};
@@ -301,6 +304,7 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 		pnFile.setBorder(new TitledBorder("File"));
 		pnFile.add(BorderLayout.NORTH, pnDirectory);
 		pnFile.add(BorderLayout.CENTER, pnFolder);
+		//pnFile.add(BorderLayout.EAST, new JButton("Create"));
 
 		c.add(BorderLayout.NORTH, pnFile);
 		c.add(BorderLayout.CENTER, pnTimer);
