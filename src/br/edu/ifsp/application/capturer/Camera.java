@@ -1,8 +1,14 @@
 package br.edu.ifsp.application.capturer;
 
 import java.awt.Container;
+import java.awt.Font;
+import java.awt.FontFormatException;
+import java.awt.GraphicsEnvironment;
 import java.awt.GridLayout;
-
+import java.io.File;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JFrame;
 
 import br.edu.ifsp.capturer.ShowObject;

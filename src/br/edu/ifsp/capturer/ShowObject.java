@@ -29,7 +29,8 @@ public class ShowObject extends Component {
 	private long timestamp;
 	private List<Float[][]> coordinate;
 	private int[] mColors = new int[] { 0xFFFF0000, 0xFF00FF00, 0xFF0000FF, 0xFFFFFF00, 0xFFFF00FF, 0xFF00FFFF };
-	private String status;
+	private String status, statusCenter;
+	private Font font;
 
 	public ShowObject() {
 		this.coordinate = createStructure();
@@ -41,6 +42,10 @@ public class ShowObject extends Component {
 
 	public void setStatus(String status) {
 		this.status = status;
+	}
+
+	public void setStatusCenter(String status) {
+		this.statusCenter = status;
 	}
 
 	public void setCamera(int camera) {
@@ -67,6 +72,10 @@ public class ShowObject extends Component {
 		this.coordinate.add(coordinate);
 	}
 
+	public void setFont(Font font) {
+		this.font = font;
+	}
+
 	@Override
 	public synchronized void paint(Graphics g) {
 		Graphics2D g2d = (Graphics2D) g;
@@ -79,6 +88,8 @@ public class ShowObject extends Component {
 
 		drawStatus(g2d);
 
+		drawStatusCenter(g2d);
+
 		coordinate = createStructure();
 	}
 
@@ -87,6 +98,15 @@ public class ShowObject extends Component {
 			g.setFont(new Font("Serif", Font.BOLD, 46));
 			g.setColor(Color.red);
 			g.drawString(status, 10, 46);
+		}
+	}
+
+	private void drawStatusCenter(Graphics2D g) {
+		if (statusCenter != null && !statusCenter.equals("") && font != null) {
+			g.setFont(font);
+			g.setColor(Color.red);
+			int size = font.getSize() / 2;
+			g.drawString(statusCenter, getWidth() / 2 - size, getHeight() / 2);
 		}
 	}
 

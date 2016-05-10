@@ -5,6 +5,8 @@ import java.awt.Color;
 import java.awt.Container;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.FontFormatException;
+import java.awt.GraphicsEnvironment;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -74,6 +76,8 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 		initialize();
 		initializeComponentsForm();
 
+		view.setFont(getLibrasFont());
+		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setLocation(camera.getLocation().x + camera.getWidth(), camera.getLocation().y);
 		setSize(500, 500);
@@ -95,6 +99,7 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 				case Capture.StateChangedListener.RECORDING_STARTED:
 					lblSeconds.setText("\u25CF");
 					view.setStatus("\u25CF");
+					view.setStatusCenter(null);
 
 					cbStartingPose.setEnabled(false);
 					btStart.setEnabled(false);
@@ -112,7 +117,8 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 				case Capture.StateChangedListener.RECORDING_STOPPED:
 					lblSeconds.setText("\u25A0");
 					view.setStatus("\u25A0");
-
+					view.setStatusCenter(null);
+					
 					cbStartingPose.setEnabled(true);
 					btStart.setEnabled(true);
 					cbStoppingPose.setEnabled(false);
@@ -129,7 +135,8 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 				case Capture.StateChangedListener.TIMER_CHANGED:
 					lblSeconds.setText(String.valueOf(capture.getSeconds()));
 					view.setStatus(String.valueOf(capture.getSeconds()));
-
+					view.setStatusCenter(String.valueOf(capture.getSeconds()));
+					
 					cbStartingPose.setEnabled(false);
 					btStart.setEnabled(false);
 					cbStoppingPose.setEnabled(false);
@@ -144,6 +151,21 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 		capture.setStateChanged(stateChanged);
 	}
 
+	private Font getLibrasFont(){
+		Font font = null;
+		GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+		try {
+			Font fontTemp = Font.createFont(Font.TRUETYPE_FONT, new File("config" + File.separator + "libras.ttf"));
+			ge.registerFont(fontTemp);
+			font = new Font(fontTemp.getFontName(), Font.BOLD, 100);
+		} catch (FontFormatException ex) {
+			Logger.getLogger(Control.class.getName()).log(Level.SEVERE, null, ex);
+		} catch (IOException ex) {
+			Logger.getLogger(Control.class.getName()).log(Level.SEVERE, null, ex);
+		}
+		return font;
+	}
+	
 	private void statusBar() {
 		Runtime run = Runtime.getRuntime();
 		long used = (run.maxMemory() - run.freeMemory());
