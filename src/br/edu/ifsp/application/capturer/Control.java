@@ -110,6 +110,7 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 					cbSign.setEnabled(false);
 					cbRecord.setEnabled(false);
 
+					sSeconds.setEnabled(false);
 					btOpenData.setEnabled(false);
 					btDirectory.setEnabled(false);
 					btDelete.setEnabled(false);
@@ -127,7 +128,8 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 					txtPerson.setEnabled(true);
 					cbSign.setEnabled(true);
 					cbRecord.setEnabled(true);
-
+					
+					sSeconds.setEnabled(true);
 					btOpenData.setEnabled(true);
 					btDirectory.setEnabled(true);
 					btDelete.setEnabled(true);
