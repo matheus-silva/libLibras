@@ -14,7 +14,6 @@ public class Config {
 
 	private static Config config;
 	private String directory;
-	private List<String> people;
 	private List<String> sign;
 	private List<String> record;
 
@@ -60,14 +59,6 @@ public class Config {
 
 	public void setDirectory(String directory) {
 		this.directory = directory;
-	}
-
-	public List<String> getPeople() {
-		return people;
-	}
-
-	public void setPeople(List<String> people) {
-		this.people = people;
 	}
 
 	public List<String> getSign() {
