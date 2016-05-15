@@ -27,7 +27,6 @@ public class Camera extends JFrame {
 
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setSize(640, 480);
-		setVisible(true);
 	}
 
 	private void initialize() {

@@ -31,9 +31,9 @@ import com.google.gson.Gson;
 import br.edu.ifsp.capturer.ShowObject;
 import br.edu.ifsp.util.CaptureData.CaptureMetadata;
 
-public class Load implements Runnable {
+public class Load {
 
-	private JDialog d;
+	private Util util;
 	private File file;
 	private Component father;
 	private CaptureData data;
@@ -67,11 +67,11 @@ public class Load implements Runnable {
 
 	private File open(Component father, int mode) {
 		JFileChooser chooser = new JFileChooser();
-		
-		if(Config.getInstance() != null && Config.getInstance().getDirectory() != null){
+
+		if (Config.getInstance() != null && Config.getInstance().getDirectory() != null) {
 			chooser.setCurrentDirectory(new File(Config.getInstance().getDirectory()));
 		}
-		
+
 		chooser.setFileSelectionMode(mode);
 		if (chooser.showOpenDialog(father) == JFileChooser.APPROVE_OPTION) {
 			File f = chooser.getSelectedFile();
@@ -80,28 +80,28 @@ public class Load implements Runnable {
 		return null;
 	}
 
-	public CaptureMetadata loadMetadata(File file){
+	public CaptureMetadata loadMetadata(File file) {
 		CaptureMetadata metadata = null;
-		
+
 		try {
 			List<String> lines = Files.readAllLines(file.toPath());
 			String json = new String();
-			
-			for(String s: lines){
+
+			for (String s : lines) {
 				json += s + "\n";
 			}
-			
+
 			Gson g = new Gson();
 			metadata = g.fromJson(json, CaptureMetadata.class);
-			
+
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 		return metadata;
 	}
-	
+
 	public ByteBuffer loadBuffer(File file) {
 		BufferedInputStream in;
 		List<Byte> bytes = new ArrayList<>();
@@ -229,23 +229,16 @@ public class Load implements Runnable {
 
 		loaded = false;
 
-		d = new JDialog((JFrame) father, "Loading...", true);
-		d.setSize(300, 75);
-		d.setLocationRelativeTo(father);
-		d.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
-		d.setResizable(false);
-
-		JProgressBar pb = new JProgressBar();
-		pb.setIndeterminate(true);
-		d.getContentPane().add(BorderLayout.CENTER, pb);
-
-		new Thread(this).start();
-		
-		d.setVisible(true);
+		util = new Util();
+		util.createLoadingWindow((JFrame) father, "Loading...");
+		new LoadData().start();
+		util.showLoadingWindow();
 
 		while (!loaded) {
 			try {
-				Thread.sleep(150);
+				synchronized (this) {
+					this.wait(500);
+				}
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -253,71 +246,6 @@ public class Load implements Runnable {
 		}
 
 		return data;
-	}
-
-	@Override
-	public void run() {
-		System.out.println("Loading " + file.getAbsolutePath());
-		try {
-			File depth = new File(file.getAbsoluteFile() + File.separator + "Depth");
-			File color = new File(file.getAbsoluteFile() + File.separator + "Color");
-			File segmentation = new File(file.getAbsoluteFile() + File.separator + "Segmentation");
-			File coor = new File(file.getAbsoluteFile() + File.separator + "Coordinates");
-			File info = new File(file.getAbsolutePath() + File.separator + "info.json");
-			
-			File coorDepth = new File(coor.getAbsolutePath() + File.separator + "Depth.txt");
-			if (coorDepth.exists()) {
-				System.out.println("Coordinate Depth");
-				data.setCoordinateDepth(loadCoords(coorDepth, new TreeMap<Long, Float[][]>()));
-			}
-
-			File coorReal = new File(coor.getAbsolutePath() + File.separator + "Real.txt");
-			if (coorReal.exists()) {
-				System.out.println("Coordinate Real");
-				data.setCoordinateReal(loadCoords(coorReal, new TreeMap<Long, Float[][]>()));
-			}
-
-			if (depth.exists()) {
-				System.out.println("Depth");
-				data.setImageDepth(loadBuffers(depth, new TreeMap<Long, ByteBuffer>()));
-			}
-
-			if (color.exists()) {
-				System.out.println("Color");
-				data.setImageColor(loadBuffers(color, new TreeMap<Long, ByteBuffer>()));
-			}
-
-			if (segmentation.exists()) {
-				System.out.println("Segmentation");
-				data.setSegmentation(loadBuffers(segmentation, new TreeMap<Long, ByteBuffer>()));
-			}
-
-			if(info.exists()){
-				System.out.println("Info");
-				data.setMetadata(loadMetadata(info));
-			}
-			
-			if (data.hasSegmentation()) {
-				formatSegmentation(data.getSegmentation());
-			}
-
-			Set<Long> time = new TreeSet<>();
-			if (data.hasImageDepth()) {
-				for (Long l : data.getImageDepth().keySet()) {
-					time.add(l);
-				}
-			}
-			data.setTimestamp(time);
-
-		} catch (Exception e) {
-			JOptionPane.showMessageDialog(father,
-					"An error happened. Try again later!\n" + "Message: " + e.getMessage(), "Error",
-					JOptionPane.ERROR_MESSAGE);
-			e.printStackTrace();
-		}
-
-		loaded = true;
-		d.dispose();
 	}
 
 	public float[][][] loadFile(File arquivo) {
@@ -357,6 +285,79 @@ public class Load implements Runnable {
 
 		}
 		return moves;
+	}
+
+	private class LoadData extends Thread {
+		@Override
+		public void run() {
+
+			System.out.println("Loading " + file.getAbsolutePath());
+			try {
+				File depth = new File(file.getAbsoluteFile() + File.separator + "Depth");
+				File color = new File(file.getAbsoluteFile() + File.separator + "Color");
+				File segmentation = new File(file.getAbsoluteFile() + File.separator + "Segmentation");
+				File coor = new File(file.getAbsoluteFile() + File.separator + "Coordinates");
+				File info = new File(file.getAbsolutePath() + File.separator + "info.json");
+
+				File coorDepth = new File(coor.getAbsolutePath() + File.separator + "Depth.txt");
+				if (coorDepth.exists()) {
+					System.out.println("Coordinate Depth");
+					data.setCoordinateDepth(loadCoords(coorDepth, new TreeMap<Long, Float[][]>()));
+				}
+
+				File coorReal = new File(coor.getAbsolutePath() + File.separator + "Real.txt");
+				if (coorReal.exists()) {
+					System.out.println("Coordinate Real");
+					data.setCoordinateReal(loadCoords(coorReal, new TreeMap<Long, Float[][]>()));
+				}
+
+				if (depth.exists()) {
+					System.out.println("Depth");
+					data.setImageDepth(loadBuffers(depth, new TreeMap<Long, ByteBuffer>()));
+				}
+
+				if (color.exists()) {
+					System.out.println("Color");
+					data.setImageColor(loadBuffers(color, new TreeMap<Long, ByteBuffer>()));
+				}
+
+				if (segmentation.exists()) {
+					System.out.println("Segmentation");
+					data.setSegmentation(loadBuffers(segmentation, new TreeMap<Long, ByteBuffer>()));
+				}
+
+				if (info.exists()) {
+					System.out.println("Info");
+					data.setMetadata(loadMetadata(info));
+				}
+
+				if (data.hasSegmentation()) {
+					formatSegmentation(data.getSegmentation());
+				}
+
+				Set<Long> time = new TreeSet<>();
+				if (data.hasImageDepth()) {
+					for (Long l : data.getImageDepth().keySet()) {
+						time.add(l);
+					}
+				}
+				data.setTimestamp(time);
+
+			} catch (Exception e) {
+				JOptionPane.showMessageDialog(father,
+						"An error happened. Try again later!\n" + "Message: " + e.getMessage(), "Error",
+						JOptionPane.ERROR_MESSAGE);
+				e.printStackTrace();
+			}
+
+			loaded = true;
+
+			util.closeLoadingWindow();
+
+			synchronized (this) {
+				this.notifyAll();
+			}
+		}
 	}
 
 }

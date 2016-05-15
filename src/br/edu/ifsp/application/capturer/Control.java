@@ -72,7 +72,10 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 
 	public Control() {
 		super("New Control");
-
+		
+		Util util = new Util();
+		util.openLoadingWindowThread(this, "Loading...");
+		
 		initialize();
 		initializeComponentsForm();
 
@@ -81,8 +84,13 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setLocation(camera.getLocation().x + camera.getWidth(), camera.getLocation().y);
 		setSize(500, 500);
-		setVisible(true);
+		
 		callGCAlways(5_000);
+		
+		util.closeLoadingWindow();
+
+		camera.setVisible(true);
+		this.setVisible(true);
 	}
 
 	private void initialize() {
