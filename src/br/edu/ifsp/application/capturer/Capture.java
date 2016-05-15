@@ -623,8 +623,15 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 	 * 
 	 * @return The seconds remaining to start storing the movements.
 	 */
-	public Integer getSeconds() {
+	public Integer getSecondsRemaining() {
 		return secondsRemaining;
+	}
+	
+	public void setSeconds(int seconds){
+		if(!startTimer){
+			this.seconds = seconds;
+			this.secondsRemaining = seconds;
+		}
 	}
 
 	/**

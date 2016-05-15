@@ -130,21 +130,31 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 					cbSign.setEnabled(true);
 					cbRecord.setEnabled(true);
 					btCreate.setEnabled(true);
-					
+
 					sSeconds.setEnabled(true);
 					btOpenData.setEnabled(true);
 					btDirectory.setEnabled(true);
 					btDelete.setEnabled(true);
 					break;
 				case Capture.StateChangedListener.TIMER_CHANGED:
-					lblSeconds.setText(String.valueOf(capture.getSeconds()));
-					view.setStatus(String.valueOf(capture.getSeconds()));
-					view.setStatusCenter(String.valueOf(capture.getSeconds()));
+					lblSeconds.setText(String.valueOf(capture.getSecondsRemaining()));
+					view.setStatus(String.valueOf(capture.getSecondsRemaining()));
+					view.setStatusCenter(String.valueOf(capture.getSecondsRemaining()));
 
 					cbStartingPose.setEnabled(false);
 					btStart.setEnabled(false);
 					cbStoppingPose.setEnabled(false);
 					btStop.setEnabled(false);
+					
+					txtPerson.setEnabled(false);
+					cbSign.setEnabled(false);
+					cbRecord.setEnabled(false);
+					btCreate.setEnabled(false);
+
+					sSeconds.setEnabled(false);
+					btOpenData.setEnabled(false);
+					btDirectory.setEnabled(false);
+					btDelete.setEnabled(false);
 					break;
 				case Capture.StateChangedListener.NEW_DATA_ARRIVED:
 					statusBar();
@@ -385,7 +395,10 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 
 	@Override
 	public void stateChanged(ChangeEvent e) {
-		startingPoseDetection();
+		if (!capture.isRecording()) {
+			capture.setSeconds((int) sSeconds.getValue());
+		}
+		// startingPoseDetection();
 	}
 
 	@Override
