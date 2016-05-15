@@ -109,6 +109,7 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 					txtPerson.setEnabled(false);
 					cbSign.setEnabled(false);
 					cbRecord.setEnabled(false);
+					btCreate.setEnabled(false);
 
 					sSeconds.setEnabled(false);
 					btOpenData.setEnabled(false);
@@ -128,6 +129,7 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 					txtPerson.setEnabled(true);
 					cbSign.setEnabled(true);
 					cbRecord.setEnabled(true);
+					btCreate.setEnabled(true);
 					
 					sSeconds.setEnabled(true);
 					btOpenData.setEnabled(true);
@@ -414,11 +416,6 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 
 			SimpleViewer view = new SimpleViewer(file, this);
 
-			/*
-			 * Save save = new Save(); File f = save.openFile(this); if (f !=
-			 * null) { save.saveFile(this, f, capture.getRecordedData());
-			 * save.clearData(); }
-			 */
 		} else if (ae.getSource() == btDelete) {
 			if (!isDestinationValidMessage()) {
 				return;
