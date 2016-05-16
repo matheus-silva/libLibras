@@ -58,7 +58,7 @@ public class SimpleViewer extends JDialog implements ChangeListener, ActionListe
 				loadData(this.data);
 			}
 		}
-
+		
 		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		setSize(1300, 600);
 		setVisible(true);
@@ -180,6 +180,8 @@ public class SimpleViewer extends JDialog implements ChangeListener, ActionListe
 
 		c.add(BorderLayout.CENTER, pnViewer);
 		c.add(BorderLayout.SOUTH, slSync);
+		
+		slSync.requestFocusInWindow();
 	}
 
 	public int getIndexByTimestamp(Long timestamp, Set<Long> timestamps) {
