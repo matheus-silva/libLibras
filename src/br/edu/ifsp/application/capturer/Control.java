@@ -17,6 +17,7 @@ import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.Calendar;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -59,7 +60,6 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 	private JComboBox<String> cbStartingPose = new JComboBox<String>(poseOptions);
 	private JComboBox<String> cbStoppingPose = new JComboBox<String>(poseOptions);
 	private JComboBox<Object> cbSign;
-	private JComboBox<Object> cbRecord;
 	private String lastSelectedStartPose = "Manual";
 	private JPanel pnTimer, pnCameras, pnSetup, pnRecord, pnOption;
 	private JRadioButton rbColor, rbDepth, rbIr;
@@ -68,6 +68,7 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 	private ButtonGroup btCamerasGroup;
 	private JSpinner sSeconds;
 	private JButton btStart, btStop, btOpenData, btDelete, btDirectory, btCreate, btGarbage;
+	private long lastTimestamp;
 	private JLabel lblSeconds, lblCount;
 
 	public Control() {
@@ -116,7 +117,6 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 
 					txtPerson.setEnabled(false);
 					cbSign.setEnabled(false);
-					cbRecord.setEnabled(false);
 					btCreate.setEnabled(false);
 
 					sSeconds.setEnabled(false);
@@ -136,7 +136,6 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 
 					txtPerson.setEnabled(true);
 					cbSign.setEnabled(true);
-					cbRecord.setEnabled(true);
 					btCreate.setEnabled(true);
 
 					sSeconds.setEnabled(true);
@@ -156,7 +155,6 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 					
 					txtPerson.setEnabled(false);
 					cbSign.setEnabled(false);
-					cbRecord.setEnabled(false);
 					btCreate.setEnabled(false);
 
 					sSeconds.setEnabled(false);
@@ -224,7 +222,6 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 		txtDirectory = new JTextField();
 		txtPerson = new JTextField(8);
 		cbSign = new JComboBox<>();
-		cbRecord = new JComboBox<>();
 
 		// Creating listeners
 		rbDepth.addItemListener(this);
@@ -314,15 +311,11 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 			if (Config.getInstance().getSign() != null) {
 				cbSign.setModel(new DefaultComboBoxModel<>(Config.getInstance().getSign().toArray()));
 			}
-			if (Config.getInstance().getRecord() != null) {
-				cbRecord.setModel(new DefaultComboBoxModel<>(Config.getInstance().getRecord().toArray()));
-			}
 		}
 
 		JPanel pnFolder = new JPanel(new BorderLayout());
 		pnFolder.add(BorderLayout.WEST, txtPerson);
 		pnFolder.add(BorderLayout.CENTER, cbSign);
-		pnFolder.add(BorderLayout.EAST, cbRecord);
 
 		JPanel pnFile = new JPanel(new BorderLayout());
 		pnFile.setBorder(new TitledBorder("File"));
@@ -496,7 +489,6 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 		String directory = txtDirectory.getText().trim();
 		String person = txtPerson.getText().trim();
 		String sign = (String) cbSign.getSelectedItem();
-		String record = (String) cbRecord.getSelectedItem();
 
 		if (directory == null || directory.isEmpty()) {
 			JOptionPane.showMessageDialog(this, "Please, inform the destination directory", "Error",
@@ -535,11 +527,6 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 			cbSign.requestFocus();
 			return false;
 		}
-		if (record == null || record.equals("Select")) {
-			JOptionPane.showMessageDialog(this, "Please, inform the record", "Error", JOptionPane.ERROR_MESSAGE);
-			cbRecord.requestFocus();
-			return false;
-		}
 		return true;
 	}
 
@@ -547,7 +534,6 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 		String directory = txtDirectory.getText().trim();
 		String person = txtPerson.getText().trim();
 		String sign = cbSign.getSelectedItem().toString().hashCode() + "";
-		String record = (String) cbRecord.getSelectedItem();
 		String s = File.separator;
 
 		File tempFile = new File(directory + s + person);
@@ -571,9 +557,8 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 				e.printStackTrace();
 			}
 		}
-
-		File file = new File(directory + s + person + s + sign + s + record);
-
+		lastTimestamp = Calendar.getInstance().getTimeInMillis();
+		File file = new File(tempFile2.getAbsolutePath() + s + lastTimestamp);
 		if (!file.exists()) {
 			try {
 				Files.createDirectory(file.toPath());
@@ -591,10 +576,9 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 		String directory = txtDirectory.getText().trim();
 		String person = txtPerson.getText().trim();
 		String sign = cbSign.getSelectedItem().toString().hashCode() + "";
-		String record = (String) cbRecord.getSelectedItem();
 		String s = File.separator;
 
-		File file = new File(directory + s + person + s + sign + s + record);
+		File file = new File(directory + s + person + s + sign + s + lastTimestamp);
 
 		return file;
 	}
@@ -605,7 +589,6 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 		metadata.setPerson(txtPerson.getText().trim());
 		metadata.setSign(cbSign.getSelectedItem().toString());
 		metadata.setFolder("" + cbSign.getSelectedItem().toString().hashCode());
-		metadata.setRecord(cbRecord.getSelectedItem().toString());
 		metadata.setCreator(System.getProperty("user.name"));
 
 		return metadata;

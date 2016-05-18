@@ -15,7 +15,6 @@ public class Config {
 	private static Config config;
 	private String directory;
 	private List<String> sign;
-	private List<String> record;
 
 	private Config() {
 	}
@@ -67,13 +66,5 @@ public class Config {
 
 	public void setSign(List<String> sign) {
 		this.sign = sign;
-	}
-
-	public List<String> getRecord() {
-		return record;
-	}
-
-	public void setRecord(List<String> record) {
-		this.record = record;
 	}
 }
