@@ -368,9 +368,6 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 			cbStartingPose.setSelectedItem(lastSelectedStartPose);
 			return;
 		}
-		if (!overwriteFile()) {
-			return;
-		}
 		lastSelectedStartPose = (String) cbStartingPose.getSelectedItem();
 		File file = createDestinationDirectory();
 		capture.setFile(file, getMetadata());
@@ -406,9 +403,6 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 	public void actionPerformed(ActionEvent ae) {
 		if (ae.getSource() == btStart) {
 			if (!isDestinationValidMessage()) {
-				return;
-			}
-			if (!overwriteFile()) {
 				return;
 			}
 			File file = createDestinationDirectory();
@@ -592,22 +586,6 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 		metadata.setCreator(System.getProperty("user.name"));
 
 		return metadata;
-	}
-
-	private boolean overwriteFile() {
-		Util util = new Util();
-		if (!util.isFileEmpty(getDestinationDirectory())) {
-			int option = JOptionPane.showConfirmDialog(this,
-					"There are some data stored in the informed directory:\n" + "<html><pre>"
-							+ getDestinationDirectory().getAbsolutePath() + "</pre></html>"
-							+ "\nDo you want to save in this directory?",
-					"Warning", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
-
-			if (option != JOptionPane.YES_OPTION) {
-				return false;
-			}
-		}
-		return true;
 	}
 
 	public void callGC() {
