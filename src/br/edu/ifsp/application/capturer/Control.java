@@ -3,6 +3,7 @@ package br.edu.ifsp.application.capturer;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Container;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.FontFormatException;
@@ -269,6 +270,8 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 		lblSeconds.setFont(new Font("Serif", Font.BOLD, 100));
 		lblSeconds.setForeground(Color.red);
 		lblSeconds.setText("\u25A0");
+		
+		txtPerson.setPreferredSize(new Dimension(txtPerson.getWidth(), 25));
 
 		pnTimer.setBorder(new TitledBorder("Timer"));
 		pnCameras.setBorder(new TitledBorder("Cameras"));
@@ -312,17 +315,18 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 				cbSign.setModel(new DefaultComboBoxModel<>(Config.getInstance().getSign().toArray()));
 			}
 		}
-
+		
 		JPanel pnFolder = new JPanel(new BorderLayout());
-		pnFolder.add(BorderLayout.WEST, txtPerson);
-		pnFolder.add(BorderLayout.CENTER, cbSign);
+		pnFolder.add(BorderLayout.WEST, new JLabel("Name: "));
+		pnFolder.add(BorderLayout.CENTER, txtPerson);
+		//pnFolder.add(BorderLayout.EAST, cbSign);
 
 		JPanel pnFile = new JPanel(new BorderLayout());
 		pnFile.setBorder(new TitledBorder("File"));
 		pnFile.add(BorderLayout.NORTH, pnDirectory);
 		pnFile.add(BorderLayout.CENTER, pnFolder);
 		//pnFile.add(BorderLayout.EAST, btCreate);
-
+		
 		c.add(BorderLayout.NORTH, pnFile);
 		c.add(BorderLayout.CENTER, pnTimer);
 		c.add(BorderLayout.EAST, pnSetup);
@@ -482,7 +486,7 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 	private boolean isDestinationValidMessage() {
 		String directory = txtDirectory.getText().trim();
 		String person = txtPerson.getText().trim();
-		String sign = (String) cbSign.getSelectedItem();
+		//String sign = (String) cbSign.getSelectedItem();
 
 		if (directory == null || directory.isEmpty()) {
 			JOptionPane.showMessageDialog(this, "Please, inform the destination directory", "Error",
@@ -515,12 +519,12 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 			txtPerson.requestFocus();
 			return false;
 		}
-		if (sign == null || sign.equals("Select")) {
+		/*if (sign == null || sign.equals("Select")) {
 			JOptionPane.showMessageDialog(this, "Please, inform the name of the sign", "Error",
 					JOptionPane.ERROR_MESSAGE);
 			cbSign.requestFocus();
 			return false;
-		}
+		}*/
 		return true;
 	}
 
@@ -541,7 +545,7 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 			}
 		}
 
-		File tempFile2 = new File(directory + s + person + s + sign);
+		/*File tempFile2 = new File(directory + s + person + s + sign);
 
 		if (!tempFile2.exists()) {
 			try {
@@ -550,9 +554,11 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-		}
+		}*/
+		
 		lastTimestamp = Calendar.getInstance().getTimeInMillis();
-		File file = new File(tempFile2.getAbsolutePath() + s + lastTimestamp);
+		
+		File file = new File(tempFile.getAbsolutePath() + s + lastTimestamp);
 		if (!file.exists()) {
 			try {
 				Files.createDirectory(file.toPath());
@@ -572,7 +578,8 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 		String sign = cbSign.getSelectedItem().toString().hashCode() + "";
 		String s = File.separator;
 
-		File file = new File(directory + s + person + s + sign + s + lastTimestamp);
+		// File file = new File(directory + s + person + s + sign + s + lastTimestamp);
+		File file = new File(directory + s + person + s + lastTimestamp);
 
 		return file;
 	}
@@ -581,8 +588,9 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 		CaptureMetadata metadata = new CaptureMetadata();
 
 		metadata.setPerson(txtPerson.getText().trim());
-		metadata.setSign(cbSign.getSelectedItem().toString());
-		metadata.setFolder("" + cbSign.getSelectedItem().toString().hashCode());
+		metadata.setSign(null);
+		metadata.setFolder(String.valueOf(lastTimestamp));
+		metadata.setRecord(String.valueOf(lastTimestamp));
 		metadata.setCreator(System.getProperty("user.name"));
 
 		return metadata;
