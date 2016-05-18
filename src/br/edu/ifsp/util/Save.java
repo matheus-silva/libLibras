@@ -21,6 +21,7 @@ import javax.swing.JProgressBar;
 
 public class Save extends Thread {
 
+	private static File lastFile;
 	private Component father;
 	private File file;
 	private JDialog d;
@@ -30,7 +31,9 @@ public class Save extends Thread {
 	public File openFile(Component father) {
 		JFileChooser chooser = new JFileChooser();
 		
-		if(Config.getInstance() != null && Config.getInstance().getDirectory() != null){
+		if(lastFile != null){
+			chooser.setCurrentDirectory(lastFile);
+		} else if(Config.getInstance() != null && Config.getInstance().getDirectory() != null){
 			chooser.setCurrentDirectory(new File(Config.getInstance().getDirectory()));
 		}
 		

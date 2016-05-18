@@ -32,13 +32,14 @@ import br.edu.ifsp.capturer.ShowObject;
 import br.edu.ifsp.util.CaptureData.CaptureMetadata;
 
 public class Load {
-
+	
+	private static File lastFile;
 	private Util util;
 	private File file;
 	private Component father;
 	private CaptureData data;
 	private boolean loaded;
-
+	
 	public static void main(String args[]) {
 		ByteBuffer buff = new Load().loadBuffer(new File("/home/matheus/Música/Olá/Depth/3608575622.bin"));
 
@@ -68,13 +69,16 @@ public class Load {
 	private File open(Component father, int mode) {
 		JFileChooser chooser = new JFileChooser();
 
-		if (Config.getInstance() != null && Config.getInstance().getDirectory() != null) {
+		if(lastFile != null){
+			chooser.setCurrentDirectory(lastFile);
+		} else if (Config.getInstance() != null && Config.getInstance().getDirectory() != null) {
 			chooser.setCurrentDirectory(new File(Config.getInstance().getDirectory()));
 		}
 
 		chooser.setFileSelectionMode(mode);
 		if (chooser.showOpenDialog(father) == JFileChooser.APPROVE_OPTION) {
 			File f = chooser.getSelectedFile();
+			lastFile = f;
 			return f;
 		}
 		return null;
@@ -250,7 +254,6 @@ public class Load {
 
 	public float[][][] loadFile(File arquivo) {
 		List<String> lines = null;
-		;
 		try {
 			lines = Files.readAllLines(Paths.get(arquivo.toURI()));
 		} catch (IOException ex) {
@@ -266,7 +269,6 @@ public class Load {
 		});
 
 		float[][][] moves = new float[lines.size()][15][3];
-		Map<Long, float[][]> map = new TreeMap<>();
 		for (int i = 0; i < lines.size(); i++) {
 
 			String temp[] = lines.get(i).split("[0-9] ");
