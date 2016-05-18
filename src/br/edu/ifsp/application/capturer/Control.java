@@ -84,7 +84,7 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setLocation(camera.getLocation().x + camera.getWidth(), camera.getLocation().y);
-		setSize(500, 500);
+		setSize(500, 450);
 		
 		callGCAlways(5_000);
 		
@@ -202,7 +202,7 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 		pnTimer = new JPanel(new GridLayout(1, 1, 0, 0));
 		pnSetup = new JPanel(new BorderLayout(0, 0));
 		pnCameras = new JPanel(new FlowLayout(FlowLayout.LEADING, 0, 0));
-		pnRecord = new JPanel(new GridLayout(8, 1, 0, 1));
+		pnRecord = new JPanel(new GridLayout(0, 1, 5, 5));
 		JPanel pnStatus = new JPanel(new BorderLayout());
 		pnOption = new JPanel(new GridLayout(0, 1));
 		rbColor = new JRadioButton("Color");
@@ -287,10 +287,10 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 
 		pnRecord.add(new JLabel("Seconds:"));
 		pnRecord.add(sSeconds);
-		pnRecord.add(new JLabel("Start Recording Pose:"));
-		pnRecord.add(cbStartingPose);
-		pnRecord.add(new JLabel("Stop Recording Pose:"));
-		pnRecord.add(cbStoppingPose);
+		//pnRecord.add(new JLabel("Start Recording Pose:"));
+		//pnRecord.add(cbStartingPose);
+		//pnRecord.add(new JLabel("Stop Recording Pose:"));
+		//pnRecord.add(cbStoppingPose);
 		pnRecord.add(btStart);
 		pnRecord.add(btStop);
 
@@ -321,7 +321,7 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 		pnFile.setBorder(new TitledBorder("File"));
 		pnFile.add(BorderLayout.NORTH, pnDirectory);
 		pnFile.add(BorderLayout.CENTER, pnFolder);
-		pnFile.add(BorderLayout.EAST, btCreate);
+		//pnFile.add(BorderLayout.EAST, btCreate);
 
 		c.add(BorderLayout.NORTH, pnFile);
 		c.add(BorderLayout.CENTER, pnTimer);
