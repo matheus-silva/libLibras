@@ -256,14 +256,17 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 			}
 		};
 
-		btOpenData.addMouseListener(showFileSize);
-		btDelete.addMouseListener(showFileSize);
+		//btOpenData.addMouseListener(showFileSize);
+		//btDelete.addMouseListener(showFileSize);
 
 		// Basic configurations
 		rbColor.setSelected(true);
 		rbDepth.setVisible(true);
 		rbColor.setVisible(true);
 		rbIr.setVisible(false);
+		
+		rbColor.setEnabled(false);
+		rbDepth.setEnabled(false);
 
 		txtDirectory.setEditable(false);
 
@@ -288,8 +291,8 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 		pnCameras.add(rbDepth);
 		pnCameras.add(rbIr);
 
-		pnRecord.add(new JLabel("Seconds:"));
-		pnRecord.add(sSeconds);
+		//pnRecord.add(new JLabel("Seconds:"));
+		//pnRecord.add(sSeconds);
 		//pnRecord.add(new JLabel("Start Recording Pose:"));
 		//pnRecord.add(cbStartingPose);
 		//pnRecord.add(new JLabel("Stop Recording Pose:"));
@@ -495,12 +498,7 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 			return false;
 		}
 		File dir = new File(directory);
-		if (!dir.exists()) {
-			JOptionPane.showMessageDialog(this, "Please, inform an existing directory", "Error",
-					JOptionPane.ERROR_MESSAGE);
-			txtDirectory.requestFocus();
-			return false;
-		}
+		
 		if (dir.isFile()) {
 			JOptionPane.showMessageDialog(this, "Please, inform a directory instead of a file", "Error",
 					JOptionPane.ERROR_MESSAGE);
@@ -537,12 +535,13 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 		File tempFile = new File(directory + s + person);
 
 		if (!tempFile.exists()) {
-			try {
-				Files.createDirectory(tempFile.toPath());
-			} catch (IOException e) {
+			//try {
+				//Files.createDirectory(tempFile.toPath());
+				tempFile.mkdirs();
+			//} catch (IOException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+				//e.printStackTrace();
+			//}
 		}
 
 		/*File tempFile2 = new File(directory + s + person + s + sign);
