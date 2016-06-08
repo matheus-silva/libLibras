@@ -3,6 +3,7 @@ package br.edu.ifsp.editor;
 import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.Event;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -12,26 +13,34 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.swing.DefaultListModel;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
+import javax.swing.JList;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JSlider;
 import javax.swing.KeyStroke;
+import javax.swing.ListSelectionModel;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
 import br.edu.ifsp.capturer.ShowObject;
 import br.edu.ifsp.util.CaptureData;
 import br.edu.ifsp.util.Load;
 
-public class SimpleViewer extends JDialog implements ChangeListener, ActionListener {
+public class SimpleViewer extends JDialog implements ChangeListener, ActionListener, ListSelectionListener {
 
 	private ShowObject viewColor, viewDepth;
 	private JSlider slColor, slDepth, slSync;
+	private JList lRecords;
+	private File parent, current;
 	private Load load;
 	private JFrame father;
 	private CaptureData data;
@@ -56,11 +65,12 @@ public class SimpleViewer extends JDialog implements ChangeListener, ActionListe
 			if (this.data != null) {
 				this.syncData = this.data.synchronize();
 				loadData(this.data);
+				loadRecords(file);
 			}
 		}
-		
+
 		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-		setSize(1300, 600);
+		setSize(1366, 600);
 		setVisible(true);
 	}
 
@@ -91,6 +101,7 @@ public class SimpleViewer extends JDialog implements ChangeListener, ActionListe
 	private CaptureData openData(File file) {
 		CaptureData data = null;
 		if (file != null) {
+			current = file;
 			data = load.loadFile(father, file);
 		}
 		return data;
@@ -106,6 +117,10 @@ public class SimpleViewer extends JDialog implements ChangeListener, ActionListe
 		slColor = new JSlider();
 		slDepth = new JSlider();
 		slSync = new JSlider();
+		lRecords = new JList<>();
+		JScrollPane scrollList = new JScrollPane(lRecords);
+
+		lRecords.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
 		viewColor.setCamera(ShowObject.COLOR);
 		viewDepth.setCamera(ShowObject.DEPTH);
@@ -155,6 +170,7 @@ public class SimpleViewer extends JDialog implements ChangeListener, ActionListe
 		slColor.addChangeListener(this);
 		slDepth.addChangeListener(this);
 		slSync.addChangeListener(this);
+		lRecords.addListSelectionListener(this);
 
 		JPanel pnSliderColor = new JPanel(new BorderLayout());
 		pnSliderColor.add(BorderLayout.CENTER, slColor);
@@ -180,8 +196,21 @@ public class SimpleViewer extends JDialog implements ChangeListener, ActionListe
 
 		c.add(BorderLayout.CENTER, pnViewer);
 		c.add(BorderLayout.SOUTH, slSync);
-		
+		c.add(BorderLayout.WEST, scrollList);
+
 		slSync.requestFocusInWindow();
+	}
+
+	private void loadRecords(File file) {
+		parent = file.getParentFile();
+		File[] children = parent.listFiles();
+		DefaultListModel<String> model = new DefaultListModel<>();
+
+		for (File f : children) {
+			model.addElement(f.getName());
+		}
+		lRecords.setModel(model);
+		lRecords.setSelectedIndex(model.indexOf(file.getName()));
 	}
 
 	public int getIndexByTimestamp(Long timestamp, Set<Long> timestamps) {
@@ -235,11 +264,11 @@ public class SimpleViewer extends JDialog implements ChangeListener, ActionListe
 			viewDepth.setStatus(timestamp.toString());
 			viewDepth.setBackground(buff, 640, 480);
 			String sTimestamp = timestamp.toString();
-			
-			if(data.hasCoordinatesDepth()){
+
+			if (data.hasCoordinatesDepth()) {
 				viewDepth.setUserCoordinate(
 						data.getCoordinateDepth().get(Long.parseLong(sTimestamp.substring(0, sTimestamp.length() - 1))),
-						640, 480);	
+						640, 480);
 			}
 
 			viewDepth.repaint();
@@ -274,6 +303,36 @@ public class SimpleViewer extends JDialog implements ChangeListener, ActionListe
 	}
 
 	@Override
+	public void valueChanged(ListSelectionEvent e) {
+		if (e.getSource() == lRecords) {
+			String name = (String) lRecords.getSelectedValue();
+			if (parent != null && parent.exists()) {
+				File file = new File(parent.getAbsolutePath() + File.separator + name);
+				if (file.getAbsolutePath().equals(current.getAbsolutePath())) {
+					return;
+				}
+				if (file.exists()) {
+					setTitle("Simple Viewer - " + file.getAbsolutePath());
+					this.data = openData(file);
+					if (this.data != null) {
+						getContentPane().removeAll();
+						revalidate();
+						repaint();
+						
+						this.syncData = this.data.synchronize();
+						loadData(this.data);
+						loadRecords(file);
+						
+						revalidate();
+						repaint();
+					}
+				}
+
+			}
+		}
+	}
+
+	@Override
 	public void actionPerformed(ActionEvent ae) {
 		if (ae.getSource() == mOpen) {
 			Load load = new Load();
@@ -289,13 +348,14 @@ public class SimpleViewer extends JDialog implements ChangeListener, ActionListe
 
 					this.syncData = this.data.synchronize();
 					loadData(this.data);
+					loadRecords(file);
 
 					revalidate();
 					repaint();
 				}
 			}
 		} else if (ae.getSource() == mRealWorld) {
-			if(!data.hasCoordinatesReal()){
+			if (!data.hasCoordinatesReal()) {
 				return;
 			}
 			JDialog dialog = new JDialog(this, "Real World Coordinate", true);
@@ -350,4 +410,5 @@ public class SimpleViewer extends JDialog implements ChangeListener, ActionListe
 			}
 		});
 	}
+
 }
