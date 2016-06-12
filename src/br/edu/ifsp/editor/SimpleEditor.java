@@ -71,7 +71,7 @@ public class SimpleEditor extends JDialog implements ActionListener, ChangeListe
 	}
 
 	private CaptureData load(File file) {
-		return load.loadFile(father, file);
+		return load.loadDirectory(father, file);
 	}
 
 	private void initialize(File file) {

@@ -36,6 +36,7 @@ import javax.swing.event.ListSelectionListener;
 import br.edu.ifsp.capturer.ShowObject;
 import br.edu.ifsp.util.CaptureData;
 import br.edu.ifsp.util.Load;
+import br.edu.ifsp.util.CaptureData.CaptureMetadata;
 
 public class SimpleViewer extends JDialog implements ChangeListener, ActionListener, ListSelectionListener {
 
@@ -114,7 +115,7 @@ public class SimpleViewer extends JDialog implements ChangeListener, ActionListe
 		CaptureData data = null;
 		if (file != null) {
 			current = file;
-			data = load.loadFile(father, file);
+			data = load.loadDirectory(father, file);
 		}
 		return data;
 	}
@@ -143,7 +144,7 @@ public class SimpleViewer extends JDialog implements ChangeListener, ActionListe
 		slColor.setMaximum(0);
 		slDepth.setMaximum(0);
 		slSync.setMaximum(0);
-		
+
 		if (data != null) {
 			if (data.hasImageColor()) {
 				slColor.setMaximum(data.getImageColor().size() - 1);
@@ -206,8 +207,9 @@ public class SimpleViewer extends JDialog implements ChangeListener, ActionListe
 
 		c.add(BorderLayout.CENTER, pnViewer);
 		c.add(BorderLayout.SOUTH, slSync);
-		c.add(BorderLayout.WEST, scrollList);
-
+		if (data != null) {
+			c.add(BorderLayout.WEST, scrollList);
+		}
 		slSync.requestFocusInWindow();
 
 		viewColor.repaint();
@@ -251,7 +253,7 @@ public class SimpleViewer extends JDialog implements ChangeListener, ActionListe
 	@Override
 	public void stateChanged(ChangeEvent e) {
 		if (e.getSource() == slColor) {
-			if (!data.hasImageColor()) {
+			if (data == null || !data.hasImageColor()) {
 				return;
 			}
 			Map<Long, ByteBuffer> c = data.getImageColor();
@@ -265,7 +267,7 @@ public class SimpleViewer extends JDialog implements ChangeListener, ActionListe
 			viewColor.setBackground(buff, 640, 480);
 			viewColor.repaint();
 		} else if (e.getSource() == slDepth) {
-			if (!data.hasImageDepth()) {
+			if (data == null || !data.hasImageDepth()) {
 				return;
 			}
 			Map<Long, ByteBuffer> c = data.getImageDepth();
@@ -286,6 +288,9 @@ public class SimpleViewer extends JDialog implements ChangeListener, ActionListe
 
 			viewDepth.repaint();
 		} else if (e.getSource() == slSync) {
+			if(data == null) {
+				return;
+			}
 			int index = slSync.getValue();
 
 			if (data.hasImageDepth()) {
@@ -367,8 +372,35 @@ public class SimpleViewer extends JDialog implements ChangeListener, ActionListe
 					repaint();
 				}
 			}
+		} else if (ae.getSource() == mOpenFile) {
+			Load load = new Load();
+			File file = load.openFile(father);
+
+			if (file != null) {
+				setTitle("Simple Viewer - " + file.getAbsolutePath());
+				ByteBuffer buff = load.loadBuffer(file);
+
+				this.data = null;
+				getContentPane().removeAll();
+				revalidate();
+				repaint();
+
+				File info = new File(file.getPath() + File.separator + "info.json");
+				loadData(null);
+
+				if (info.exists()) {
+					CaptureMetadata metadata = load.loadMetadata(new File(file.getPath()));
+					viewColor.setBackground(buff, metadata.getColorWidth(), metadata.getColorHeight());
+					viewDepth.setBackground(buff, metadata.getDepthWidth(), metadata.getDepthHeight());
+				} else {
+					viewColor.setBackground(buff, 640, 480);
+					viewDepth.setBackground(buff, 640, 480);
+				}
+
+				repaint();
+			}
 		} else if (ae.getSource() == mRealWorld) {
-			if (!data.hasCoordinatesReal()) {
+			if (data == null || !data.hasCoordinatesReal()) {
 				return;
 			}
 			JDialog dialog = new JDialog(this, "Real World Coordinate", true);

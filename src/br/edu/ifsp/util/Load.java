@@ -226,7 +226,7 @@ public class Load {
 		}
 	}
 
-	public synchronized CaptureData loadFile(Component father, File file) {
+	public synchronized CaptureData loadDirectory(Component father, File file) {
 		this.father = father;
 		this.file = file;
 		this.data = new CaptureData();
