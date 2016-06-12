@@ -6,14 +6,11 @@ import java.awt.EventQueue;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.event.WindowStateListener;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.nio.ByteBuffer;
 import java.util.Set;
-import java.util.TreeSet;
 
 import javax.swing.JDialog;
 import javax.swing.JFrame;
@@ -26,8 +23,6 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import br.edu.ifsp.capturer.Coordinate;
-import br.edu.ifsp.capturer.ImageCapture;
 import br.edu.ifsp.capturer.Segmentation;
 import br.edu.ifsp.capturer.ShowObject;
 import br.edu.ifsp.util.CaptureData;
@@ -287,7 +282,13 @@ public class SimpleEditor extends JDialog implements ActionListener, ChangeListe
 
 			@Override
 			public void run() {
-				new SimpleEditor(new JFrame());
+				new SimpleEditor(new JFrame()).addWindowListener(new WindowAdapter() {
+
+					@Override
+					public void windowClosing(WindowEvent we) {
+						System.exit(0);
+					}
+				});
 			}
 		});
 	}

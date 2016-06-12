@@ -20,14 +20,14 @@ public class ShowObject extends Component {
 	public static final int COLOR = 0, DEPTH = 1;
 	private int[][] skelCoor = { { 0, 1 }, { 1, 8 }, { 8, 9 }, { 8, 10 }, { 9, 11 }, { 11, 13 }, { 10, 12 }, { 12, 14 },
 			{ 1, 3 }, { 3, 5 }, { 5, 7 }, { 1, 2 }, { 2, 4 }, { 4, 6 } };
-	private int width = 1, height = 1;
+	protected int width = 1, height = 1;
 	private int camera = COLOR;
-	private ByteBuffer buffBackground;
+	protected ByteBuffer buffBackground;
 	private ByteBuffer buffUser;
 	private Segmentation seg;
-	private BufferedImage img;
+	protected BufferedImage img;
 	private long timestamp;
-	private List<Float[][]> coordinate;
+	protected List<Float[][]> coordinate;
 	private int[] mColors = new int[] { 0xFFFF0000, 0xFF00FF00, 0xFF0000FF, 0xFFFFFF00, 0xFFFF00FF, 0xFF00FFFF };
 	private String status, statusCenter;
 	private Font font;
@@ -36,7 +36,7 @@ public class ShowObject extends Component {
 		this.coordinate = createStructure();
 	}
 
-	private List<Float[][]> createStructure() {
+	protected List<Float[][]> createStructure() {
 		return new CopyOnWriteArrayList<>();
 	}
 
@@ -93,7 +93,7 @@ public class ShowObject extends Component {
 		coordinate = createStructure();
 	}
 
-	private void drawStatus(Graphics2D g) {
+	protected void drawStatus(Graphics2D g) {
 		if (!(status == null || status.equals(""))) {
 			g.setFont(new Font("Serif", Font.BOLD, 46));
 			g.setColor(Color.red);
@@ -101,7 +101,7 @@ public class ShowObject extends Component {
 		}
 	}
 
-	private void drawStatusCenter(Graphics2D g) {
+	protected void drawStatusCenter(Graphics2D g) {
 		if (statusCenter != null && !statusCenter.equals("") && font != null) {
 			g.setFont(font);
 			g.setColor(Color.red);
@@ -110,7 +110,7 @@ public class ShowObject extends Component {
 		}
 	}
 
-	private void drawBackground(Graphics g, int[] background) {
+	protected void drawBackground(Graphics g, int[] background) {
 		if (background == null) {
 			return;
 		}
@@ -154,7 +154,7 @@ public class ShowObject extends Component {
 		}
 	}
 
-	private int[] getBackgroundImage() {
+	protected int[] getBackgroundImage() {
 		int pixels[] = new int[] { 0 };
 
 		if (buffBackground == null) {
@@ -246,7 +246,7 @@ public class ShowObject extends Component {
 	}
 
 	private float[] getHistogram(ByteBuffer data) {
-		float mHistogram[] = new float[width * height * 4];
+		float mHistogram[] = new float[data.limit()];
 
 		// reset
 		for (int i = 0; i < mHistogram.length; ++i)

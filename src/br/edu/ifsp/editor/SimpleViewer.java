@@ -7,6 +7,8 @@ import java.awt.Event;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.File;
 import java.nio.ByteBuffer;
 import java.util.List;
@@ -45,7 +47,7 @@ public class SimpleViewer extends JDialog implements ChangeListener, ActionListe
 	private JFrame father;
 	private CaptureData data;
 	private List<CaptureData.SyncData> syncData;
-	private JMenuItem mOpen, mRealWorld;
+	private JMenuItem mOpen, mOpenFile, mRealWorld, mCut;
 
 	public SimpleViewer(JFrame father) {
 		this(null, father);
@@ -71,28 +73,38 @@ public class SimpleViewer extends JDialog implements ChangeListener, ActionListe
 
 		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		setSize(1366, 600);
-		setVisible(true);
 	}
 
 	private JMenuBar createMenuBar() {
 		JMenuBar menu = new JMenuBar();
 
-		mOpen = new JMenuItem("Open");
+		mOpen = new JMenuItem("Open Directory");
+		mOpenFile = new JMenuItem("Open File");
 		mRealWorld = new JMenuItem("Real World Coordinate");
+		mCut = new JMenuItem("Cut");
 
 		mOpen.setAccelerator(KeyStroke.getKeyStroke("control O"));
+		mOpenFile.setAccelerator(KeyStroke.getKeyStroke("control shift O"));
 		mRealWorld.setAccelerator(KeyStroke.getKeyStroke("control R"));
+		mCut.setAccelerator(KeyStroke.getKeyStroke("control T"));
 
 		mOpen.addActionListener(this);
+		mOpenFile.addActionListener(this);
 		mRealWorld.addActionListener(this);
+		mCut.addActionListener(this);
 
 		JMenu file = new JMenu("File");
 		file.add(mOpen);
+		file.add(mOpenFile);
 
 		JMenu view = new JMenu("View");
 		view.add(mRealWorld);
 
+		JMenu edit = new JMenu("Edit");
+		edit.add(mCut);
+
 		menu.add(file);
+		menu.add(edit);
 		menu.add(view);
 
 		return menu;
@@ -125,24 +137,22 @@ public class SimpleViewer extends JDialog implements ChangeListener, ActionListe
 		viewColor.setCamera(ShowObject.COLOR);
 		viewDepth.setCamera(ShowObject.DEPTH);
 
-		viewColor.setSize(d);
-		viewDepth.setSize(d);
+		viewColor.setPreferredSize(d);
+		viewDepth.setPreferredSize(d);
 
+		slColor.setMaximum(0);
+		slDepth.setMaximum(0);
+		slSync.setMaximum(0);
+		
 		if (data != null) {
 			if (data.hasImageColor()) {
 				slColor.setMaximum(data.getImageColor().size() - 1);
-			} else {
-				slColor.setMaximum(0);
 			}
 			if (data.hasImageDepth()) {
 				slDepth.setMaximum(data.getImageDepth().size() - 1);
-			} else {
-				slDepth.setMaximum(0);
 			}
 			if (syncData != null) {
 				slSync.setMaximum(syncData.size() - 1);
-			} else {
-				slSync.setMaximum(0);
 			}
 		}
 
@@ -199,6 +209,9 @@ public class SimpleViewer extends JDialog implements ChangeListener, ActionListe
 		c.add(BorderLayout.WEST, scrollList);
 
 		slSync.requestFocusInWindow();
+
+		viewColor.repaint();
+		viewDepth.repaint();
 	}
 
 	private void loadRecords(File file) {
@@ -318,11 +331,11 @@ public class SimpleViewer extends JDialog implements ChangeListener, ActionListe
 						getContentPane().removeAll();
 						revalidate();
 						repaint();
-						
+
 						this.syncData = this.data.synchronize();
 						loadData(this.data);
 						loadRecords(file);
-						
+
 						revalidate();
 						repaint();
 					}
@@ -398,6 +411,18 @@ public class SimpleViewer extends JDialog implements ChangeListener, ActionListe
 			c.adjustView();
 			dialog.getContentPane().add(BorderLayout.CENTER, main);
 			dialog.setVisible(true);
+		} else if (ae.getSource() == mCut) {
+			Map<Long, ByteBuffer> mapDepth = data.getImageDepth();
+			Set<Long> keysDepth = mapDepth.keySet();
+			ByteBuffer buffDepth = mapDepth.get(getTimestampByIndex(slDepth.getValue(), keysDepth));
+
+			Map<Long, ByteBuffer> mapColor = data.getImageColor();
+			Set<Long> keysColor = mapColor.keySet();
+			ByteBuffer buffColor = mapColor.get(getTimestampByIndex(slColor.getValue(), keysColor));
+
+			CutterGUI cut = new CutterGUI(this, true);
+			cut.loadImages(buffColor, buffDepth);
+			cut.setVisible(true);
 		}
 	}
 
@@ -406,7 +431,15 @@ public class SimpleViewer extends JDialog implements ChangeListener, ActionListe
 
 			@Override
 			public void run() {
-				new SimpleViewer(null, new JFrame());
+				SimpleViewer viewer = new SimpleViewer(null, new JFrame());
+				viewer.addWindowListener(new WindowAdapter() {
+
+					@Override
+					public void windowClosing(WindowEvent we) {
+						System.exit(0);
+					}
+				});
+				viewer.setVisible(true);
 			}
 		});
 	}
