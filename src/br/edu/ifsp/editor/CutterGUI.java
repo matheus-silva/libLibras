@@ -3,7 +3,6 @@ package br.edu.ifsp.editor;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
@@ -17,8 +16,8 @@ import java.io.File;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-import javax.swing.JButton;
 import javax.swing.JDialog;
+import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
@@ -30,7 +29,6 @@ import br.edu.ifsp.util.Save;
 
 public class CutterGUI extends JDialog implements ActionListener {
 
-	private JButton btCut;
 	private ByteBuffer buffColor, buffDepth;
 	private Dimension selectionSize = new Dimension(75, 75);
 	private Cutter ctColor, ctDepth;
@@ -39,23 +37,25 @@ public class CutterGUI extends JDialog implements ActionListener {
 	public CutterGUI(JDialog father, boolean modal) {
 		super(father, "Cutter", modal);
 
-		JMenuBar menu = new JMenuBar();
-		menu.setLayout(new FlowLayout());
 		mSave = new JMenuItem("Save");
 		mView = new JMenuItem("View Selection");
-		
+
 		mSave.addActionListener(this);
 		mView.addActionListener(this);
-		
+
 		mSave.setAccelerator(KeyStroke.getKeyStroke("control S"));
 		mView.setAccelerator(KeyStroke.getKeyStroke("control T"));
-		
-		menu.add(mSave);
-		menu.add(mView);
-		
+
+		JMenu file = new JMenu("Options");
+		file.add(mSave);
+		file.addSeparator();
+		file.add(mView);
+
+		JMenuBar menu = new JMenuBar();
+		menu.add(file);
 		setJMenuBar(menu);
-		
-		setSize(1300, 600);
+
+		setSize(1300, 550);
 		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 	}
 
@@ -65,9 +65,6 @@ public class CutterGUI extends JDialog implements ActionListener {
 
 		ctColor = new Cutter();
 		ctDepth = new Cutter();
-		btCut = new JButton("Cut");
-
-		btCut.addActionListener(this);
 
 		ctColor.setCamera(ShowObject.COLOR);
 		ctDepth.setCamera(ShowObject.DEPTH);
@@ -82,13 +79,12 @@ public class CutterGUI extends JDialog implements ActionListener {
 
 		JPanel pnColor = new JPanel(new BorderLayout());
 		pnColor.add(BorderLayout.CENTER, ctColor);
-		
+
 		JPanel pnDepth = new JPanel(new BorderLayout());
 		pnDepth.add(BorderLayout.CENTER, ctDepth);
-		
+
 		getContentPane().removeAll();
 		getContentPane().revalidate();
-		getContentPane().add(BorderLayout.SOUTH, btCut);
 		getContentPane().add(BorderLayout.WEST, pnColor);
 		getContentPane().add(BorderLayout.EAST, pnDepth);
 		getContentPane().revalidate();
@@ -96,7 +92,7 @@ public class CutterGUI extends JDialog implements ActionListener {
 
 		ctColor.setSelectionSize(selectionSize);
 		ctDepth.setSelectionSize(selectionSize);
-		
+
 		ctColor.requestFocusInWindow();
 		ctDepth.requestFocusInWindow();
 
@@ -106,7 +102,7 @@ public class CutterGUI extends JDialog implements ActionListener {
 		ctColor.repaint();
 		ctDepth.repaint();
 	}
-	
+
 	private ByteBuffer getDepthSelection(ByteBuffer buff, Point origin, Dimension size) {
 		byte values[] = new byte[size.width * size.height * 2 + 2];
 
@@ -150,49 +146,48 @@ public class CutterGUI extends JDialog implements ActionListener {
 			}
 			pos++;
 		}
-		System.out.println("Color: " + indexValue + " Buff: " + buff.limit());
 		return ByteBuffer.wrap(values).order(ByteOrder.LITTLE_ENDIAN);
 	}
 
 	@Override
 	public void actionPerformed(ActionEvent ae) {
-		if (ae.getSource() == btCut) {
-
-		} else if(ae.getSource() == mSave) {
-			if(ctDepth.getPointBeginning() == null){
+		if (ae.getSource() == mSave) {
+			if (ctDepth.getPointBeginning() == null) {
 				return;
 			}
-			
+
 			ByteBuffer bColor = getColorSelection(buffColor, ctColor.getPointBeginning(), selectionSize);
 			ByteBuffer bDepth = getDepthSelection(buffDepth, ctDepth.getPointBeginning(), selectionSize);
-			
+
 			Load load = new Load();
 			File file = load.openFile(this);
-			
-			if(file != null) {
+
+			if (file != null) {
 				File fColor = new File(file.getAbsolutePath() + "-Color.bin");
 				File fDepth = new File(file.getAbsolutePath() + "-Depth.bin");
-				
+
 				Save save = new Save();
 				save.saveBuffer(fColor, bColor);
 				save.saveBuffer(fDepth, bDepth);
 			}
-			
+
 		} else if (ae.getSource() == mView) {
-			if(ctDepth.getPointBeginning() == null){
+			if (ctDepth.getPointBeginning() == null) {
 				return;
 			}
-			
+
 			Dimension d = new Dimension(150, 150);
 			CutterResult jdColor = new CutterResult(this, "Color", false, d);
 			CutterResult jdDepth = new CutterResult(this, "Depth", false, d);
-			
-			jdColor.setByteBuffer(getColorSelection(buffColor, ctColor.getPointBeginning(), selectionSize), ShowObject.COLOR, selectionSize);
-			jdDepth.setByteBuffer(getDepthSelection(buffDepth, ctDepth.getPointBeginning(), selectionSize), ShowObject.DEPTH, selectionSize);
-			
+
+			jdColor.setByteBuffer(getColorSelection(buffColor, ctColor.getPointBeginning(), selectionSize),
+					ShowObject.COLOR, selectionSize);
+			jdDepth.setByteBuffer(getDepthSelection(buffDepth, ctDepth.getPointBeginning(), selectionSize),
+					ShowObject.DEPTH, selectionSize);
+
 			jdColor.setLocation(ctColor.getPointBeginning());
 			jdDepth.setLocation(new Point(ctDepth.getPointBeginning().y + 640, ctDepth.getPointBeginning().y));
-			
+
 			jdColor.setVisible(true);
 			jdDepth.setVisible(true);
 		}
