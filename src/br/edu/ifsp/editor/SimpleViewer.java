@@ -3,7 +3,6 @@ package br.edu.ifsp.editor;
 import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.Dimension;
-import java.awt.Event;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -17,6 +16,7 @@ import java.util.Set;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JDialog;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JList;
 import javax.swing.JMenu;
@@ -32,15 +32,16 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import br.edu.ifsp.capturer.ShowObject;
 import br.edu.ifsp.util.CaptureData;
-import br.edu.ifsp.util.Load;
 import br.edu.ifsp.util.CaptureData.CaptureMetadata;
+import br.edu.ifsp.util.Load;
 
 public class SimpleViewer extends JDialog implements ChangeListener, ActionListener, ListSelectionListener {
 
-	private ShowObject viewColor, viewDepth;
+	private ShowObject viewColor, viewDepth, view;
 	private JSlider slColor, slDepth, slSync;
 	private JList lRecords;
 	private File parent, current;
@@ -48,7 +49,7 @@ public class SimpleViewer extends JDialog implements ChangeListener, ActionListe
 	private JFrame father;
 	private CaptureData data;
 	private List<CaptureData.SyncData> syncData;
-	private JMenuItem mOpen, mOpenFile, mRealWorld, mCut;
+	private JMenuItem mOpen, mOpenFile, mSaveImage, mRealWorld, mCut;
 
 	public SimpleViewer(JFrame father) {
 		this(null, father);
@@ -81,22 +82,29 @@ public class SimpleViewer extends JDialog implements ChangeListener, ActionListe
 
 		mOpen = new JMenuItem("Open Directory");
 		mOpenFile = new JMenuItem("Open File");
+		mSaveImage = new JMenuItem("Save as Image");
 		mRealWorld = new JMenuItem("Real World Coordinate");
 		mCut = new JMenuItem("Cut");
 
+		mSaveImage.setEnabled(false);
+		
 		mOpen.setAccelerator(KeyStroke.getKeyStroke("control O"));
 		mOpenFile.setAccelerator(KeyStroke.getKeyStroke("control shift O"));
+		mSaveImage.setAccelerator(KeyStroke.getKeyStroke("control shift S"));
 		mRealWorld.setAccelerator(KeyStroke.getKeyStroke("control R"));
 		mCut.setAccelerator(KeyStroke.getKeyStroke("control T"));
 
 		mOpen.addActionListener(this);
 		mOpenFile.addActionListener(this);
+		mSaveImage.addActionListener(this);
 		mRealWorld.addActionListener(this);
 		mCut.addActionListener(this);
 
 		JMenu file = new JMenu("File");
 		file.add(mOpen);
 		file.add(mOpenFile);
+		file.addSeparator();
+		file.add(mSaveImage);
 
 		JMenu view = new JMenu("View");
 		view.add(mRealWorld);
@@ -122,7 +130,7 @@ public class SimpleViewer extends JDialog implements ChangeListener, ActionListe
 
 	private void loadDataFile(ByteBuffer buff, CaptureMetadata metadata, int camera) {
 		Container c = getContentPane();
-		
+
 		Dimension d;
 		if (metadata != null) {
 			d = new Dimension(metadata.getColorWidth(), metadata.getColorHeight());
@@ -130,10 +138,10 @@ public class SimpleViewer extends JDialog implements ChangeListener, ActionListe
 			d = new Dimension(640, 480);
 		}
 
-		ShowObject view = new ShowObject();
+		view = new ShowObject();
 
 		view.setCamera(camera);
-		
+
 		view.setPreferredSize(d);
 
 		view.setBackground(buff, d.width, d.height);
@@ -141,10 +149,11 @@ public class SimpleViewer extends JDialog implements ChangeListener, ActionListe
 		c.add(BorderLayout.CENTER, view);
 
 		view.revalidate();
-		
+
 		view.repaint();
-		
+
 		setSize(d.width, d.height + 100);
+		mSaveImage.setEnabled(true);
 	}
 
 	private void loadDataDirectory(CaptureData data) {
@@ -241,8 +250,9 @@ public class SimpleViewer extends JDialog implements ChangeListener, ActionListe
 
 		viewColor.repaint();
 		viewDepth.repaint();
-		
+
 		setSize(1366, 600);
+		mSaveImage.setEnabled(false);
 	}
 
 	private void loadRecords(File file) {
@@ -414,17 +424,17 @@ public class SimpleViewer extends JDialog implements ChangeListener, ActionListe
 				ByteBuffer buff = load.loadBuffer(file);
 				File info = new File(file.getParentFile().getAbsolutePath() + File.separator + "info.json");
 				int camera;
-				
-				if(file.getName().toLowerCase().contains("depth")) {
+
+				if (file.getName().toLowerCase().contains("depth")) {
 					camera = ShowObject.DEPTH;
-				} else if(file.getName().toLowerCase().contains("color")) {
+				} else if (file.getName().toLowerCase().contains("color")) {
 					camera = ShowObject.COLOR;
-				} else if(file.getParentFile().getName().toLowerCase().contains("depth")){
+				} else if (file.getParentFile().getName().toLowerCase().contains("depth")) {
 					camera = ShowObject.DEPTH;
 				} else {
 					camera = ShowObject.COLOR;
 				}
-				
+
 				if (info.exists()) {
 					CaptureMetadata metadata = load.loadMetadata(info);
 					loadDataFile(buff, metadata, camera);
@@ -435,6 +445,20 @@ public class SimpleViewer extends JDialog implements ChangeListener, ActionListe
 				revalidate();
 				repaint();
 			}
+		} else if (ae.getSource() == mSaveImage) {
+			JFileChooser load = new JFileChooser(current);
+
+			load.setFileSelectionMode(JFileChooser.FILES_ONLY);
+			load.setFileFilter(new FileNameExtensionFilter("Image PNG", ".png"));
+			
+			if(load.showOpenDialog(father) == JFileChooser.APPROVE_OPTION){
+				File file = load.getSelectedFile();
+				
+				if (file != null) {
+					view.saveFrame(file);
+				}
+			}
+			
 		} else if (ae.getSource() == mRealWorld) {
 			if (data == null || !data.hasCoordinatesReal()) {
 				return;

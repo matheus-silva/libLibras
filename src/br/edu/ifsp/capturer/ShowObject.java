@@ -121,11 +121,18 @@ public class ShowObject extends Component {
 	}
 
 	public void saveFrame(File file) {
-		if (img == null) {
+		int[] background = getBackgroundImage();
+		if(background == null){
 			return;
 		}
+		
+		BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+		img.setRGB(0, 0, width, height, background, 0, width);
+		
 		try {
-			ImageIO.write(img, "png", file);
+			if(ImageIO.write(img, "png", file)){
+				System.out.println("File " + file.getAbsolutePath() + " saved");
+			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
