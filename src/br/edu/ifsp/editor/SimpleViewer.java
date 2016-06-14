@@ -416,6 +416,8 @@ public class SimpleViewer extends JDialog implements ChangeListener, ActionListe
 			File file = load.openFile(father);
 
 			if (file != null) {
+				this.current = file;
+				
 				setTitle("Simple Viewer - " + file.getAbsolutePath());
 				getContentPane().removeAll();
 				revalidate();
@@ -449,12 +451,21 @@ public class SimpleViewer extends JDialog implements ChangeListener, ActionListe
 			JFileChooser load = new JFileChooser(current);
 
 			load.setFileSelectionMode(JFileChooser.FILES_ONLY);
-			load.setFileFilter(new FileNameExtensionFilter("Image PNG", ".png"));
+			load.setFileFilter(new FileNameExtensionFilter("PNG Image", ".png"));
 			
 			if(load.showOpenDialog(father) == JFileChooser.APPROVE_OPTION){
 				File file = load.getSelectedFile();
 				
 				if (file != null) {
+					if(!file.getName().endsWith(".png")){
+						String nome = new String();
+						int index = file.getName().lastIndexOf("\\.");
+						if(index != -1 ){
+							nome = file.getName().substring(0, file.getName().lastIndexOf("\\."));
+						}
+						nome = file.getName() + ".png";
+						file = new File(file.getParentFile().getAbsolutePath() + File.separator + nome);
+					}
 					view.saveFrame(file);
 				}
 			}
