@@ -67,7 +67,7 @@ public class SimpleViewer extends JDialog implements ChangeListener, ActionListe
 			this.data = openData(file);
 			if (this.data != null) {
 				this.syncData = this.data.synchronize();
-				loadData(this.data);
+				loadDataDirectory(this.data);
 				loadRecords(file);
 			}
 		}
@@ -120,7 +120,34 @@ public class SimpleViewer extends JDialog implements ChangeListener, ActionListe
 		return data;
 	}
 
-	private void loadData(CaptureData data) {
+	private void loadDataFile(ByteBuffer buff, CaptureMetadata metadata, int camera) {
+		Container c = getContentPane();
+		
+		Dimension d;
+		if (metadata != null) {
+			d = new Dimension(metadata.getColorWidth(), metadata.getColorHeight());
+		} else {
+			d = new Dimension(640, 480);
+		}
+
+		ShowObject view = new ShowObject();
+
+		view.setCamera(camera);
+		
+		view.setPreferredSize(d);
+
+		view.setBackground(buff, d.width, d.height);
+
+		c.add(BorderLayout.CENTER, view);
+
+		view.revalidate();
+		
+		view.repaint();
+		
+		setSize(d.width, d.height + 100);
+	}
+
+	private void loadDataDirectory(CaptureData data) {
 		Container c = getContentPane();
 
 		Dimension d = new Dimension(640, 480);
@@ -214,6 +241,8 @@ public class SimpleViewer extends JDialog implements ChangeListener, ActionListe
 
 		viewColor.repaint();
 		viewDepth.repaint();
+		
+		setSize(1366, 600);
 	}
 
 	private void loadRecords(File file) {
@@ -288,7 +317,7 @@ public class SimpleViewer extends JDialog implements ChangeListener, ActionListe
 
 			viewDepth.repaint();
 		} else if (e.getSource() == slSync) {
-			if(data == null) {
+			if (data == null) {
 				return;
 			}
 			int index = slSync.getValue();
@@ -338,7 +367,7 @@ public class SimpleViewer extends JDialog implements ChangeListener, ActionListe
 						repaint();
 
 						this.syncData = this.data.synchronize();
-						loadData(this.data);
+						loadDataDirectory(this.data);
 						loadRecords(file);
 
 						revalidate();
@@ -365,7 +394,7 @@ public class SimpleViewer extends JDialog implements ChangeListener, ActionListe
 					repaint();
 
 					this.syncData = this.data.synchronize();
-					loadData(this.data);
+					loadDataDirectory(this.data);
 					loadRecords(file);
 
 					revalidate();
@@ -378,25 +407,32 @@ public class SimpleViewer extends JDialog implements ChangeListener, ActionListe
 
 			if (file != null) {
 				setTitle("Simple Viewer - " + file.getAbsolutePath());
-				ByteBuffer buff = load.loadBuffer(file);
-
-				this.data = null;
 				getContentPane().removeAll();
 				revalidate();
 				repaint();
 
-				File info = new File(file.getPath() + File.separator + "info.json");
-				loadData(null);
-
-				if (info.exists()) {
-					CaptureMetadata metadata = load.loadMetadata(new File(file.getPath()));
-					viewColor.setBackground(buff, metadata.getColorWidth(), metadata.getColorHeight());
-					viewDepth.setBackground(buff, metadata.getDepthWidth(), metadata.getDepthHeight());
+				ByteBuffer buff = load.loadBuffer(file);
+				File info = new File(file.getParentFile().getAbsolutePath() + File.separator + "info.json");
+				int camera;
+				
+				if(file.getName().toLowerCase().contains("depth")) {
+					camera = ShowObject.DEPTH;
+				} else if(file.getName().toLowerCase().contains("color")) {
+					camera = ShowObject.COLOR;
+				} else if(file.getParentFile().getName().toLowerCase().contains("depth")){
+					camera = ShowObject.DEPTH;
 				} else {
-					viewColor.setBackground(buff, 640, 480);
-					viewDepth.setBackground(buff, 640, 480);
+					camera = ShowObject.COLOR;
+				}
+				
+				if (info.exists()) {
+					CaptureMetadata metadata = load.loadMetadata(info);
+					loadDataFile(buff, metadata, camera);
+				} else {
+					loadDataFile(buff, null, camera);
 				}
 
+				revalidate();
 				repaint();
 			}
 		} else if (ae.getSource() == mRealWorld) {
@@ -444,17 +480,19 @@ public class SimpleViewer extends JDialog implements ChangeListener, ActionListe
 			dialog.getContentPane().add(BorderLayout.CENTER, main);
 			dialog.setVisible(true);
 		} else if (ae.getSource() == mCut) {
-			Map<Long, ByteBuffer> mapDepth = data.getImageDepth();
-			Set<Long> keysDepth = mapDepth.keySet();
-			ByteBuffer buffDepth = mapDepth.get(getTimestampByIndex(slDepth.getValue(), keysDepth));
+			if (data != null) {
+				Map<Long, ByteBuffer> mapDepth = data.getImageDepth();
+				Set<Long> keysDepth = mapDepth.keySet();
+				ByteBuffer buffDepth = mapDepth.get(getTimestampByIndex(slDepth.getValue(), keysDepth));
 
-			Map<Long, ByteBuffer> mapColor = data.getImageColor();
-			Set<Long> keysColor = mapColor.keySet();
-			ByteBuffer buffColor = mapColor.get(getTimestampByIndex(slColor.getValue(), keysColor));
+				Map<Long, ByteBuffer> mapColor = data.getImageColor();
+				Set<Long> keysColor = mapColor.keySet();
+				ByteBuffer buffColor = mapColor.get(getTimestampByIndex(slColor.getValue(), keysColor));
 
-			CutterGUI cut = new CutterGUI(this, true);
-			cut.loadImages(buffColor, buffDepth);
-			cut.setVisible(true);
+				CutterGUI cut = new CutterGUI(this, true);
+				cut.loadImages(buffColor, buffDepth);
+				cut.setVisible(true);
+			}
 		}
 	}
 

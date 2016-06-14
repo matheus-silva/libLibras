@@ -212,7 +212,7 @@ public class CaptureData {
 			}
 			msg += "CR: " + realTime + " | ";
 		}
-		System.out.println(msg);
+		//System.out.println(msg);
 		return data;
 	}
 

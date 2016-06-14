@@ -108,7 +108,7 @@ public class CutterGUI extends JDialog implements ActionListener {
 	}
 	
 	private ByteBuffer getDepthSelection(ByteBuffer buff, Point origin, Dimension size) {
-		byte values[] = new byte[buff.limit()];
+		byte values[] = new byte[size.width * size.height * 2 + 2];
 
 		buff.rewind();
 
@@ -126,12 +126,11 @@ public class CutterGUI extends JDialog implements ActionListener {
 			}
 			pos++;
 		}
-
 		return ByteBuffer.wrap(values).order(ByteOrder.LITTLE_ENDIAN);
 	}
 
 	private ByteBuffer getColorSelection(ByteBuffer buff, Point origin, Dimension size) {
-		byte values[] = new byte[buff.limit()];
+		byte values[] = new byte[size.width * size.height * 3 + 3];
 
 		buff.rewind();
 
@@ -151,7 +150,7 @@ public class CutterGUI extends JDialog implements ActionListener {
 			}
 			pos++;
 		}
-
+		System.out.println("Color: " + indexValue + " Buff: " + buff.limit());
 		return ByteBuffer.wrap(values).order(ByteOrder.LITTLE_ENDIAN);
 	}
 

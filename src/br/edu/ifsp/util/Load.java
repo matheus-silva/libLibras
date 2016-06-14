@@ -8,7 +8,9 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -20,11 +22,9 @@ import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
-import javax.swing.JProgressBar;
 
 import com.google.gson.Gson;
 
@@ -88,7 +88,8 @@ public class Load {
 		CaptureMetadata metadata = null;
 
 		try {
-			List<String> lines = Files.readAllLines(file.toPath());
+			Path path = file.toPath();
+			List<String> lines = Files.readAllLines(path);
 			String json = new String();
 
 			for (String s : lines) {
@@ -97,8 +98,7 @@ public class Load {
 
 			Gson g = new Gson();
 			metadata = g.fromJson(json, CaptureMetadata.class);
-
-		} catch (IOException e) {
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -225,7 +225,7 @@ public class Load {
 			segmentation.put(v, buffNew);
 		}
 	}
-
+	
 	public synchronized CaptureData loadDirectory(Component father, File file) {
 		this.father = father;
 		this.file = file;
