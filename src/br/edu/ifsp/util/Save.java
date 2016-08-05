@@ -19,24 +19,25 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 
-public class Save extends Thread {
+public class Save {
 
 	private static File lastFile;
 	private Component father;
 	private File file;
 	private JDialog d;
 	private CaptureData data;
-	private float[][][] moviments;
-	
+	private Util util;
+	private boolean loaded;
+
 	public File openFile(Component father) {
 		JFileChooser chooser = new JFileChooser();
-		
-		if(lastFile != null && lastFile.exists()){
+
+		if (lastFile != null && lastFile.exists()) {
 			chooser.setCurrentDirectory(lastFile);
-		} else if(Config.getInstance() != null && Config.getInstance().getDirectory() != null){
+		} else if (Config.getInstance() != null && Config.getInstance().getDirectory() != null) {
 			chooser.setCurrentDirectory(new File(Config.getInstance().getDirectory()));
 		}
-		
+
 		// chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 		if (chooser.showSaveDialog(father) == JFileChooser.APPROVE_OPTION) {
 			File f = chooser.getSelectedFile();
@@ -45,8 +46,8 @@ public class Save extends Thread {
 		}
 		return null;
 	}
-	
-	public void clearData(){
+
+	public void clearData() {
 		data = null;
 	}
 
@@ -108,7 +109,7 @@ public class Save extends Thread {
 			e.printStackTrace();
 		}
 	}
-	
+
 	private void saveBytes(File file, Map<Long, byte[]> map) {
 		String caminho = file.getAbsolutePath();
 
@@ -119,7 +120,8 @@ public class Save extends Thread {
 
 	}
 
-	public void saveFile(Component father, File file, CaptureData data) {
+	// This method is no longer being used
+	private void saveFile(Component father, File file, CaptureData data) {
 		this.father = father;
 		this.file = file;
 		this.data = data;
@@ -134,7 +136,7 @@ public class Save extends Thread {
 		pb.setIndeterminate(true);
 		d.getContentPane().add(BorderLayout.CENTER, pb);
 
-		this.start();
+		new SaveCaptureData().start();
 
 		d.setVisible(true);
 
@@ -168,61 +170,23 @@ public class Save extends Thread {
 
 		this.father = father;
 		this.file = file;
-		this.moviments = moviments;
 
-		d = new JDialog((JFrame) father, "Saving...", true);
-		d.setSize(300, 75);
-		d.setLocationRelativeTo(father);
-		d.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-		d.setResizable(false);
+		loaded = false;
 
-		JProgressBar pb = new JProgressBar();
-		pb.setIndeterminate(true);
-		d.getContentPane().add(BorderLayout.CENTER, pb);
+		util = new Util();
+		util.createLoadingWindow((JFrame) father, "Saving...");
+		new SaveCoords().start();
+		util.showLoadingWindow();
 
-		this.start();
-
-		d.setVisible(true);
-	}
-
-	@Override
-	public void run() {
-		System.out.println("Saving");
-		try {
-
-			Path directory = Files.createDirectory(file.toPath());
-			Path depth = Files.createDirectory(new File(directory.toFile().getAbsolutePath() + File.separator + "Depth").toPath());
-			Path color = Files.createDirectory(new File(directory.toFile().getAbsolutePath() + File.separator + "Color").toPath());
-			Path segmentation = Files
-					.createDirectory(new File(directory.toFile().getAbsolutePath() + File.separator + "Segmentation").toPath());
-			Path coordinates = Files
-					.createDirectory(new File(directory.toFile().getAbsolutePath() + File.separator + "Coordinates").toPath());
-
-			StringBuilder sb = new StringBuilder();
-
-			System.out.println("Config");
-			saveString(new File(directory.toFile().getAbsolutePath() + File.separator + "Config.txt"), sb.toString());
-			System.out.println("Coordinate Depth");
-			saveCoords(new File(coordinates.toFile().getAbsolutePath() + File.separator + "Depth.txt"), data.getCoordinateDepth());
-			System.out.println("Coordinate Real");
-			saveCoords(new File(coordinates.toFile().getAbsolutePath() + File.separator + "Real.txt"), data.getCoordinateReal());
-
-			System.out.println("Color");
-			saveBuffers(depth.toFile(), data.getImageDepth());
-			System.out.println("Depth");
-			saveBuffers(color.toFile(), data.getImageColor());
-			System.out.println("Segmentation");
-			saveBuffers(segmentation.toFile(), data.getSegmentation());
-
-			// saveCoords(null, 0L, null);
-		} catch (IOException e) {
-			JOptionPane.showMessageDialog(father,
-					"An error happened. Try again later!\n" + "Message: " + e.getMessage(), "Error",
-					JOptionPane.ERROR_MESSAGE);
-			e.printStackTrace();
+		while (!loaded) {
+			try {
+				synchronized (this) {
+					this.wait();
+				}
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 		}
-
-		d.dispose();
 	}
 
 	private String getCoords(float[][][] coor) {
@@ -242,4 +206,75 @@ public class Save extends Thread {
 		return coords;
 	}
 
+	private class SaveCaptureData extends Thread {
+
+		@Override
+		public void run() {
+			System.out.println("Saving");
+			try {
+
+				Path directory = Files.createDirectory(file.toPath());
+				Path depth = Files.createDirectory(
+						new File(directory.toFile().getAbsolutePath() + File.separator + "Depth").toPath());
+				Path color = Files.createDirectory(
+						new File(directory.toFile().getAbsolutePath() + File.separator + "Color").toPath());
+				Path segmentation = Files.createDirectory(
+						new File(directory.toFile().getAbsolutePath() + File.separator + "Segmentation").toPath());
+				Path coordinates = Files.createDirectory(
+						new File(directory.toFile().getAbsolutePath() + File.separator + "Coordinates").toPath());
+
+				StringBuilder sb = new StringBuilder();
+
+				System.out.println("Config");
+				saveString(new File(directory.toFile().getAbsolutePath() + File.separator + "Config.txt"),
+						sb.toString());
+				System.out.println("Coordinate Depth");
+				saveCoords(new File(coordinates.toFile().getAbsolutePath() + File.separator + "Depth.txt"),
+						data.getCoordinateDepth());
+				System.out.println("Coordinate Real");
+				saveCoords(new File(coordinates.toFile().getAbsolutePath() + File.separator + "Real.txt"),
+						data.getCoordinateReal());
+
+				System.out.println("Color");
+				saveBuffers(depth.toFile(), data.getImageDepth());
+				System.out.println("Depth");
+				saveBuffers(color.toFile(), data.getImageColor());
+				System.out.println("Segmentation");
+				saveBuffers(segmentation.toFile(), data.getSegmentation());
+
+				// saveCoords(null, 0L, null);
+			} catch (IOException e) {
+				JOptionPane.showMessageDialog(father,
+						"An error happened. Try again later!\n" + "Message: " + e.getMessage(), "Error",
+						JOptionPane.ERROR_MESSAGE);
+				e.printStackTrace();
+			}
+
+			d.dispose();
+		}
+
+	}
+
+	private class SaveCoords extends Thread {
+
+		@Override
+		public void run() {
+			try {
+				
+			} catch (Exception e) {
+				JOptionPane.showMessageDialog(father,
+						"An error happened. Try again later!\n" + "Message: " + e.getMessage(), "Error",
+						JOptionPane.ERROR_MESSAGE);
+				e.printStackTrace();
+			}
+
+			loaded = true;
+
+			util.closeLoadingWindow();
+
+			synchronized (this) {
+				this.notifyAll();
+			}
+		}
+	}
 }
