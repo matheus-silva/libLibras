@@ -69,7 +69,7 @@ public class Load {
 	private File open(Component father, int mode) {
 		JFileChooser chooser = new JFileChooser();
 
-		if(lastFile != null){
+		if(lastFile != null && lastFile.exists()){
 			chooser.setCurrentDirectory(lastFile);
 		} else if (Config.getInstance() != null && Config.getInstance().getDirectory() != null) {
 			chooser.setCurrentDirectory(new File(Config.getInstance().getDirectory()));

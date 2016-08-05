@@ -153,7 +153,10 @@ public class SimpleViewer extends JDialog implements ChangeListener, ActionListe
 		view.repaint();
 
 		setSize(d.width, d.height + 100);
+		
 		mSaveImage.setEnabled(true);
+		mCut.setEnabled(false);
+		mRealWorld.setEnabled(false);
 	}
 
 	private void loadDataDirectory(CaptureData data) {
@@ -252,7 +255,10 @@ public class SimpleViewer extends JDialog implements ChangeListener, ActionListe
 		viewDepth.repaint();
 
 		setSize(1366, 600);
+		
 		mSaveImage.setEnabled(false);
+		mCut.setEnabled(true);
+		mRealWorld.setEnabled(true);
 	}
 
 	private void loadRecords(File file) {
@@ -518,14 +524,16 @@ public class SimpleViewer extends JDialog implements ChangeListener, ActionListe
 			if (data != null) {
 				Map<Long, ByteBuffer> mapDepth = data.getImageDepth();
 				Set<Long> keysDepth = mapDepth.keySet();
-				ByteBuffer buffDepth = mapDepth.get(getTimestampByIndex(slDepth.getValue(), keysDepth));
+				long timeDepth = getTimestampByIndex(slDepth.getValue(), keysDepth);
+				ByteBuffer buffDepth = mapDepth.get(timeDepth);
 
 				Map<Long, ByteBuffer> mapColor = data.getImageColor();
 				Set<Long> keysColor = mapColor.keySet();
-				ByteBuffer buffColor = mapColor.get(getTimestampByIndex(slColor.getValue(), keysColor));
+				long timeColor = getTimestampByIndex(slColor.getValue(), keysColor);
+				ByteBuffer buffColor = mapColor.get(timeColor);
 
 				CutterGUI cut = new CutterGUI(this, true);
-				cut.loadImages(buffColor, buffDepth);
+				cut.loadImages(buffColor, timeColor, buffDepth, timeDepth);
 				cut.setVisible(true);
 			}
 		}

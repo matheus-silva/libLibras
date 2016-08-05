@@ -30,6 +30,7 @@ import br.edu.ifsp.util.Save;
 public class CutterGUI extends JDialog implements ActionListener {
 
 	private ByteBuffer buffColor, buffDepth;
+	private long timeColor, timeDepth;
 	private Dimension selectionSize = new Dimension(75, 75);
 	private Cutter ctColor, ctDepth;
 	private JMenuItem mSave, mView;
@@ -59,9 +60,11 @@ public class CutterGUI extends JDialog implements ActionListener {
 		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 	}
 
-	public void loadImages(ByteBuffer color, ByteBuffer depth) {
+	public void loadImages(ByteBuffer color, long timeColor, ByteBuffer depth, long timeDepth) {
 		this.buffColor = color;
 		this.buffDepth = depth;
+		this.timeColor = timeColor;
+		this.timeDepth = timeDepth;
 
 		ctColor = new Cutter();
 		ctDepth = new Cutter();
@@ -159,14 +162,13 @@ public class CutterGUI extends JDialog implements ActionListener {
 			ByteBuffer bColor = getColorSelection(buffColor, ctColor.getPointBeginning(), selectionSize);
 			ByteBuffer bDepth = getDepthSelection(buffDepth, ctDepth.getPointBeginning(), selectionSize);
 
-			Load load = new Load();
-			File file = load.openFile(this);
+			Save save = new Save();
+			File file = save.openFile(this);
 
 			if (file != null) {
-				File fColor = new File(file.getAbsolutePath() + "-Color.bin");
-				File fDepth = new File(file.getAbsolutePath() + "-Depth.bin");
-
-				Save save = new Save();
+				File fColor = new File(file.getAbsolutePath() + "-" + timeColor + "-Color.bin");
+				File fDepth = new File(file.getAbsolutePath() + "-" + timeDepth + "-Depth.bin");
+				
 				save.saveBuffer(fColor, bColor);
 				save.saveBuffer(fDepth, bDepth);
 			}

@@ -31,7 +31,7 @@ public class Save extends Thread {
 	public File openFile(Component father) {
 		JFileChooser chooser = new JFileChooser();
 		
-		if(lastFile != null){
+		if(lastFile != null && lastFile.exists()){
 			chooser.setCurrentDirectory(lastFile);
 		} else if(Config.getInstance() != null && Config.getInstance().getDirectory() != null){
 			chooser.setCurrentDirectory(new File(Config.getInstance().getDirectory()));
@@ -39,7 +39,9 @@ public class Save extends Thread {
 		
 		// chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 		if (chooser.showSaveDialog(father) == JFileChooser.APPROVE_OPTION) {
-			return chooser.getSelectedFile();
+			File f = chooser.getSelectedFile();
+			lastFile = f;
+			return f;
 		}
 		return null;
 	}
