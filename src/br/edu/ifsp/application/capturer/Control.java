@@ -28,6 +28,9 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
@@ -69,15 +72,19 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 	private ButtonGroup btCamerasGroup;
 	private JSpinner sSeconds;
 	private JButton btStart, btStop, btOpenData, btDelete, btDirectory, btCreate, btGarbage;
+
+	private JMenuBar mbMenu;
+	private JMenuItem miVideo;
+
 	private long lastTimestamp;
 	private JLabel lblSeconds, lblCount;
 
 	public Control() {
 		super("New Control");
-		
+
 		Util util = new Util();
 		util.openLoadingWindowThread(this, "Loading...");
-		
+
 		initialize();
 		initializeComponentsForm();
 
@@ -86,9 +93,9 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setLocation(camera.getLocation().x + camera.getWidth(), camera.getLocation().y);
 		setSize(500, 450);
-		
+
 		callGCAlways(5_000);
-		
+
 		util.closeLoadingWindow();
 
 		camera.setVisible(true);
@@ -153,7 +160,7 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 					btStart.setEnabled(false);
 					cbStoppingPose.setEnabled(false);
 					btStop.setEnabled(false);
-					
+
 					txtPerson.setEnabled(false);
 					cbSign.setEnabled(false);
 					btCreate.setEnabled(false);
@@ -223,6 +230,8 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 		txtDirectory = new JTextField();
 		txtPerson = new JTextField(8);
 		cbSign = new JComboBox<>();
+		mbMenu = new JMenuBar();
+		miVideo = new JMenuItem("Video...");
 
 		// Creating listeners
 		rbDepth.addItemListener(this);
@@ -238,6 +247,7 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 		btCreate.addActionListener(this);
 		btGarbage.addActionListener(this);
 		sSeconds.addChangeListener(this);
+		miVideo.addActionListener(this);
 
 		MouseAdapter showFileSize = new MouseAdapter() {
 
@@ -256,24 +266,24 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 			}
 		};
 
-		//btOpenData.addMouseListener(showFileSize);
-		//btDelete.addMouseListener(showFileSize);
+		// btOpenData.addMouseListener(showFileSize);
+		// btDelete.addMouseListener(showFileSize);
 
 		// Basic configurations
 		rbColor.setSelected(true);
 		rbDepth.setVisible(true);
 		rbColor.setVisible(true);
 		rbIr.setVisible(false);
-		
-		rbColor.setEnabled(false);
-		rbDepth.setEnabled(false);
+
+		rbColor.setEnabled(true);
+		rbDepth.setEnabled(true);
 
 		txtDirectory.setEditable(false);
 
 		lblSeconds.setFont(new Font("Serif", Font.BOLD, 100));
 		lblSeconds.setForeground(Color.red);
 		lblSeconds.setText("\u25A0");
-		
+
 		txtPerson.setPreferredSize(new Dimension(txtPerson.getWidth(), 25));
 
 		pnTimer.setBorder(new TitledBorder("Timer"));
@@ -291,12 +301,12 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 		pnCameras.add(rbDepth);
 		pnCameras.add(rbIr);
 
-		//pnRecord.add(new JLabel("Seconds:"));
-		//pnRecord.add(sSeconds);
-		//pnRecord.add(new JLabel("Start Recording Pose:"));
-		//pnRecord.add(cbStartingPose);
-		//pnRecord.add(new JLabel("Stop Recording Pose:"));
-		//pnRecord.add(cbStoppingPose);
+		// pnRecord.add(new JLabel("Seconds:"));
+		// pnRecord.add(sSeconds);
+		// pnRecord.add(new JLabel("Start Recording Pose:"));
+		// pnRecord.add(cbStartingPose);
+		// pnRecord.add(new JLabel("Stop Recording Pose:"));
+		// pnRecord.add(cbStoppingPose);
 		pnRecord.add(btStart);
 		pnRecord.add(btStop);
 
@@ -318,18 +328,18 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 				cbSign.setModel(new DefaultComboBoxModel<>(Config.getInstance().getSign().toArray()));
 			}
 		}
-		
+
 		JPanel pnFolder = new JPanel(new BorderLayout());
 		pnFolder.add(BorderLayout.WEST, new JLabel("Name: "));
 		pnFolder.add(BorderLayout.CENTER, txtPerson);
-		//pnFolder.add(BorderLayout.EAST, cbSign);
+		// pnFolder.add(BorderLayout.EAST, cbSign);
 
 		JPanel pnFile = new JPanel(new BorderLayout());
 		pnFile.setBorder(new TitledBorder("File"));
 		pnFile.add(BorderLayout.NORTH, pnDirectory);
 		pnFile.add(BorderLayout.CENTER, pnFolder);
-		//pnFile.add(BorderLayout.EAST, btCreate);
-		
+		// pnFile.add(BorderLayout.EAST, btCreate);
+
 		c.add(BorderLayout.NORTH, pnFile);
 		c.add(BorderLayout.CENTER, pnTimer);
 		c.add(BorderLayout.EAST, pnSetup);
@@ -339,6 +349,12 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 		pnOption.add(btOpenData);
 		pnOption.add(btDelete);
 		pnSetup.add(BorderLayout.SOUTH, pnOption);
+
+		// Creating menu
+		JMenu mOption = new JMenu("Options");
+		mOption.add(miVideo);
+		mbMenu.add(mOption);
+		this.setJMenuBar(mbMenu);
 
 		statusBar();
 	}
@@ -481,6 +497,8 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 			}
 			File file = createDestinationDirectory();
 			capture.setFile(file, getMetadata());
+		} else if (ae.getSource() == miVideo) {
+			JOptionPane.showMessageDialog(this, "Nothing to say");
 		} else if (ae.getSource() == btGarbage) {
 			callGC();
 		}
@@ -489,7 +507,7 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 	private boolean isDestinationValidMessage() {
 		String directory = txtDirectory.getText().trim();
 		String person = txtPerson.getText().trim();
-		//String sign = (String) cbSign.getSelectedItem();
+		// String sign = (String) cbSign.getSelectedItem();
 
 		if (directory == null || directory.isEmpty()) {
 			JOptionPane.showMessageDialog(this, "Please, inform the destination directory", "Error",
@@ -498,7 +516,7 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 			return false;
 		}
 		File dir = new File(directory);
-		
+
 		if (dir.isFile()) {
 			JOptionPane.showMessageDialog(this, "Please, inform a directory instead of a file", "Error",
 					JOptionPane.ERROR_MESSAGE);
@@ -517,12 +535,12 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 			txtPerson.requestFocus();
 			return false;
 		}
-		/*if (sign == null || sign.equals("Select")) {
-			JOptionPane.showMessageDialog(this, "Please, inform the name of the sign", "Error",
-					JOptionPane.ERROR_MESSAGE);
-			cbSign.requestFocus();
-			return false;
-		}*/
+		/*
+		 * if (sign == null || sign.equals("Select")) {
+		 * JOptionPane.showMessageDialog(this,
+		 * "Please, inform the name of the sign", "Error",
+		 * JOptionPane.ERROR_MESSAGE); cbSign.requestFocus(); return false; }
+		 */
 		return true;
 	}
 
@@ -535,28 +553,25 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 		File tempFile = new File(directory + s + person);
 
 		if (!tempFile.exists()) {
-			//try {
-				//Files.createDirectory(tempFile.toPath());
-				tempFile.mkdirs();
-			//} catch (IOException e) {
-				// TODO Auto-generated catch block
-				//e.printStackTrace();
-			//}
+			// try {
+			// Files.createDirectory(tempFile.toPath());
+			tempFile.mkdirs();
+			// } catch (IOException e) {
+			// TODO Auto-generated catch block
+			// e.printStackTrace();
+			// }
 		}
 
-		/*File tempFile2 = new File(directory + s + person + s + sign);
+		/*
+		 * File tempFile2 = new File(directory + s + person + s + sign);
+		 * 
+		 * if (!tempFile2.exists()) { try {
+		 * Files.createDirectory(tempFile2.toPath()); } catch (IOException e) {
+		 * // TODO Auto-generated catch block e.printStackTrace(); } }
+		 */
 
-		if (!tempFile2.exists()) {
-			try {
-				Files.createDirectory(tempFile2.toPath());
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}*/
-		
 		lastTimestamp = Calendar.getInstance().getTimeInMillis();
-		
+
 		File file = new File(tempFile.getAbsolutePath() + s + lastTimestamp);
 		if (!file.exists()) {
 			try {
@@ -577,7 +592,8 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 		String sign = cbSign.getSelectedItem().toString().hashCode() + "";
 		String s = File.separator;
 
-		// File file = new File(directory + s + person + s + sign + s + lastTimestamp);
+		// File file = new File(directory + s + person + s + sign + s +
+		// lastTimestamp);
 		File file = new File(directory + s + person + s + lastTimestamp);
 
 		return file;

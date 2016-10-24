@@ -4,28 +4,23 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
-import java.nio.file.attribute.FileAttribute;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
 
 import org.openni.Device;
 import org.openni.ImageRegistrationMode;
 import org.openni.OpenNI;
 import org.openni.SensorType;
 import org.openni.VideoFrameRef;
+import org.openni.VideoMode;
 import org.openni.VideoStream;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.primesense.nite.NiTE;
 import com.primesense.nite.PoseType;
 import com.primesense.nite.SkeletonState;
 import com.primesense.nite.UserData;
 import com.primesense.nite.UserTracker;
 import com.primesense.nite.UserTrackerFrameRef;
-import com.sun.xml.internal.ws.api.addressing.WSEndpointReference.Metadata;
 
 import br.edu.ifsp.capturer.Coordinate;
 import br.edu.ifsp.capturer.ImageCapture;
@@ -44,6 +39,7 @@ import br.edu.ifsp.util.CaptureData.CaptureMetadata;;
  */
 public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFrameListener {
 
+	private Device device = null;
 	private UserTracker userTracker = null;
 	private UserTrackerFrameRef frame;
 	private VideoStream videoColor;
@@ -94,24 +90,23 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 		this.view = view;
 
 		System.out.println("Creating streams");
-		Device d = null;
 		try {
-			d = Device.open(OpenNI.enumerateDevices().get(0).getUri());
+			device = Device.open(OpenNI.enumerateDevices().get(0).getUri());
 
 			this.userTracker = UserTracker.create();
 
 			userTracker.addNewFrameListener(this);
 
-			if (d.isImageRegistrationModeSupported(ImageRegistrationMode.DEPTH_TO_COLOR)) {
-				d.setImageRegistrationMode(ImageRegistrationMode.DEPTH_TO_COLOR);
+			if (device.isImageRegistrationModeSupported(ImageRegistrationMode.DEPTH_TO_COLOR)) {
+				device.setImageRegistrationMode(ImageRegistrationMode.DEPTH_TO_COLOR);
 			}
 
 			// d.setDepthColorSyncEnabled(true);
 
-			VideoStream video = VideoStream.create(d, SensorType.COLOR);
+			this.videoColor = VideoStream.create(device, SensorType.COLOR);
 
-			video.addNewFrameListener(this);
-			video.start();
+			videoColor.addNewFrameListener(this);
+			videoColor.start();
 
 		} catch (Exception e) {
 			System.out.println("Error during the loading of the sensor.");
@@ -493,6 +488,14 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 		data.setCoordinateDepth(coor.getRecordedDepthData().get(idShort));
 		data.setCoordinateReal(coor.getRecordedRealData().get(idShort));
 		return data;
+	}
+	
+	public List<VideoMode> getSupportedVideoModes(){
+			return device.getSensorInfo(SensorType.COLOR).getSupportedVideoModes();
+	}
+	
+	public void setVideoMode(VideoMode mode){
+		this.videoColor.setVideoMode(mode);
 	}
 
 	private void checkFile(File file) {
