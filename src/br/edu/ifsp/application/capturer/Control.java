@@ -43,6 +43,8 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import org.openni.VideoMode;
+
 import com.primesense.nite.PoseType;
 
 import br.edu.ifsp.capturer.ShowObject;
@@ -498,7 +500,10 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 			File file = createDestinationDirectory();
 			capture.setFile(file, getMetadata());
 		} else if (ae.getSource() == miVideo) {
-			JOptionPane.showMessageDialog(this, "Nothing to say");
+			VideoOptions options = new VideoOptions(this, capture.getSupportedVideoModes());
+			options.setVisible(true);
+			VideoMode mode = options.getVideoMode();
+			capture.setVideoMode(mode);
 		} else if (ae.getSource() == btGarbage) {
 			callGC();
 		}

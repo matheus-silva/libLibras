@@ -466,7 +466,7 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 
 	public CaptureData getRecordedData() {
 		CaptureData data = new CaptureData();
-		
+
 		data.setMetadata(metadata);
 
 		// data.setTimestamp(timestamp);
@@ -489,13 +489,20 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 		data.setCoordinateReal(coor.getRecordedRealData().get(idShort));
 		return data;
 	}
-	
-	public List<VideoMode> getSupportedVideoModes(){
-			return device.getSensorInfo(SensorType.COLOR).getSupportedVideoModes();
+
+	public List<VideoMode> getSupportedVideoModes() {
+		return device.getSensorInfo(SensorType.COLOR).getSupportedVideoModes();
 	}
-	
-	public void setVideoMode(VideoMode mode){
-		this.videoColor.setVideoMode(mode);
+
+	public void setVideoMode(VideoMode mode) {
+		if (mode != null) {
+			this.videoColor.stop();
+			this.videoColor = VideoStream.create(this.device, SensorType.COLOR);
+			this.videoColor.setVideoMode(mode);
+			this.videoColor.addNewFrameListener(this);
+			this.videoColor.start();
+			System.out.println("Mudou");
+		}
 	}
 
 	private void checkFile(File file) {
@@ -550,12 +557,12 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 		metadata.setDepthHeight(frameDepth.getVideoMode().getResolutionY());
 		metadata.setDepthFPS(frameDepth.getVideoMode().getFps());
 		metadata.setDepthPixelFormat(frameDepth.getVideoMode().getPixelFormat().name());
-		
+
 		metadata.setColorWidth(frameColor.getVideoMode().getResolutionX());
 		metadata.setColorHeight(frameColor.getVideoMode().getResolutionY());
 		metadata.setColorFPS(frameColor.getVideoMode().getFps());
 		metadata.setColorPixelFormat(frameColor.getVideoMode().getPixelFormat().name());
-		
+
 		File depth = new File(file.getAbsolutePath() + File.separator + "Depth");
 		File color = new File(file.getAbsolutePath() + File.separator + "Color");
 		File coord = new File(file.getAbsolutePath() + File.separator + "Coordinates");
@@ -602,8 +609,8 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 		return frames;
 		// return timestamp.size();
 	}
-	
-	public void setFramesCount(int frames){
+
+	public void setFramesCount(int frames) {
 		this.frames = frames;
 	}
 
@@ -629,9 +636,9 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 	public Integer getSecondsRemaining() {
 		return secondsRemaining;
 	}
-	
-	public void setSeconds(int seconds){
-		if(!startTimer){
+
+	public void setSeconds(int seconds) {
+		if (!startTimer) {
 			this.seconds = seconds;
 			this.secondsRemaining = seconds;
 		}
@@ -646,8 +653,8 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 	public boolean isTimerActivated() {
 		return startTimer;
 	}
-	
-	public boolean isRecording(){
+
+	public boolean isRecording() {
 		return startRecordingUsers;
 	}
 
