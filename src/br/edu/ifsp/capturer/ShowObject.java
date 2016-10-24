@@ -21,7 +21,7 @@ public class ShowObject extends Component {
 	public static final int COLOR = 0, DEPTH = 1;
 	private int[][] skelCoor = { { 0, 1 }, { 1, 8 }, { 8, 9 }, { 8, 10 }, { 9, 11 }, { 11, 13 }, { 10, 12 }, { 12, 14 },
 			{ 1, 3 }, { 3, 5 }, { 5, 7 }, { 1, 2 }, { 2, 4 }, { 4, 6 } };
-	protected int width = 1, height = 1;
+	protected int width = 1, height = 1, widthUser, heightUser;
 	private int camera = COLOR;
 	protected ByteBuffer buffBackground;
 	private ByteBuffer buffUser;
@@ -71,6 +71,8 @@ public class ShowObject extends Component {
 
 	public void setUserCoordinate(Float[][] coordinate, int width, int height) {
 		this.coordinate.add(coordinate);
+		this.widthUser = width;
+		this.heightUser = height;
 	}
 
 	public void setFont(Font font) {
@@ -90,7 +92,7 @@ public class ShowObject extends Component {
 		drawStatus(g2d);
 
 		drawStatusCenter(g2d);
-
+		
 		coordinate = createStructure();
 	}
 
@@ -154,10 +156,10 @@ public class ShowObject extends Component {
 		}
 
 		for (int i = 0; i < skelCoor.length; i++) {
-			g.drawLine((int) (getWidth() * fs[skelCoor[i][0]][0] / width),
-					(int) (getHeight() * fs[skelCoor[i][0]][1] / height),
-					(int) (getWidth() * fs[skelCoor[i][1]][0] / width),
-					(int) (getHeight() * fs[skelCoor[i][1]][1]) / height);
+			g.drawLine((int) (getWidth() * fs[skelCoor[i][0]][0] / widthUser),
+					(int) (getHeight() * fs[skelCoor[i][0]][1] / heightUser),
+					(int) (getWidth() * fs[skelCoor[i][1]][0] / widthUser),
+					(int) (getHeight() * fs[skelCoor[i][1]][1]) / heightUser);
 
 		}
 	}
