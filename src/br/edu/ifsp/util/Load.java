@@ -89,7 +89,7 @@ public class Load {
 
 		try {
 			Path path = file.toPath();
-			List<String> lines = Files.readAllLines(path);
+			List<String> lines = Files.readAllLines(path, StandardCharsets.ISO_8859_1);
 			String json = new String();
 
 			for (String s : lines) {
@@ -100,6 +100,7 @@ public class Load {
 			metadata = g.fromJson(json, CaptureMetadata.class);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
+			System.err.println(file.getAbsolutePath());
 			e.printStackTrace();
 		}
 
