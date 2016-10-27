@@ -2,6 +2,7 @@ package br.edu.ifsp.capturer;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -10,7 +11,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ShortBuffer;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -68,11 +68,19 @@ public class ShowObject extends Component {
 		this.width = width;
 		this.height = height;
 	}
+	
+	public void setBackground(ByteBuffer buff, Dimension dimension) {
+		this.setBackground(buff, dimension.width, dimension.height);
+	}
 
 	public void setUserCoordinate(Float[][] coordinate, int width, int height) {
 		this.coordinate.add(coordinate);
 		this.widthUser = width;
 		this.heightUser = height;
+	}
+	
+	public void setUserCoordinate(Float[][] coordinate, Dimension dimension) {
+		this.setUserCoordinate(coordinate, dimension.width, dimension.height);
 	}
 
 	public void setFont(Font font) {

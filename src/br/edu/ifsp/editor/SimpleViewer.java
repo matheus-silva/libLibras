@@ -47,6 +47,7 @@ public class SimpleViewer extends JDialog implements ChangeListener, ActionListe
 	private File parent, current;
 	private Load load;
 	private JFrame father;
+	private Dimension dimensionDepth, dimensionColor;
 	private CaptureData data;
 	private List<CaptureData.SyncData> syncData;
 	private JMenuItem mOpen, mOpenFile, mSaveImage, mRealWorld, mCut;
@@ -144,7 +145,7 @@ public class SimpleViewer extends JDialog implements ChangeListener, ActionListe
 
 		view.setPreferredSize(d);
 
-		view.setBackground(buff, d.width, d.height);
+		view.setBackground(buff, d);
 
 		c.add(BorderLayout.CENTER, view);
 
@@ -161,9 +162,7 @@ public class SimpleViewer extends JDialog implements ChangeListener, ActionListe
 
 	private void loadDataDirectory(CaptureData data) {
 		Container c = getContentPane();
-
-		Dimension d = new Dimension(640, 480);
-
+		
 		viewColor = new ShowObject();
 		viewDepth = new ShowObject();
 		slColor = new JSlider();
@@ -173,12 +172,21 @@ public class SimpleViewer extends JDialog implements ChangeListener, ActionListe
 		JScrollPane scrollList = new JScrollPane(lRecords);
 
 		lRecords.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-
+		
 		viewColor.setCamera(ShowObject.COLOR);
 		viewDepth.setCamera(ShowObject.DEPTH);
 
-		viewColor.setPreferredSize(d);
-		viewDepth.setPreferredSize(d);
+		CaptureMetadata metadata = data.getMetadata();
+		
+		if(metadata != null) {
+			dimensionColor = new Dimension(metadata.getColorWidth(), metadata.getColorHeight());
+			dimensionDepth = new Dimension(metadata.getDepthWidth(), metadata.getDepthHeight());
+		} else {
+			dimensionColor = dimensionDepth = new Dimension(640, 480); 
+		}
+		
+		viewColor.setPreferredSize(dimensionColor);
+		viewDepth.setPreferredSize(dimensionDepth);
 
 		slColor.setMaximum(0);
 		slDepth.setMaximum(0);
@@ -309,7 +317,7 @@ public class SimpleViewer extends JDialog implements ChangeListener, ActionListe
 
 			viewColor.setStatus(timestamp.toString());
 
-			viewColor.setBackground(buff, 640, 480);
+			viewColor.setBackground(buff, dimensionColor);
 			viewColor.repaint();
 		} else if (e.getSource() == slDepth) {
 			if (data == null || !data.hasImageDepth()) {
@@ -322,13 +330,13 @@ public class SimpleViewer extends JDialog implements ChangeListener, ActionListe
 			ByteBuffer buff = c.get(timestamp);
 
 			viewDepth.setStatus(timestamp.toString());
-			viewDepth.setBackground(buff, 640, 480);
+			viewDepth.setBackground(buff, dimensionDepth);
 			String sTimestamp = timestamp.toString();
 
 			if (data.hasCoordinatesDepth()) {
 				viewDepth.setUserCoordinate(
 						data.getCoordinateDepth().get(Long.parseLong(sTimestamp.substring(0, sTimestamp.length() - 1))),
-						640, 480);
+						dimensionDepth);
 			}
 
 			viewDepth.repaint();
@@ -340,20 +348,20 @@ public class SimpleViewer extends JDialog implements ChangeListener, ActionListe
 
 			if (data.hasImageDepth()) {
 				Long timeDepth = syncData.get(index).getTimestampDepth();
-				viewDepth.setBackground(data.getImageDepth().get(timeDepth), 640, 480);
+				viewDepth.setBackground(data.getImageDepth().get(timeDepth), dimensionDepth);
 				viewDepth.setStatus(timeDepth.toString());
 				slDepth.setValue(getIndexByTimestamp(timeDepth, data.getImageDepth().keySet()));
 			}
 			if (data.hasImageColor()) {
 				Long timeColor = syncData.get(index).getTimestampColor();
-				viewColor.setBackground(data.getImageColor().get(timeColor), 640, 480);
+				viewColor.setBackground(data.getImageColor().get(timeColor), dimensionColor);
 				viewColor.setStatus(timeColor.toString());
 				slColor.setValue(getIndexByTimestamp(timeColor, data.getImageColor().keySet()));
 			}
 			if (data.hasCoordinatesDepth()) {
 				Long timeCoorDepth = syncData.get(index).getTimestampCoordinateDepth();
-				viewDepth.setUserCoordinate(data.getCoordinateDepth().get(timeCoorDepth), 640, 480);
-				viewColor.setUserCoordinate(data.getCoordinateDepth().get(timeCoorDepth), 640, 480);
+				viewDepth.setUserCoordinate(data.getCoordinateDepth().get(timeCoorDepth), dimensionDepth);
+				viewColor.setUserCoordinate(data.getCoordinateDepth().get(timeCoorDepth), dimensionColor);
 			}
 			if (data.hasSegmentation()) {
 				Long timeSeg = syncData.get(index).getTimestampSegmentation();
