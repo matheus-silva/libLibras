@@ -501,7 +501,6 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 			this.videoColor.setVideoMode(mode);
 			this.videoColor.addNewFrameListener(this);
 			this.videoColor.start();
-			System.out.println("Mudou");
 		}
 	}
 

@@ -361,7 +361,7 @@ public class SimpleViewer extends JDialog implements ChangeListener, ActionListe
 			if (data.hasCoordinatesDepth()) {
 				Long timeCoorDepth = syncData.get(index).getTimestampCoordinateDepth();
 				viewDepth.setUserCoordinate(data.getCoordinateDepth().get(timeCoorDepth), dimensionDepth);
-				viewColor.setUserCoordinate(data.getCoordinateDepth().get(timeCoorDepth), dimensionColor);
+				viewColor.setUserCoordinate(data.getCoordinateDepth().get(timeCoorDepth), dimensionDepth);
 			}
 			if (data.hasSegmentation()) {
 				Long timeSeg = syncData.get(index).getTimestampSegmentation();
