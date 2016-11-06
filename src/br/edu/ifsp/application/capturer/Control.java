@@ -448,7 +448,8 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 			}
 
 			SimpleViewer view = new SimpleViewer(file, this);
-
+			view.setVisible(true);
+			
 		} else if (ae.getSource() == btDelete) {
 			if (!isDestinationValidMessage()) {
 				return;
