@@ -192,7 +192,7 @@ public class CutterGUI extends JDialog implements ActionListener {
 		}
 	}
 
-	private ByteBuffer getDepthSelection(ByteBuffer buff, Point origin, Dimension size) {
+	private ByteBuffer getDepthSelection(ByteBuffer buff, Point origin, Dimension size, Dimension resolution) {
 		byte values[] = new byte[size.width * size.height * 2 + 2];
 
 		buff.rewind();
@@ -201,8 +201,8 @@ public class CutterGUI extends JDialog implements ActionListener {
 		while (buff.remaining() > 0) {
 			byte pixel1 = buff.get();
 			byte pixel2 = buff.get();
-			int pixelX = pos % 640;
-			int pixelY = pos / 640;
+			int pixelX = pos % resolution.width;
+			int pixelY = pos / resolution.width;
 			if ((pixelX >= origin.x && pixelX < (origin.x + size.width))
 					&& (pixelY >= origin.y && pixelY < (origin.y + size.height))) {
 				values[indexValue] = pixel1;
@@ -214,7 +214,7 @@ public class CutterGUI extends JDialog implements ActionListener {
 		return ByteBuffer.wrap(values).order(ByteOrder.LITTLE_ENDIAN);
 	}
 
-	private ByteBuffer getColorSelection(ByteBuffer buff, Point origin, Dimension size) {
+	private ByteBuffer getColorSelection(ByteBuffer buff, Point origin, Dimension size, Dimension resolution) {
 		byte values[] = new byte[size.width * size.height * 3 + 3];
 
 		buff.rewind();
@@ -224,8 +224,8 @@ public class CutterGUI extends JDialog implements ActionListener {
 			byte pixel1 = buff.get();
 			byte pixel2 = buff.get();
 			byte pixel3 = buff.get();
-			int pixelX = pos % 640;
-			int pixelY = pos / 640;
+			int pixelX = pos % resolution.width;
+			int pixelY = pos / resolution.width;
 			if ((pixelX >= origin.x && pixelX < (origin.x + size.width))
 					&& (pixelY >= origin.y && pixelY < (origin.y + size.height))) {
 				values[indexValue] = pixel1;
@@ -245,8 +245,8 @@ public class CutterGUI extends JDialog implements ActionListener {
 				return;
 			}
 
-			ByteBuffer bColor = getColorSelection(buffColor, ctColor.getPointBeginning(), selectionSize);
-			ByteBuffer bDepth = getDepthSelection(buffDepth, ctDepth.getPointBeginning(), selectionSize);
+			ByteBuffer bColor = getColorSelection(buffColor, ctColor.getPointBeginning(), ctColor.getSelectionSize(), dimColor);
+			ByteBuffer bDepth = getDepthSelection(buffDepth, ctDepth.getPointBeginning(), ctDepth.getSelectionSize(), dimDepth);
 
 			Save save = new Save();
 			File file = save.openFile(this);
@@ -268,10 +268,10 @@ public class CutterGUI extends JDialog implements ActionListener {
 			CutterResult jdColor = new CutterResult(this, "Color", false, d);
 			CutterResult jdDepth = new CutterResult(this, "Depth", false, d);
 
-			jdColor.setByteBuffer(getColorSelection(buffColor, ctColor.getPointBeginning(), selectionSize),
-					ShowObject.COLOR, selectionSize);
-			jdDepth.setByteBuffer(getDepthSelection(buffDepth, ctDepth.getPointBeginning(), selectionSize),
-					ShowObject.DEPTH, selectionSize);
+			jdColor.setByteBuffer(getColorSelection(buffColor, ctColor.getPointBeginning(), ctColor.getSelectionSize(), dimColor),
+					ShowObject.COLOR, ctColor.getSelectionSize());
+			jdDepth.setByteBuffer(getDepthSelection(buffDepth, ctDepth.getPointBeginning(), ctDepth.getSelectionSize(), dimDepth),
+					ShowObject.DEPTH, ctDepth.getSelectionSize());
 
 			jdColor.setLocation(ctColor.getPointBeginning());
 			jdDepth.setLocation(new Point(ctDepth.getPointBeginning().y + 640, ctDepth.getPointBeginning().y));
@@ -323,9 +323,6 @@ public class CutterGUI extends JDialog implements ActionListener {
 		}
 
 		public void setSelectionSize(Dimension d, Dimension r) {
-			System.out.printf("%sx%s", r.getWidth(), r.getHeight());
-			System.out.printf(" %sx%s\n", width, height);
-			
 			if (r.getWidth() == width && r.getHeight() == height) {
 				this.dimensionSelected = d;
 			} else {
@@ -344,7 +341,7 @@ public class CutterGUI extends JDialog implements ActionListener {
 			return this.pointBeginning;
 		}
 
-		public Dimension getSelectionDimension() {
+		public Dimension getSelectionSize() {
 			return this.dimensionSelected;
 		}
 
