@@ -30,7 +30,7 @@ public class ShowObject extends Component {
 	private long timestamp;
 	protected List<Float[][]> coordinate;
 	private int[] mColors = new int[] { 0xFFFF0000, 0xFF00FF00, 0xFF0000FF, 0xFFFFFF00, 0xFFFF00FF, 0xFF00FFFF };
-	private String status, statusCenter, statusFooter;
+	private String status, statusCenter;
 	private Font font;
 
 	public ShowObject() {
@@ -47,10 +47,6 @@ public class ShowObject extends Component {
 
 	public void setStatusCenter(String status) {
 		this.statusCenter = status;
-	}
-	
-	public void setStatusFooter(String status) {
-		this.statusFooter = status;
 	}
 
 	public void setCamera(int camera) {
@@ -105,8 +101,6 @@ public class ShowObject extends Component {
 
 		drawStatusCenter(g2d);
 		
-		drawStatusFooter(g2d);
-		
 		coordinate = createStructure();
 	}
 
@@ -124,14 +118,6 @@ public class ShowObject extends Component {
 			g.setColor(Color.red);
 			int size = font.getSize() / 2;
 			g.drawString(statusCenter, getWidth() / 2 - size, getHeight() / 2);
-		}
-	}
-
-	protected void drawStatusFooter(Graphics2D g) {
-		if (statusFooter != null && !statusFooter.equals("")){
-			g.setFont(new Font("Serif", 0, 18));
-			g.setColor(Color.red);
-			g.drawString(statusFooter, 10, getHeight() - 12);
 		}
 	}
 	

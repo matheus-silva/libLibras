@@ -98,7 +98,7 @@ public class ImageCapture implements VideoStream.NewFrameListener {
 
 		if (view != null) {
 			// view.setCamera(camera);
-			if (view.getCamera() == camera) {
+			if (view.getCamera() == camera && camera != ShowObject.DEPTH) {
 
 				new Thread(new Runnable() {
 
@@ -106,8 +106,6 @@ public class ImageCapture implements VideoStream.NewFrameListener {
 					public void run() {
 						buff.rewind();
 						view.setBackground(buff, frame.getWidth(), frame.getHeight());
-						view.setStatusFooter(frame.getWidth() + "x" + frame.getHeight() + " @ "
-								+ frame.getVideoMode().getFps() + " FPS");
 						view.repaint();
 					}
 				}).start();

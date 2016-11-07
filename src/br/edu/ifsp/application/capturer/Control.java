@@ -201,7 +201,8 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 		long used = (run.maxMemory() - run.freeMemory());
 		double p = (100 * used / run.maxMemory());
 		lblCount.setText(
-				"Frames: " + capture.getFramesCount() + " | Memory:  " + (used / 1_048_576) + " Mb (" + (p) + "%)");
+				"<html>Frames: " + capture.getFramesCount() + " | Memory:  " + (used / 1_048_576) + " Mb (" + (p) + "%)<br>"
+						+ "Color: " + capture.getColorResolutionInfo() + " | Depth: " + capture.getDepthResolutionInfo() + "</html>");
 	}
 
 	private void initializeComponentsForm() {
@@ -277,8 +278,8 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 		rbColor.setVisible(true);
 		rbIr.setVisible(false);
 
-		rbColor.setEnabled(true);
-		rbDepth.setEnabled(true);
+		rbColor.setEnabled(false);
+		rbDepth.setEnabled(false);
 
 		txtDirectory.setEditable(false);
 

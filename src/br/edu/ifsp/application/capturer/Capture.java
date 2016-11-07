@@ -21,6 +21,7 @@ import com.primesense.nite.SkeletonState;
 import com.primesense.nite.UserData;
 import com.primesense.nite.UserTracker;
 import com.primesense.nite.UserTrackerFrameRef;
+import com.sun.media.jfxmedia.control.VideoDataBuffer;
 
 import br.edu.ifsp.capturer.Coordinate;
 import br.edu.ifsp.capturer.ImageCapture;
@@ -105,6 +106,13 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 
 			this.videoColor = VideoStream.create(device, SensorType.COLOR);
 
+			for (VideoMode mode: device.getSensorInfo(videoColor.getSensorType()).getSupportedVideoModes()){
+				if (mode.getResolutionX() == 1280 & mode.getResolutionY() == 960) {
+					videoColor.setVideoMode(mode);
+					break;
+				}
+			}
+			
 			videoColor.addNewFrameListener(this);
 			videoColor.start();
 
@@ -502,6 +510,16 @@ public class Capture implements UserTracker.NewFrameListener, VideoStream.NewFra
 			this.videoColor.addNewFrameListener(this);
 			this.videoColor.start();
 		}
+	}
+	
+	public String getColorResolutionInfo(){
+		VideoMode mode = videoColor.getVideoMode();
+		return mode.getResolutionX() + "x" + mode.getResolutionY() + " @ " + mode.getFps() + " FPS";
+	}
+	
+	public String getDepthResolutionInfo(){
+		VideoMode mode = frameDepth.getVideoMode();
+		return mode.getResolutionX() + "x" + mode.getResolutionY() + " @ " + mode.getFps() + " FPS";
 	}
 
 	private void checkFile(File file) {
