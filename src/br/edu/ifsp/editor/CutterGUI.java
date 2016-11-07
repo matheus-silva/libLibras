@@ -63,7 +63,7 @@ public class CutterGUI extends JDialog implements ActionListener {
 
 		setSize(1300, 550);
 		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-		
+
 		initializeComponentsForm();
 	}
 
@@ -111,6 +111,8 @@ public class CutterGUI extends JDialog implements ActionListener {
 
 		ctColor.setBackground(buffColor, dimColor);
 		ctColor.setPreferredSize(dimColor);
+		ctColor.setSelectionSize(selectionSize, selectionReference);
+		
 		this.repaint();
 	}
 
@@ -121,11 +123,13 @@ public class CutterGUI extends JDialog implements ActionListener {
 
 		ctDepth.setBackground(buffDepth, dimDepth);
 		ctDepth.setPreferredSize(dimDepth);
+		ctDepth.setSelectionSize(selectionSize, selectionReference);
+		
 		this.repaint();
 	}
-	
+
 	@Override
-	public void setVisible(boolean visible){
+	public void setVisible(boolean visible) {
 		Dimension windowsSize = Toolkit.getDefaultToolkit().getScreenSize();
 
 		if (dimColor.getWidth() + dimDepth.getWidth() > windowsSize.getWidth()) {
@@ -133,29 +137,26 @@ public class CutterGUI extends JDialog implements ActionListener {
 		} else {
 			dualPanel();
 		}
-		
+
 		this.getContentPane().repaint();
 		super.setVisible(visible);
 	}
 
 	private void initializeComponentsForm() {
 		ctColor = new Cutter();
-		ctDepth = new Cutter();	
-		
+		ctDepth = new Cutter();
+
 		ctColor.setCamera(ShowObject.COLOR);
 		ctDepth.setCamera(ShowObject.DEPTH);
-		
+
 		pnColor = new JPanel(new BorderLayout());
 		pnDepth = new JPanel(new BorderLayout());
 
 		JScrollPane scColor = new JScrollPane(ctColor);
 		JScrollPane scDepth = new JScrollPane(ctDepth);
-		
+
 		pnColor.add(BorderLayout.CENTER, scColor);
 		pnDepth.add(BorderLayout.CENTER, scDepth);
-
-		ctColor.setSelectionSize(selectionSize, selectionReference);
-		ctDepth.setSelectionSize(selectionSize, selectionReference);
 
 		ctColor.requestFocusInWindow();
 		ctDepth.requestFocusInWindow();
@@ -183,9 +184,9 @@ public class CutterGUI extends JDialog implements ActionListener {
 			Container c = this.getContentPane();
 			c.removeAll();
 			c.revalidate();
-			
+
 			c.add(BorderLayout.CENTER, panel);
-			
+
 			c.revalidate();
 			c.repaint();
 		}
@@ -284,7 +285,7 @@ public class CutterGUI extends JDialog implements ActionListener {
 
 		private Point point;
 		private Point pointBeginning, pointCenter;
-		private Dimension dimensionSelected, dimensionReference;
+		private Dimension dimensionSelected;
 		private Cutter mirror;
 
 		public Cutter() {
@@ -303,13 +304,7 @@ public class CutterGUI extends JDialog implements ActionListener {
 
 				@Override
 				public void mouseClicked(MouseEvent me) {
-					pointCenter = new Point(me.getX(), me.getY());
-					if (dimensionSelected != null) {
-						int x = pointCenter.x - (int) (dimensionSelected.getWidth() / 2);
-						int y = pointCenter.y - (int) (dimensionSelected.getHeight() / 2);
-						pointBeginning = new Point(x, y);
-					}
-					repaint();
+					setCenterPoint(new Point(me.getX(), me.getY()));
 					if (mirror != null) {
 						mirror.setCenterPoint(pointCenter);
 					}
@@ -328,8 +323,17 @@ public class CutterGUI extends JDialog implements ActionListener {
 		}
 
 		public void setSelectionSize(Dimension d, Dimension r) {
-			this.dimensionSelected = d;
-			this.dimensionReference = r;
+			System.out.printf("%sx%s", r.getWidth(), r.getHeight());
+			System.out.printf(" %sx%s\n", width, height);
+			
+			if (r.getWidth() == width && r.getHeight() == height) {
+				this.dimensionSelected = d;
+			} else {
+				int selectedWidth = (int) (width * d.getWidth() / r.getWidth());
+				int selectedHeight = (int) (height * d.getHeight() / r.getHeight());
+
+				this.dimensionSelected = new Dimension(selectedWidth, selectedHeight);
+			}
 		}
 
 		public void setCutterMirror(Cutter cut) {
