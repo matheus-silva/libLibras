@@ -88,7 +88,7 @@ public class SimpleViewer extends JDialog implements ChangeListener, ActionListe
 		mCut = new JMenuItem("Cut");
 
 		mSaveImage.setEnabled(false);
-		
+
 		mOpen.setAccelerator(KeyStroke.getKeyStroke("control O"));
 		mOpenFile.setAccelerator(KeyStroke.getKeyStroke("control shift O"));
 		mSaveImage.setAccelerator(KeyStroke.getKeyStroke("control shift S"));
@@ -133,8 +133,10 @@ public class SimpleViewer extends JDialog implements ChangeListener, ActionListe
 		Container c = getContentPane();
 
 		Dimension d;
-		if (metadata != null) {
+		if (metadata != null && camera == ShowObject.COLOR) {
 			d = new Dimension(metadata.getColorWidth(), metadata.getColorHeight());
+		} else if (metadata != null && camera == ShowObject.DEPTH) {
+			d = new Dimension(metadata.getDepthWidth(), metadata.getDepthHeight());
 		} else {
 			d = new Dimension(640, 480);
 		}
@@ -154,7 +156,7 @@ public class SimpleViewer extends JDialog implements ChangeListener, ActionListe
 		view.repaint();
 
 		setSize(d.width, d.height + 100);
-		
+
 		mSaveImage.setEnabled(true);
 		mCut.setEnabled(false);
 		mRealWorld.setEnabled(false);
@@ -162,7 +164,7 @@ public class SimpleViewer extends JDialog implements ChangeListener, ActionListe
 
 	private void loadDataDirectory(CaptureData data) {
 		Container c = getContentPane();
-		
+
 		viewColor = new ShowObject();
 		viewDepth = new ShowObject();
 		slColor = new JSlider();
@@ -172,19 +174,19 @@ public class SimpleViewer extends JDialog implements ChangeListener, ActionListe
 		JScrollPane scrollList = new JScrollPane(lRecords);
 
 		lRecords.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		
+
 		viewColor.setCamera(ShowObject.COLOR);
 		viewDepth.setCamera(ShowObject.DEPTH);
 
 		CaptureMetadata metadata = data.getMetadata();
-		
-		if(metadata != null) {
+
+		if (metadata != null) {
 			dimensionColor = new Dimension(metadata.getColorWidth(), metadata.getColorHeight());
 			dimensionDepth = new Dimension(metadata.getDepthWidth(), metadata.getDepthHeight());
 		} else {
-			dimensionColor = dimensionDepth = new Dimension(640, 480); 
+			dimensionColor = dimensionDepth = new Dimension(640, 480);
 		}
-		
+
 		viewColor.setPreferredSize(dimensionColor);
 		viewDepth.setPreferredSize(dimensionDepth);
 
@@ -263,7 +265,7 @@ public class SimpleViewer extends JDialog implements ChangeListener, ActionListe
 		viewDepth.repaint();
 
 		setSize(1366, 600);
-		
+
 		mSaveImage.setEnabled(false);
 		mCut.setEnabled(true);
 		mRealWorld.setEnabled(true);
@@ -431,7 +433,7 @@ public class SimpleViewer extends JDialog implements ChangeListener, ActionListe
 
 			if (file != null) {
 				this.current = file;
-				
+
 				setTitle("Simple Viewer - " + file.getAbsolutePath());
 				getContentPane().removeAll();
 				revalidate();
@@ -466,15 +468,15 @@ public class SimpleViewer extends JDialog implements ChangeListener, ActionListe
 
 			load.setFileSelectionMode(JFileChooser.FILES_ONLY);
 			load.setFileFilter(new FileNameExtensionFilter("PNG Image", ".png"));
-			
-			if(load.showOpenDialog(father) == JFileChooser.APPROVE_OPTION){
+
+			if (load.showOpenDialog(father) == JFileChooser.APPROVE_OPTION) {
 				File file = load.getSelectedFile();
-				
+
 				if (file != null) {
-					if(!file.getName().endsWith(".png")){
+					if (!file.getName().endsWith(".png")) {
 						String nome = new String();
 						int index = file.getName().lastIndexOf("\\.");
-						if(index != -1 ){
+						if (index != -1) {
 							nome = file.getName().substring(0, file.getName().lastIndexOf("\\."));
 						}
 						nome = file.getName() + ".png";
@@ -483,7 +485,7 @@ public class SimpleViewer extends JDialog implements ChangeListener, ActionListe
 					view.saveFrame(file);
 				}
 			}
-			
+
 		} else if (ae.getSource() == mRealWorld) {
 			if (data == null || !data.hasCoordinatesReal()) {
 				return;

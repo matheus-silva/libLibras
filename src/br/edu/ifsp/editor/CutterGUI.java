@@ -296,7 +296,7 @@ public class CutterGUI extends JDialog implements ActionListener {
 					point = new Point(e.getX(), e.getY());
 					repaint();
 					if (mirror != null) {
-						mirror.setPoint(point);
+						mirror.setPoint(point, new Dimension(width, height));
 					}
 				}
 			});
@@ -304,30 +304,56 @@ public class CutterGUI extends JDialog implements ActionListener {
 
 				@Override
 				public void mouseClicked(MouseEvent me) {
-					setCenterPoint(new Point(me.getX(), me.getY()));
+					Dimension d = new Dimension(width, height);
+					setCenterPoint(new Point(me.getX(), me.getY()), d);
 					if (mirror != null) {
-						mirror.setCenterPoint(pointCenter);
+						mirror.setCenterPoint(pointCenter, d);
 					}
 				}
 			});
 		}
 
-		public void setCenterPoint(Point pointCenter) {
-			this.pointCenter = pointCenter;
-			if (dimensionSelected != null) {
-				int x = pointCenter.x - (int) (dimensionSelected.getWidth() / 2);
-				int y = pointCenter.y - (int) (dimensionSelected.getHeight() / 2);
-				pointBeginning = new Point(x, y);
+		public void setCenterPoint(Point pointCenter, Dimension resolution) {
+			if (dimensionSelected != null) {				
+				int centerX;
+				int centerY;
+				
+				if (resolution.getWidth() == width && resolution.getHeight() == height) {
+					centerX = pointCenter.x;
+					centerY = pointCenter.y;
+				} else {
+					centerX = (int) (pointCenter.x * width / resolution.getWidth());
+					centerY = (int) (pointCenter.y * height / resolution.getHeight());
+				}
+				
+				int beginningX = centerX - (int) (dimensionSelected.getWidth() / 2);;
+				int beginningY = centerY - (int) (dimensionSelected.getHeight() / 2);
+				
+				this.pointCenter = new Point(centerX, centerY);
+				this.pointBeginning = new Point(beginningX, beginningY);
 			}
 			repaint();
 		}
+		
+		public void setPoint(Point point, Dimension resolution) {
+			/*if (resolution.getWidth() == width && resolution.getHeight() == height) {
+				this.point = point;
+			} else {
+				int pointedWidth = (int) (point.x * width / resolution.getWidth());
+				int pointedHeight = (int) (point.y * height / resolution.getHeight());
+				
+				this.point = new Point(pointedWidth, pointedHeight);
+			}*/
+			this.point = point;
+			repaint();
+		}
 
-		public void setSelectionSize(Dimension d, Dimension r) {
-			if (r.getWidth() == width && r.getHeight() == height) {
+		public void setSelectionSize(Dimension d, Dimension resolution) {
+			if (resolution.getWidth() == width && resolution.getHeight() == height) {
 				this.dimensionSelected = d;
 			} else {
-				int selectedWidth = (int) (width * d.getWidth() / r.getWidth());
-				int selectedHeight = (int) (height * d.getHeight() / r.getHeight());
+				int selectedWidth = (int) (width * d.getWidth() / resolution.getWidth());
+				int selectedHeight = (int) (height * d.getHeight() / resolution.getHeight());
 
 				this.dimensionSelected = new Dimension(selectedWidth, selectedHeight);
 			}
@@ -343,11 +369,6 @@ public class CutterGUI extends JDialog implements ActionListener {
 
 		public Dimension getSelectionSize() {
 			return this.dimensionSelected;
-		}
-
-		public void setPoint(Point point) {
-			this.point = point;
-			repaint();
 		}
 
 		@Override
