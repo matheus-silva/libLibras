@@ -2,10 +2,12 @@ package br.edu.ifsp.editor;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -24,14 +26,16 @@ import javax.swing.JPanel;
 import javax.swing.KeyStroke;
 
 import br.edu.ifsp.capturer.ShowObject;
-import br.edu.ifsp.util.Load;
 import br.edu.ifsp.util.Save;
 
 public class CutterGUI extends JDialog implements ActionListener {
 
 	private ByteBuffer buffColor, buffDepth;
 	private long timeColor, timeDepth;
+	private JPanel pnColor, pnDepth;
+	private Dimension dimColor, dimDepth;
 	private Dimension selectionSize = new Dimension(75, 75);
+	private Dimension selectionReference = new Dimension(640, 480);
 	private Cutter ctColor, ctDepth;
 	private JMenuItem mSave, mView;
 
@@ -58,52 +62,130 @@ public class CutterGUI extends JDialog implements ActionListener {
 
 		setSize(1300, 550);
 		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+		
+		initializeComponentsForm();
 	}
 
-	public void loadImages(ByteBuffer color, long timeColor, ByteBuffer depth, long timeDepth) {
+	/*
+	 * public void loadImages(ByteBuffer color, long timeColor, ByteBuffer
+	 * depth, long timeDepth) { this.buffColor = color; this.buffDepth = depth;
+	 * this.timeColor = timeColor; this.timeDepth = timeDepth;
+	 * 
+	 * ctColor = new Cutter(); ctDepth = new Cutter();
+	 * 
+	 * ctColor.setCamera(ShowObject.COLOR); ctDepth.setCamera(ShowObject.DEPTH);
+	 * 
+	 * ctColor.setBackground(buffColor, 640, 480);
+	 * ctDepth.setBackground(buffDepth, 640, 480);
+	 * 
+	 * Dimension d = new Dimension(640, 480);
+	 * 
+	 * ctColor.setPreferredSize(d); ctDepth.setPreferredSize(d);
+	 * 
+	 * JPanel pnColor = new JPanel(new BorderLayout());
+	 * pnColor.add(BorderLayout.CENTER, ctColor);
+	 * 
+	 * JPanel pnDepth = new JPanel(new BorderLayout());
+	 * pnDepth.add(BorderLayout.CENTER, ctDepth);
+	 * 
+	 * getContentPane().removeAll(); getContentPane().revalidate();
+	 * getContentPane().add(BorderLayout.WEST, pnColor);
+	 * getContentPane().add(BorderLayout.EAST, pnDepth);
+	 * getContentPane().revalidate(); getContentPane().repaint();
+	 * 
+	 * ctColor.setSelectionSize(selectionSize);
+	 * ctDepth.setSelectionSize(selectionSize);
+	 * 
+	 * ctColor.requestFocusInWindow(); ctDepth.requestFocusInWindow();
+	 * 
+	 * ctColor.setCutterMirror(ctDepth); ctDepth.setCutterMirror(ctColor);
+	 * 
+	 * ctColor.repaint(); ctDepth.repaint(); }
+	 */
+
+	public void setColorImage(ByteBuffer color, long timeColor, Dimension dimColor) {
 		this.buffColor = color;
-		this.buffDepth = depth;
 		this.timeColor = timeColor;
+		this.dimColor = dimColor;
+
+		ctColor.setBackground(buffColor, dimColor);
+		ctColor.setPreferredSize(dimColor);
+		this.repaint();
+	}
+
+	public void setDepthImage(ByteBuffer depth, long timeDepth, Dimension dimDepth) {
+		this.buffDepth = depth;
 		this.timeDepth = timeDepth;
+		this.dimDepth = dimDepth;
 
+		ctDepth.setBackground(buffDepth, dimDepth);
+		ctDepth.setPreferredSize(dimDepth);
+		this.repaint();
+	}
+	
+	/*@Override
+	public void setVisible(boolean visible){
+		initializeComponentsForm();
+		this.getContentPane().repaint();
+		super.setVisible(visible);
+	}*/
+
+	private void initializeComponentsForm() {
 		ctColor = new Cutter();
-		ctDepth = new Cutter();
-
+		ctDepth = new Cutter();	
+		
 		ctColor.setCamera(ShowObject.COLOR);
 		ctDepth.setCamera(ShowObject.DEPTH);
+		
+		pnColor = new JPanel(new BorderLayout());
+		pnDepth = new JPanel(new BorderLayout());
 
-		ctColor.setBackground(buffColor, 640, 480);
-		ctDepth.setBackground(buffDepth, 640, 480);
-
-		Dimension d = new Dimension(640, 480);
-
-		ctColor.setPreferredSize(d);
-		ctDepth.setPreferredSize(d);
-
-		JPanel pnColor = new JPanel(new BorderLayout());
 		pnColor.add(BorderLayout.CENTER, ctColor);
-
-		JPanel pnDepth = new JPanel(new BorderLayout());
 		pnDepth.add(BorderLayout.CENTER, ctDepth);
 
-		getContentPane().removeAll();
-		getContentPane().revalidate();
-		getContentPane().add(BorderLayout.WEST, pnColor);
-		getContentPane().add(BorderLayout.EAST, pnDepth);
-		getContentPane().revalidate();
-		getContentPane().repaint();
+		Dimension windowsSize = Toolkit.getDefaultToolkit().getScreenSize();
 
-		ctColor.setSelectionSize(selectionSize);
-		ctDepth.setSelectionSize(selectionSize);
+		if (ctColor.getWidth() + ctDepth.getWidth() > windowsSize.getWidth()) {
+			singlePanel(pnColor);
+		} else {
+			dualPanel();
+		}
+
+		ctColor.setSelectionSize(selectionSize, selectionReference);
+		ctDepth.setSelectionSize(selectionSize, selectionReference);
 
 		ctColor.requestFocusInWindow();
 		ctDepth.requestFocusInWindow();
 
 		ctColor.setCutterMirror(ctDepth);
 		ctDepth.setCutterMirror(ctColor);
+	}
 
-		ctColor.repaint();
-		ctDepth.repaint();
+	private void dualPanel() {
+		if (pnDepth != null || pnColor != null) {
+			Container c = this.getContentPane();
+			c.removeAll();
+			c.revalidate();
+
+			c.add(BorderLayout.WEST, pnColor);
+			c.add(BorderLayout.EAST, pnDepth);
+
+			c.revalidate();
+			c.repaint();
+		}
+	}
+
+	private void singlePanel(JPanel panel) {
+		if (panel != null) {
+			Container c = this.getContentPane();
+			c.removeAll();
+			c.revalidate();
+			
+			c.add(BorderLayout.CENTER, panel);
+			
+			c.revalidate();
+			c.repaint();
+		}
 	}
 
 	private ByteBuffer getDepthSelection(ByteBuffer buff, Point origin, Dimension size) {
@@ -168,7 +250,7 @@ public class CutterGUI extends JDialog implements ActionListener {
 			if (file != null) {
 				File fColor = new File(file.getAbsolutePath() + "-" + timeColor + "-Color.bin");
 				File fDepth = new File(file.getAbsolutePath() + "-" + timeDepth + "-Depth.bin");
-				
+
 				save.saveBuffer(fColor, bColor);
 				save.saveBuffer(fDepth, bDepth);
 			}
@@ -199,7 +281,7 @@ public class CutterGUI extends JDialog implements ActionListener {
 
 		private Point point;
 		private Point pointBeginning, pointCenter;
-		private Dimension dimensionSelected;
+		private Dimension dimensionSelected, dimensionReference;
 		private Cutter mirror;
 
 		public Cutter() {
@@ -242,8 +324,9 @@ public class CutterGUI extends JDialog implements ActionListener {
 			repaint();
 		}
 
-		public void setSelectionSize(Dimension d) {
+		public void setSelectionSize(Dimension d, Dimension r) {
 			this.dimensionSelected = d;
+			this.dimensionReference = r;
 		}
 
 		public void setCutterMirror(Cutter cut) {

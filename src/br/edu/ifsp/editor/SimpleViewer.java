@@ -541,7 +541,8 @@ public class SimpleViewer extends JDialog implements ChangeListener, ActionListe
 				ByteBuffer buffColor = mapColor.get(timeColor);
 
 				CutterGUI cut = new CutterGUI(this, true);
-				cut.loadImages(buffColor, timeColor, buffDepth, timeDepth);
+				cut.setColorImage(buffColor, timeColor, dimensionColor);
+				cut.setDepthImage(buffDepth, timeDepth, dimensionDepth);
 				cut.setVisible(true);
 			}
 		}
