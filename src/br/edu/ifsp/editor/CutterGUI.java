@@ -23,6 +23,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.KeyStroke;
 
 import br.edu.ifsp.capturer.ShowObject;
@@ -123,12 +124,19 @@ public class CutterGUI extends JDialog implements ActionListener {
 		this.repaint();
 	}
 	
-	/*@Override
+	@Override
 	public void setVisible(boolean visible){
-		initializeComponentsForm();
+		Dimension windowsSize = Toolkit.getDefaultToolkit().getScreenSize();
+
+		if (dimColor.getWidth() + dimDepth.getWidth() > windowsSize.getWidth()) {
+			singlePanel(pnColor);
+		} else {
+			dualPanel();
+		}
+		
 		this.getContentPane().repaint();
 		super.setVisible(visible);
-	}*/
+	}
 
 	private void initializeComponentsForm() {
 		ctColor = new Cutter();
@@ -140,16 +148,11 @@ public class CutterGUI extends JDialog implements ActionListener {
 		pnColor = new JPanel(new BorderLayout());
 		pnDepth = new JPanel(new BorderLayout());
 
-		pnColor.add(BorderLayout.CENTER, ctColor);
-		pnDepth.add(BorderLayout.CENTER, ctDepth);
-
-		Dimension windowsSize = Toolkit.getDefaultToolkit().getScreenSize();
-
-		if (ctColor.getWidth() + ctDepth.getWidth() > windowsSize.getWidth()) {
-			singlePanel(pnColor);
-		} else {
-			dualPanel();
-		}
+		JScrollPane scColor = new JScrollPane(ctColor);
+		JScrollPane scDepth = new JScrollPane(ctDepth);
+		
+		pnColor.add(BorderLayout.CENTER, scColor);
+		pnDepth.add(BorderLayout.CENTER, scDepth);
 
 		ctColor.setSelectionSize(selectionSize, selectionReference);
 		ctDepth.setSelectionSize(selectionSize, selectionReference);
@@ -363,8 +366,8 @@ public class CutterGUI extends JDialog implements ActionListener {
 
 			if (point != null) {
 				g2d.setColor(Color.red);
-				g2d.drawLine(0, point.y, 640, point.y);
-				g2d.drawLine(point.x, 0, point.x, 480);
+				g2d.drawLine(0, point.y, width, point.y);
+				g2d.drawLine(point.x, 0, point.x, height);
 			}
 
 			if (pointBeginning != null && dimensionSelected != null) {
