@@ -176,7 +176,7 @@ public class Load {
 		return b;
 	}
 
-	private Map<Long, Float[][]> loadCoords(File file, Map<Long, Float[][]> map) throws Exception {
+	public Map<Long, Float[][]> loadCoords(File file, Map<Long, Float[][]> map) throws Exception {
 		List<String> lines = Files.readAllLines(Paths.get(file.toURI()));
 
 		for (int i = 0; i < lines.size(); i++) {

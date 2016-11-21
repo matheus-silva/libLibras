@@ -98,7 +98,7 @@ public class ImageCapture implements VideoStream.NewFrameListener {
 
 		if (view != null) {
 			// view.setCamera(camera);
-			if (view.getCamera() == camera && camera != ShowObject.DEPTH) {
+			if (view.getCamera() == camera) {
 
 				new Thread(new Runnable() {
 

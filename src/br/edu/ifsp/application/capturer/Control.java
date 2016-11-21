@@ -82,7 +82,7 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 	private JLabel lblSeconds, lblCount;
 
 	public Control() {
-		super("New Control");
+		super("Control");
 
 		Util util = new Util();
 		util.openLoadingWindowThread(this, "Loading...");
@@ -278,8 +278,8 @@ public class Control extends JFrame implements ItemListener, ActionListener, Cha
 		rbColor.setVisible(true);
 		rbIr.setVisible(false);
 
-		rbColor.setEnabled(false);
-		rbDepth.setEnabled(false);
+		rbColor.setEnabled(true);
+		rbDepth.setEnabled(true);
 
 		txtDirectory.setEditable(false);
 
